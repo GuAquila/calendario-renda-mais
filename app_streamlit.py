@@ -1,3 +1,9 @@
+"""
+CALENDÁRIO RENDA MAIS - INTERFACE 100% IDÊNTICA À VERSÃO DESKTOP
+================================================================
+Versão com cores corrigidas
+"""
+
 import streamlit as st
 import pandas as pd
 from datetime import datetime, date, timedelta
@@ -53,7 +59,7 @@ def verificar_senha():
 verificar_senha()
 
 # ============================================
-# CSS IDÊNTICO À VERSÃO DESKTOP (CORREÇÕES EXTREMAS)
+# CSS COM CORES CORRIGIDAS
 # ============================================
 
 st.markdown("""
@@ -101,52 +107,67 @@ st.markdown("""
         font-family: 'Segoe UI', sans-serif;
     }
     
-    /* BARRA DE SELEÇÃO */
+    /* BARRA DE SELEÇÃO - MENOR E MAIS VISÍVEL */
     .barra-selecao {
         background: #ecf0f1;
-        padding: 15px 40px;
+        padding: 10px 40px;
         font-family: 'Segoe UI', sans-serif;
     }
     
     .barra-selecao label {
         font-weight: bold;
         color: #1e4d2b;
-        font-size: 12px;
+        font-size: 13px;
         display: block;
         margin-bottom: 5px;
     }
 
-    /* ************************************** */
-    /* CORREÇÃO DO SELECTBOX (Força Máxima) */
-    /* ************************************** */
+    /* SELECTBOX - CORES CORRIGIDAS */
+    .stSelectbox {
+        margin: 0 !important;
+    }
     
-    /* 1. O PRÓPRIO SELECTBOX (fundo e borda) */
+    .stSelectbox [data-baseweb="select"] {
+        min-height: 38px !important;
+    }
+    
     .stSelectbox [data-baseweb="select"] > div:first-child {
         background: white !important;
         border: 2px solid #27ae60 !important;
-        color: #2c3e50 !important; 
-        box-shadow: none !important; /* Remove qualquer sombra preta que possa ter */
+        color: #2c3e50 !important;
+        box-shadow: none !important;
+        min-height: 38px !important;
+        padding: 6px 12px !important;
     }
     
-    /* 2. O DROPDOWN (Lista de Opções) */
+    .stSelectbox [data-baseweb="select"] div {
+        color: #2c3e50 !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+    }
+    
+    .stSelectbox [data-baseweb="select"] span {
+        color: #2c3e50 !important;
+    }
+    
+    .stSelectbox svg {
+        fill: #27ae60 !important;
+    }
+    
     [data-baseweb="popover"] {
         background: white !important;
-        color: #2c3e50 !important;
-        border: 1px solid #ddd !important;
+        border: 1px solid #27ae60 !important;
     }
     
-    /* 3. AS OPÇÕES DENTRO DO DROPDOWN */
-    [data-baseweb="popover"] ul li div {
+    [data-baseweb="popover"] ul li {
         color: #2c3e50 !important;
         background: white !important;
     }
     
-    /* 4. Opção em Hover */
-    [data-baseweb="popover"] ul li:hover div {
-        background: #f0f0f0 !important;
+    [data-baseweb="popover"] ul li:hover {
+        background: #e8f5e9 !important;
+        color: #1e4d2b !important;
     }
-    
-    /* ************************************** */
     
     /* CONTAINER PRINCIPAL */
     .container-principal {
@@ -177,6 +198,7 @@ st.markdown("""
         padding: 10px;
         overflow-y: auto;
         max-height: 600px;
+        background: #fafafa;
     }
     
     /* CARDS DE FUNDOS */
@@ -200,7 +222,6 @@ st.markdown("""
         transform: translateX(3px);
     }
 
-    /* DESTAQUE DO CARD SELECIONADO */
     .fundo-card.fundo-card-selecionado {
         border-right: 2px solid #3498db;
         border-top: 1px solid #3498db;
@@ -227,7 +248,6 @@ st.markdown("""
         font-weight: 600;
     }
 
-    /* TRUQUE DO BOTÃO PARA CLICAR NO FUNDO-CARD */
     .fundo-card-container .stButton button {
         position: absolute;
         top: 0;
@@ -242,17 +262,26 @@ st.markdown("""
         padding: 0 !important;
         margin: 0 !important;
     }
+    
     .fundo-card-container .stButton button:hover {
-        background: rgba(0, 0, 0, 0.05) !important; /* Adiciona um leve hover para feedback visual de clique */
+        background: rgba(0, 0, 0, 0.02) !important;
     }
 
-    /* TESE */
+    /* TESE - CORES ESCURAS E LEGÍVEIS */
     .tese-texto {
         padding: 15px;
         font-family: 'Segoe UI', sans-serif;
         font-size: 12px;
         line-height: 1.6;
         color: #2c3e50;
+        background: white;
+    }
+    
+    .tese-texto strong {
+        font-size: 13px;
+        font-weight: bold;
+        display: block;
+        margin-bottom: 10px;
     }
     
     .tese-texto h4 {
@@ -260,10 +289,15 @@ st.markdown("""
         font-weight: bold;
         color: #1e4d2b;
         margin: 15px 0 8px 0;
+        background: #f0f8f4;
+        padding: 6px 10px;
+        border-left: 4px solid #27ae60;
     }
     
     .tese-texto p {
-        margin: 0 0 10px 0;
+        margin: 0 0 12px 0;
+        color: #34495e;
+        line-height: 1.7;
     }
     
     /* CALENDÁRIO */
@@ -334,7 +368,7 @@ st.markdown("""
         text-overflow: ellipsis;
     }
     
-    /* BOTÕES GERAIS (MÊS ANTERIOR/PRÓXIMO MÊS) */
+    /* BOTÕES */
     .stButton button {
         background: #27ae60 !important;
         color: white !important;
@@ -350,11 +384,25 @@ st.markdown("""
         background: #1e8449 !important;
     }
     
+    /* SCROLLBAR */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: #27ae60;
+        border-radius: 4px;
+    }
+    
 </style>
 """, unsafe_allow_html=True)
 
 # ============================================
-# DADOS E LÓGICA (Mantido do anterior, pois a lógica estava correta)
+# DADOS
 # ============================================
 
 CORES_FUNDOS = [
@@ -433,26 +481,25 @@ def carregar_dados():
         return df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses
         
     except Exception as e:
-        st.error(f"❌ Erro ao carregar dados do Excel: {e}")
+        st.error(f"❌ Erro ao carregar dados: {e}")
         return None, None, None, None, None, None
 
 def criar_tese(nome_ativo, dia_util_int):
-    # Texto sem tags HTML
     if 'FII' in nome_ativo or 'Imobiliário' in nome_ativo:
         resumo = "Fundo de Investimento Imobiliário que investe em imóveis comerciais de alto padrão, galpões logísticos em regiões estratégicas e Certificados de Recebíveis Imobiliários (CRI) de emissores sólidos."
-        condicoes = f"• Emissor: Gestora especializada em FII\n• Prazo: Indeterminado (cotização diária ou semanal)\n• Taxa: Taxa de administração: 0,5% a 1,0% a.a. | Performance: Pode haver\n• Liquidez: D+30 (típico)\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
-        perfil = "Ideal para: investidores que buscam renda mensal passiva, isenta de IR para PF, com exposição ao mercado imobiliário sem precisar comprar imóveis diretamente"
-        speech = "Destaque a isenção de IR, diversificação imobiliária, liquidez em bolsa (D+3) e distribuição mensal. Enfatize que o cliente pode começar com valores acessíveis e construir um portfólio imobiliário robusto. Compare com aluguel de imóveis próprios mostrando vantagens de não ter vacância, manutenção ou inadimplência."
+        condicoes = f"• Emissor: Gestora especializada em FII\n• Prazo: Indeterminado (cotização diária ou semanal)\n• Taxa: Taxa de administração: 0,5% a 1,0% a.a.\n• Liquidez: D+30 (típico)\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
+        perfil = "Ideal para investidores que buscam renda mensal passiva, isenta de IR para PF, com exposição ao mercado imobiliário sem precisar comprar imóveis diretamente"
+        speech = "Destaque a isenção de IR, diversificação imobiliária, liquidez em bolsa (D+3) e distribuição mensal. Enfatize que o cliente pode começar com valores acessíveis e construir um portfólio imobiliário robusto."
     elif 'CRI' in nome_ativo or 'Renda' in nome_ativo:
         resumo = "Fundo de renda fixa que investe predominantemente em Certificados de Recebíveis Imobiliários (CRI), títulos públicos e crédito privado de primeira linha, com estratégia conservadora e foco em previsibilidade."
-        condicoes = f"• Emissor: Gestora com expertise em renda fixa\n• Prazo: Indeterminado (cotização diária ou semanal)\n• Taxa: Taxa de administração: 0,5% a 1,0% a.a. | Performance: Pode haver\n• Liquidez: D+30 (típico)\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
+        condicoes = f"• Emissor: Gestora com expertise em renda fixa\n• Prazo: Indeterminado (cotização diária ou semanal)\n• Taxa: Taxa de administração: 0,5% a 1,0% a.a.\n• Liquidez: D+30 (típico)\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
         perfil = "Conservadores e moderados que buscam rentabilidade acima do CDI com baixa volatilidade. Excelente para reserva de emergência de médio prazo e alocação tática"
-        speech = "Posicione como alternativa superior à poupança e CDB tradicional. Mostre histórico de rentabilidade consistente, benefícios da diversificação do fundo vs título único, e gestão ativa. Use simulações comparativas mostrando diferença acumulada ao longo de 3-5 anos. Ideal para complementar renda fixa de clientes conservadores."
+        speech = "Posicione como alternativa superior à poupança e CDB tradicional. Mostre histórico de rentabilidade consistente e benefícios da diversificação do fundo."
     else:
-        resumo = "Fundo de investimento com gestão profissional ativa, estratégia macro diversificada e foco em gerar retornos consistentes através de alocação tática em múltiplas classes de ativos conforme cenário econômico."
-        condicoes = f"• Emissor: Casa de gestão independente\n• Prazo: Variável conforme estratégia\n• Taxa: Taxa de administração: 1,0% a 2,0% a.a. | Performance: conforme mandato\n• Liquidez: D+30 (típico)\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
+        resumo = "Fundo de investimento com gestão profissional ativa, estratégia macro diversificada e foco em gerar retornos consistentes através de alocação tática em múltiplas classes de ativos."
+        condicoes = f"• Emissor: Casa de gestão independente\n• Prazo: Variável conforme estratégia\n• Taxa: Taxa de administração: 1,0% a 2,0% a.a.\n• Liquidez: D+30 (típico)\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
         perfil = "Investidores com perfil moderado que buscam diversificação e gestão ativa. Patrimônio mínimo sugerido: R$ 100 mil"
-        speech = "Posicione como 'core' do portfólio diversificado. Enfatize gestão profissional, rebalanceamento tático, e histórico do gestor. Use para clientes que não têm tempo ou conhecimento para gerir investimentos ativamente. Mostre como o fundo se comportou em diferentes cenários (alta de juros, crise, etc). Compare custo-benefício vs consultoria independente."
+        speech = "Posicione como 'core' do portfólio diversificado. Enfatize gestão profissional, rebalanceamento tático e histórico do gestor."
     
     return {
         'resumo': resumo,
@@ -481,7 +528,6 @@ def calcular_dia_util(ano, mes, numero_dia_util, feriados):
         contador_dias_uteis = 0
         
         while dia_atual.month == mes:
-            
             eh_fim_de_semana = dia_atual.weekday() >= 5
             eh_feriado = dia_atual in feriados
             
@@ -518,12 +564,11 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # BARRA DE SELEÇÃO 
+    # BARRA DE SELEÇÃO
     st.markdown('<div class="barra-selecao">', unsafe_allow_html=True)
     st.markdown('<label>👤 SELECIONE O CLIENTE:</label>', unsafe_allow_html=True)
     
     clientes = sorted(df_base['Cliente'].unique())
-    # O CSS forte irá garantir o visual aqui.
     cliente_selecionado = st.selectbox("Selecione o Cliente", [""] + list(clientes), label_visibility="collapsed", key="cliente_select")
     
     st.markdown('</div>', unsafe_allow_html=True)
@@ -539,20 +584,17 @@ def main():
         else:
             st.session_state.fundo_selecionado = None
     
-    
     # CONTAINER PRINCIPAL
     st.markdown('<div class="container-principal">', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1.2, 1.5, 3])
     
-    # COLUNA 1: FUNDOS (Lógica de Clique)
+    # COLUNA 1: FUNDOS
     with col1:
         st.markdown('<div class="box"><div class="box-titulo">📊 FUNDOS DO CLIENTE</div><div class="box-conteudo">', unsafe_allow_html=True)
         
-        # O truque é renderizar o card e o botão dentro de um container com CSS
         for _, fundo in fundos_cliente.iterrows():
             ativo = fundo['Ativo']
-            # Garante formatação como float e tratamento de erro
             try:
                 posicao = float(fundo['Financeiro'])
             except:
@@ -564,7 +606,6 @@ def main():
             
             classe_selecao = 'fundo-card-selecionado' if ativo == st.session_state.fundo_selecionado else ''
             
-            # Bloco do Card
             st.markdown(f"""
             <div class="fundo-card-container">
                 <div class="fundo-card {classe_selecao}" style="border-left-color: {info['cor']}">
@@ -575,18 +616,15 @@ def main():
                 </div>
             """, unsafe_allow_html=True)
             
-            # Botão invisível posicionado sobre o card (A tag de fechamento </div> é colocada no fim do bloco de botão)
-            # O Streamlit renderiza o botão logo após o markdown acima, e o CSS o sobrepõe.
             if st.button(" ", key=f"select_{ativo}", help=f"Clique para ver a tese do {ativo}"):
                 st.session_state.fundo_selecionado = ativo
                 st.rerun()
             
-            st.markdown("</div>", unsafe_allow_html=True) # Fechamento do fundo-card-container
-
+            st.markdown("</div>", unsafe_allow_html=True)
 
         st.markdown('</div></div>', unsafe_allow_html=True)
     
-    # COLUNA 2: TESE (CORREÇÃO DE RENDERIZAÇÃO)
+    # COLUNA 2: TESE
     with col2:
         st.markdown('<div class="box"><div class="box-titulo">📝 TESE DO FUNDO</div>', unsafe_allow_html=True)
         
@@ -596,32 +634,24 @@ def main():
             info = buscar_info_fundo(fundo_para_tese, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
             tese = info['tese']
             
-            # Renderiza o conteúdo usando Markdown dentro do bloco HTML, o que evita quebra de tags
             st.markdown(f"""
             <div class="tese-texto">
-                <strong style="color: {info['cor']}; font-size: 13px;">{fundo_para_tese}</strong>
-                <p style="margin: 10px 0;">{tese.get('resumo', '')}</p>
-            """, unsafe_allow_html=True) # Abre a div tese-texto
-
-            st.markdown('<h4>📋 Resumo de Condições</h4>', unsafe_allow_html=True)
-            # Usa `st.text` ou `st.markdown` (sem unsafe_allow_html=True) para renderizar texto puro, 
-            # respeitando as quebras de linha (`\n` no `condicoes`)
-            st.markdown(f'<p style="white-space: pre-line; font-size: 11px;">{tese.get("condicoes", "")}</p>', unsafe_allow_html=True)
-            
-            st.markdown('<h4>🎯 Perfil do Cliente</h4>', unsafe_allow_html=True)
-            st.markdown(f'<p>{tese.get("perfil", "")}</p>', unsafe_allow_html=True)
-            
-            st.markdown('<h4>💡 Speech de Venda</h4>', unsafe_allow_html=True)
-            st.markdown(f'<p>{tese.get("speech", "")}</p>', unsafe_allow_html=True)
-            
-            st.markdown("</div>", unsafe_allow_html=True) # Fecha a div tese-texto
-
+                <strong style="color: {info['cor']};">{fundo_para_tese}</strong>
+                <p>{tese.get('resumo', '')}</p>
+                <h4>📋 Resumo de Condições</h4>
+                <p style="white-space: pre-line;">{tese.get('condicoes', '')}</p>
+                <h4>🎯 Perfil do Cliente</h4>
+                <p>{tese.get('perfil', '')}</p>
+                <h4>💡 Speech de Venda</h4>
+                <p>{tese.get('speech', '')}</p>
+            </div>
+            """, unsafe_allow_html=True)
         else:
-             st.markdown('<div class="tese-texto">Selecione um fundo na coluna ao lado para visualizar a tese.</div>', unsafe_allow_html=True)
+            st.markdown('<div class="tese-texto"><p>Selecione um fundo na coluna ao lado.</p></div>', unsafe_allow_html=True)
 
         st.markdown('</div>', unsafe_allow_html=True)
     
-    # COLUNA 3: CALENDÁRIO (Mantido o anterior)
+    # COLUNA 3: CALENDÁRIO
     with col3:
         st.markdown('<div class="box"><div class="box-titulo">📅 CALENDÁRIO</div>', unsafe_allow_html=True)
         
