@@ -32,8 +32,10 @@ def validar_senha_assessor(codigo_assessor, senha):
 def verificar_autenticacao():
     """Tela de login por assessor"""
     
+    # Inicializar session_state se não existir
     if 'autenticado' not in st.session_state:
         st.session_state.autenticado = False
+    if 'assessor_logado' not in st.session_state:
         st.session_state.assessor_logado = None
     
     if not st.session_state.autenticado:
@@ -628,6 +630,13 @@ def main():
     if df_base is None:
         st.stop()
     
+    # Verificar se está autenticado
+    if not st.session_state.get('autenticado', False) or not st.session_state.get('assessor_logado'):
+        st.error("❌ Sessão expirada. Faça login novamente.")
+        st.session_state.autenticado = False
+        st.session_state.assessor_logado = None
+        st.rerun()
+    
     # FILTRAR CLIENTES DO ASSESSOR LOGADO
     assessor_logado = st.session_state.assessor_logado
     
@@ -660,9 +669,10 @@ def main():
     # Botão de sair no canto
     col_sair = st.columns([10, 1])
     with col_sair[1]:
-        if st.button("🚪 Sair"):
-            st.session_state.autenticado = False
-            st.session_state.assessor_logado = None
+        if st.button("🚪 Sair", key="btn_sair"):
+            # Limpar session_state
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
             st.rerun()
     
     # BARRA DE SELEÇÃO
