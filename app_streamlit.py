@@ -53,7 +53,7 @@ def verificar_senha():
 verificar_senha()
 
 # ============================================
-# CSS IDÊNTICO À VERSÃO DESKTOP (COM CORREÇÕES DE COR E ESPAÇAMENTO)
+# CSS IDÊNTICO À VERSÃO DESKTOP (CORREÇÕES EXTREMAS)
 # ============================================
 
 st.markdown("""
@@ -108,10 +108,9 @@ st.markdown("""
         font-family: 'Segoe UI', sans-serif;
     }
     
-    /* CORREÇÃO 1: Label do Selectbox (Cliente) */
     .barra-selecao label {
         font-weight: bold;
-        color: #1e4d2b !important; /* CORREÇÃO: Fundo do label preto */
+        color: #1e4d2b;
         font-size: 12px;
         display: block;
         margin-bottom: 5px;
@@ -125,21 +124,26 @@ st.markdown("""
     .stSelectbox [data-baseweb="select"] > div:first-child {
         background: white !important;
         border: 2px solid #27ae60 !important;
-        color: #2c3e50 !important; /* Corrigido: Cor do texto selecionado para escuro */
-        box-shadow: none !important; 
+        color: #2c3e50 !important; 
+        box-shadow: none !important; /* Remove qualquer sombra preta que possa ter */
     }
     
-    /* 2. O DROPDOWN (Lista de Opções - Fundo) */
+    /* 2. O DROPDOWN (Lista de Opções) */
     [data-baseweb="popover"] {
         background: white !important;
         color: #2c3e50 !important;
         border: 1px solid #ddd !important;
     }
     
-    /* 3. AS OPÇÕES DENTRO DO DROPDOWN (Texto) */
+    /* 3. AS OPÇÕES DENTRO DO DROPDOWN */
     [data-baseweb="popover"] ul li div {
-        color: #2c3e50 !important; /* Corrigido: Cor do texto da opção para escuro */
+        color: #2c3e50 !important;
         background: white !important;
+    }
+    
+    /* 4. Opção em Hover */
+    [data-baseweb="popover"] ul li:hover div {
+        background: #f0f0f0 !important;
     }
     
     /* ************************************** */
@@ -175,11 +179,10 @@ st.markdown("""
         max-height: 600px;
     }
     
-    /* CARDS DE FUNDOS (Espaçamento corrigido) */
+    /* CARDS DE FUNDOS */
     .fundo-card-container {
         position: relative; 
-        margin-bottom: 3px !important; /* Reduzido o espaço entre os cards */
-        padding-top: 5px; 
+        margin-bottom: 8px;
     }
     
     .fundo-card {
@@ -187,17 +190,41 @@ st.markdown("""
         border: 1px solid #ddd;
         border-left: 6px solid #27ae60;
         border-radius: 4px;
-        padding: 10px; 
+        padding: 12px;
         font-family: 'Segoe UI', sans-serif;
         transition: all 0.2s;
     }
     
+    .fundo-card:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transform: translateX(3px);
+    }
+
+    /* DESTAQUE DO CARD SELECIONADO */
+    .fundo-card.fundo-card-selecionado {
+        border-right: 2px solid #3498db;
+        border-top: 1px solid #3498db;
+        border-bottom: 1px solid #3498db;
+        box-shadow: 0 0 5px rgba(52, 152, 219, 0.5); 
+        transform: translateX(0px); 
+    }
+    
     .fundo-card .nome {
         font-weight: bold;
-        font-size: 11px; 
+        font-size: 12px;
         color: #2c3e50;
-        margin-bottom: 5px; 
-        line-height: 1.2;
+        margin-bottom: 8px;
+        line-height: 1.3;
+    }
+    
+    .fundo-card .info {
+        font-size: 11px;
+        color: #7f8c8d;
+    }
+    
+    .fundo-card .info .valor {
+        color: #27ae60;
+        font-weight: 600;
     }
 
     /* TRUQUE DO BOTÃO PARA CLICAR NO FUNDO-CARD */
@@ -215,38 +242,119 @@ st.markdown("""
         padding: 0 !important;
         margin: 0 !important;
     }
+    .fundo-card-container .stButton button:hover {
+        background: rgba(0, 0, 0, 0.05) !important; /* Adiciona um leve hover para feedback visual de clique */
+    }
 
-    /* ************************************** */
-    /* CORREÇÃO 2: TESE DO FUNDO (Visualização Escura) */
-    /* ************************************** */
+    /* TESE */
     .tese-texto {
         padding: 15px;
         font-family: 'Segoe UI', sans-serif;
         font-size: 12px;
         line-height: 1.6;
-        color: #2c3e50 !important; /* CORREÇÃO: Cor do texto para escuro */
+        color: #2c3e50;
     }
     
     .tese-texto h4 {
         font-size: 13px;
         font-weight: bold;
-        color: #1e4d2b !important; /* CORREÇÃO: Títulos escuros */
+        color: #1e4d2b;
         margin: 15px 0 8px 0;
     }
     
     .tese-texto p {
         margin: 0 0 10px 0;
-        /* Garante quebra de linha para o Resumo de Condições (usado no código Python) */
-        white-space: pre-line;
     }
     
-    /* CALENDÁRIO... (o restante do CSS está ok) */
-
+    /* CALENDÁRIO */
+    .calendario-nav {
+        background: #f8f9fa;
+        padding: 10px 15px;
+        border-bottom: 2px solid #e0e0e0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .calendario-mes {
+        font-size: 16px;
+        font-weight: bold;
+        color: #1e4d2b;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    
+    .calendario-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0;
+        border: 1px solid #ddd;
+    }
+    
+    .cal-header {
+        background: #27ae60;
+        color: white;
+        padding: 8px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 11px;
+        border: 1px solid #1e8449;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    
+    .cal-dia {
+        border: 1px solid #ddd;
+        padding: 8px;
+        min-height: 90px;
+        background: white;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    
+    .cal-dia.fim-semana {
+        background: #f8f9fa;
+    }
+    
+    .cal-dia .numero {
+        font-size: 14px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 4px;
+    }
+    
+    .cal-evento {
+        background: #27ae60;
+        color: white;
+        padding: 3px 6px;
+        border-radius: 3px;
+        font-size: 10px;
+        font-weight: bold;
+        margin: 2px 0;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    /* BOTÕES GERAIS (MÊS ANTERIOR/PRÓXIMO MÊS) */
+    .stButton button {
+        background: #27ae60 !important;
+        color: white !important;
+        border: none !important;
+        padding: 8px 15px !important;
+        border-radius: 4px !important;
+        font-weight: 600 !important;
+        font-size: 11px !important;
+        font-family: 'Segoe UI', sans-serif !important;
+    }
+    
+    .stButton button:hover {
+        background: #1e8449 !important;
+    }
+    
 </style>
 """, unsafe_allow_html=True)
 
 # ============================================
-# DADOS E LÓGICA (Mantido do anterior)
+# DADOS E LÓGICA (Mantido do anterior, pois a lógica estava correta)
 # ============================================
 
 CORES_FUNDOS = [
@@ -412,10 +520,10 @@ def main():
     
     # BARRA DE SELEÇÃO 
     st.markdown('<div class="barra-selecao">', unsafe_allow_html=True)
-    # A label "SELECIONE O CLIENTE" agora é escura graças ao CSS
     st.markdown('<label>👤 SELECIONE O CLIENTE:</label>', unsafe_allow_html=True)
     
     clientes = sorted(df_base['Cliente'].unique())
+    # O CSS forte irá garantir o visual aqui.
     cliente_selecionado = st.selectbox("Selecione o Cliente", [""] + list(clientes), label_visibility="collapsed", key="cliente_select")
     
     st.markdown('</div>', unsafe_allow_html=True)
@@ -437,12 +545,14 @@ def main():
     
     col1, col2, col3 = st.columns([1.2, 1.5, 3])
     
-    # COLUNA 1: FUNDOS
+    # COLUNA 1: FUNDOS (Lógica de Clique)
     with col1:
         st.markdown('<div class="box"><div class="box-titulo">📊 FUNDOS DO CLIENTE</div><div class="box-conteudo">', unsafe_allow_html=True)
         
+        # O truque é renderizar o card e o botão dentro de um container com CSS
         for _, fundo in fundos_cliente.iterrows():
             ativo = fundo['Ativo']
+            # Garante formatação como float e tratamento de erro
             try:
                 posicao = float(fundo['Financeiro'])
             except:
@@ -465,17 +575,18 @@ def main():
                 </div>
             """, unsafe_allow_html=True)
             
-            # Botão invisível posicionado sobre o card
+            # Botão invisível posicionado sobre o card (A tag de fechamento </div> é colocada no fim do bloco de botão)
+            # O Streamlit renderiza o botão logo após o markdown acima, e o CSS o sobrepõe.
             if st.button(" ", key=f"select_{ativo}", help=f"Clique para ver a tese do {ativo}"):
                 st.session_state.fundo_selecionado = ativo
                 st.rerun()
             
-            st.markdown("</div>", unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True) # Fechamento do fundo-card-container
 
 
         st.markdown('</div></div>', unsafe_allow_html=True)
     
-    # COLUNA 2: TESE (CORRIGIDO: Cores Escuras e Renderização)
+    # COLUNA 2: TESE (CORREÇÃO DE RENDERIZAÇÃO)
     with col2:
         st.markdown('<div class="box"><div class="box-titulo">📝 TESE DO FUNDO</div>', unsafe_allow_html=True)
         
@@ -485,15 +596,17 @@ def main():
             info = buscar_info_fundo(fundo_para_tese, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
             tese = info['tese']
             
-            # O CSS garante que o texto e títulos dentro da div `tese-texto` sejam escuros.
+            # Renderiza o conteúdo usando Markdown dentro do bloco HTML, o que evita quebra de tags
             st.markdown(f"""
             <div class="tese-texto">
                 <strong style="color: {info['cor']}; font-size: 13px;">{fundo_para_tese}</strong>
                 <p style="margin: 10px 0;">{tese.get('resumo', '')}</p>
-            """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True) # Abre a div tese-texto
 
             st.markdown('<h4>📋 Resumo de Condições</h4>', unsafe_allow_html=True)
-            st.markdown(f'<p>{tese.get("condicoes", "")}</p>', unsafe_allow_html=True)
+            # Usa `st.text` ou `st.markdown` (sem unsafe_allow_html=True) para renderizar texto puro, 
+            # respeitando as quebras de linha (`\n` no `condicoes`)
+            st.markdown(f'<p style="white-space: pre-line; font-size: 11px;">{tese.get("condicoes", "")}</p>', unsafe_allow_html=True)
             
             st.markdown('<h4>🎯 Perfil do Cliente</h4>', unsafe_allow_html=True)
             st.markdown(f'<p>{tese.get("perfil", "")}</p>', unsafe_allow_html=True)
@@ -501,14 +614,14 @@ def main():
             st.markdown('<h4>💡 Speech de Venda</h4>', unsafe_allow_html=True)
             st.markdown(f'<p>{tese.get("speech", "")}</p>', unsafe_allow_html=True)
             
-            st.markdown("</div>", unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True) # Fecha a div tese-texto
 
         else:
              st.markdown('<div class="tese-texto">Selecione um fundo na coluna ao lado para visualizar a tese.</div>', unsafe_allow_html=True)
 
         st.markdown('</div>', unsafe_allow_html=True)
     
-    # COLUNA 3: CALENDÁRIO
+    # COLUNA 3: CALENDÁRIO (Mantido o anterior)
     with col3:
         st.markdown('<div class="box"><div class="box-titulo">📅 CALENDÁRIO</div>', unsafe_allow_html=True)
         
