@@ -310,18 +310,6 @@ st.markdown("""
         font-family: 'Segoe UI', sans-serif;
     }
     
-    .btn-sair {
-        background: #e74c3c !important;
-        color: white !important;
-        border: none !important;
-        padding: 8px 15px !important;
-        border-radius: 4px !important;
-        font-weight: 600 !important;
-        font-size: 11px !important;
-        cursor: pointer;
-        margin-left: 10px;
-    }
-    
     /* BARRA DE SELEÇÃO */
     .barra-selecao {
         background: #ecf0f1;
@@ -331,7 +319,7 @@ st.markdown("""
     
     .barra-selecao label {
         font-weight: bold;
-        color: #1e4d2b;
+        color: #000000;
         font-size: 12px;
         display: block;
         margin-bottom: 4px;
@@ -350,7 +338,7 @@ st.markdown("""
     .stSelectbox [data-baseweb="select"] > div:first-child {
         background: white !important;
         border: 2px solid #27ae60 !important;
-        color: #2c3e50 !important;
+        color: #000000 !important;
         box-shadow: none !important;
         min-height: 32px !important;
         height: 32px !important;
@@ -360,7 +348,7 @@ st.markdown("""
     }
     
     .stSelectbox [data-baseweb="select"] div {
-        color: #2c3e50 !important;
+        color: #000000 !important;
         font-weight: 700 !important;
         font-size: 15px !important;
         line-height: 24px !important;
@@ -381,7 +369,7 @@ st.markdown("""
     }
     
     [data-baseweb="popover"] ul li {
-        color: #2c3e50 !important;
+        color: #000000 !important;
         background: white !important;
         padding: 8px 12px !important;
         font-size: 14px !important;
@@ -590,6 +578,18 @@ st.markdown("""
         background: #1e8449 !important;
     }
     
+    /* BOTÃO SAIR ESPECÍFICO */
+    div[data-testid="column"]:last-child .stButton button {
+        background: #e74c3c !important;
+        color: white !important;
+        padding: 10px 20px !important;
+        font-size: 13px !important;
+    }
+    
+    div[data-testid="column"]:last-child .stButton button:hover {
+        background: #c0392b !important;
+    }
+    
     ::-webkit-scrollbar {
         width: 8px;
     }
@@ -722,22 +722,27 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # Botão de sair no canto
-    col_sair = st.columns([10, 1])
-    with col_sair[1]:
+    # BARRA DE SAUDAÇÃO E BOTÃO SAIR
+    st.markdown('<div style="background: white; padding: 5px 0;">', unsafe_allow_html=True)
+    col_saudacao, col_btn_sair = st.columns([5, 1])
+    
+    with col_saudacao:
+        nome_assessor = st.session_state.get('nome_assessor', 'Assessor')
+        st.markdown(f'<p style="font-size: 22px; color: #1e4d2b; margin: 15px 0 15px 40px; font-weight: 700;">👋 Olá, {nome_assessor}!</p>', unsafe_allow_html=True)
+    
+    with col_btn_sair:
+        st.markdown('<div style="margin-top: 10px; margin-right: 40px;">', unsafe_allow_html=True)
         if st.button("🚪 Sair", key="btn_sair"):
             # Limpar session_state
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
             st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # BARRA DE SELEÇÃO
     st.markdown('<div class="barra-selecao">', unsafe_allow_html=True)
-    
-    # Saudação personalizada
-    nome_assessor = st.session_state.get('nome_assessor', 'Assessor')
-    st.markdown(f'<p style="font-size: 14px; color: #1e4d2b; margin-bottom: 8px; font-weight: 600;">👋 Olá, {nome_assessor}!</p>', unsafe_allow_html=True)
-    
     st.markdown(f'<label>👤 SELECIONE O CLIENTE ({len(df_base_filtrado)} clientes):</label>', unsafe_allow_html=True)
     
     clientes = sorted(df_base_filtrado['Cliente'].unique())
