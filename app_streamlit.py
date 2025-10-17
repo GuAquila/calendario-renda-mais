@@ -1,7 +1,7 @@
 """
-CALENDÁRIO RENDA MAIS - INTERFACE 100% IDÊNTICA À VERSÃO DESKTOP
-================================================================
-Versão com cores corrigidas
+CALENDÁRIO RENDA MAIS - COM AUTENTICAÇÃO POR ASSESSOR
+======================================================
+Sistema multi-assessor com senhas individuais
 """
 
 import streamlit as st
@@ -18,14 +18,23 @@ st.set_page_config(
 )
 
 # ============================================
-# AUTENTICAÇÃO
+# AUTENTICAÇÃO POR ASSESSOR
 # ============================================
 
-SENHA_CORRETA = "Rendamais2025@"
+def validar_senha_assessor(codigo_assessor, senha):
+    """
+    Valida a senha do assessor no formato K + código
+    Exemplo: Assessor 47104 → Senha K47104
+    """
+    senha_esperada = f"K{codigo_assessor}"
+    return senha == senha_esperada
 
-def verificar_senha():
+def verificar_autenticacao():
+    """Tela de login por assessor"""
+    
     if 'autenticado' not in st.session_state:
         st.session_state.autenticado = False
+        st.session_state.assessor_logado = None
     
     if not st.session_state.autenticado:
         st.markdown("""
@@ -34,37 +43,87 @@ def verificar_senha():
                 background: white;
             }
             .login-box {
-                max-width: 400px;
-                margin: 150px auto;
+                max-width: 450px;
+                margin: 120px auto;
                 padding: 40px;
                 background: white;
                 border-radius: 10px;
                 box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             }
+            .login-titulo {
+                text-align: center;
+                color: #1e4d2b;
+                margin-bottom: 30px;
+            }
+            .login-info {
+                background: #e8f5e9;
+                padding: 15px;
+                border-radius: 5px;
+                border-left: 4px solid #27ae60;
+                margin-top: 20px;
+                font-size: 12px;
+                color: #2c3e50;
+            }
         </style>
         """, unsafe_allow_html=True)
         
         col1, col2, col3 = st.columns([1, 2, 1])
+        
         with col2:
-            st.markdown("<div style='text-align: center;'><h1 style='font-size: 60px;'>🌳</h1><h2>Calendário Renda Mais</h2><h3 style='color: #7dcea0;'>TAUARI INVESTIMENTOS</h3></div>", unsafe_allow_html=True)
-            senha = st.text_input("Digite a senha:", type="password", placeholder="Senha")
+            st.markdown("""
+            <div class="login-titulo">
+                <h1 style='font-size: 60px; margin: 0;'>🌳</h1>
+                <h2 style='margin: 10px 0;'>Calendário Renda Mais</h2>
+                <h3 style='color: #7dcea0; margin: 0;'>TAUARI INVESTIMENTOS</h3>
+                <p style='color: #7f8c8d; font-size: 14px; margin-top: 15px;'>Acesso Restrito por Assessor</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Campos de login
+            codigo_assessor = st.text_input(
+                "👤 Código do Assessor:",
+                placeholder="Ex: 47104",
+                max_chars=10
+            )
+            
+            senha_assessor = st.text_input(
+                "🔐 Senha do Assessor:",
+                type="password",
+                placeholder="Ex: K47104",
+                max_chars=20
+            )
+            
             if st.button("🔓 Entrar", use_container_width=True):
-                if senha == SENHA_CORRETA:
+                if not codigo_assessor or not senha_assessor:
+                    st.error("❌ Preencha todos os campos!")
+                elif validar_senha_assessor(codigo_assessor, senha_assessor):
                     st.session_state.autenticado = True
+                    st.session_state.assessor_logado = codigo_assessor
+                    st.success(f"✅ Bem-vindo, Assessor {codigo_assessor}!")
                     st.rerun()
                 else:
-                    st.error("❌ Senha incorreta!")
+                    st.error("❌ Código ou senha incorretos!")
+            
+            # Informações de ajuda
+            st.markdown("""
+            <div class="login-info">
+                <strong>ℹ️ Como acessar:</strong><br>
+                • Digite seu código de assessor<br>
+                • Senha: K + seu código<br>
+                • Exemplo: Assessor <strong>47104</strong> → Senha <strong>K47104</strong>
+            </div>
+            """, unsafe_allow_html=True)
+        
         st.stop()
 
-verificar_senha()
+verificar_autenticacao()
 
 # ============================================
-# CSS COM CORES CORRIGIDAS
+# CSS
 # ============================================
 
 st.markdown("""
 <style>
-    /* RESET COMPLETO */
     .stApp {
         background: white !important;
     }
@@ -74,14 +133,19 @@ st.markdown("""
         max-width: 100% !important;
     }
     
-    /* Esconder elementos do Streamlit */
     #MainMenu, footer, header {visibility: hidden;}
     .stDeployButton {display: none;}
     
-    /* CABEÇALHO VERDE */
+    /* CABEÇALHO */
     .header-verde {
         background: #1e4d2b;
         padding: 20px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .header-content {
         display: flex;
         align-items: center;
         gap: 20px;
@@ -107,7 +171,28 @@ st.markdown("""
         font-family: 'Segoe UI', sans-serif;
     }
     
-    /* BARRA DE SELEÇÃO - COMPACTA */
+    .assessor-info {
+        color: white;
+        font-size: 13px;
+        background: rgba(255,255,255,0.1);
+        padding: 8px 15px;
+        border-radius: 5px;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    
+    .btn-sair {
+        background: #e74c3c !important;
+        color: white !important;
+        border: none !important;
+        padding: 8px 15px !important;
+        border-radius: 4px !important;
+        font-weight: 600 !important;
+        font-size: 11px !important;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+    
+    /* BARRA DE SELEÇÃO */
     .barra-selecao {
         background: #ecf0f1;
         padding: 8px 40px;
@@ -122,7 +207,7 @@ st.markdown("""
         margin-bottom: 4px;
     }
 
-    /* SELECTBOX - MENOR E NÚMEROS VISÍVEIS */
+    /* SELECTBOX */
     .stSelectbox {
         margin: 0 !important;
     }
@@ -152,12 +237,6 @@ st.markdown("""
         overflow: visible !important;
         text-overflow: clip !important;
         white-space: nowrap !important;
-    }
-    
-    .stSelectbox [data-baseweb="select"] span {
-        color: #2c3e50 !important;
-        font-weight: 700 !important;
-        font-size: 15px !important;
     }
     
     .stSelectbox svg {
@@ -241,7 +320,6 @@ st.markdown("""
         border-top: 1px solid #3498db;
         border-bottom: 1px solid #3498db;
         box-shadow: 0 0 5px rgba(52, 152, 219, 0.5); 
-        transform: translateX(0px); 
     }
     
     .fundo-card .nome {
@@ -281,7 +359,7 @@ st.markdown("""
         background: rgba(0, 0, 0, 0.02) !important;
     }
 
-    /* TESE - CORES ESCURAS E LEGÍVEIS */
+    /* TESE */
     .tese-texto {
         padding: 15px;
         font-family: 'Segoe UI', sans-serif;
@@ -315,22 +393,6 @@ st.markdown("""
     }
     
     /* CALENDÁRIO */
-    .calendario-nav {
-        background: #f8f9fa;
-        padding: 10px 15px;
-        border-bottom: 2px solid #e0e0e0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .calendario-mes {
-        font-size: 16px;
-        font-weight: bold;
-        color: #1e4d2b;
-        font-family: 'Segoe UI', sans-serif;
-    }
-    
     .calendario-grid {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
@@ -398,7 +460,6 @@ st.markdown("""
         background: #1e8449 !important;
     }
     
-    /* SCROLLBAR */
     ::-webkit-scrollbar {
         width: 8px;
     }
@@ -501,19 +562,19 @@ def carregar_dados():
 def criar_tese(nome_ativo, dia_util_int):
     if 'FII' in nome_ativo or 'Imobiliário' in nome_ativo:
         resumo = "Fundo de Investimento Imobiliário que investe em imóveis comerciais de alto padrão, galpões logísticos em regiões estratégicas e Certificados de Recebíveis Imobiliários (CRI) de emissores sólidos."
-        condicoes = f"• Emissor: Gestora especializada em FII\n• Prazo: Indeterminado (cotização diária ou semanal)\n• Taxa: Taxa de administração: 0,5% a 1,0% a.a.\n• Liquidez: D+30 (típico)\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
-        perfil = "Ideal para investidores que buscam renda mensal passiva, isenta de IR para PF, com exposição ao mercado imobiliário sem precisar comprar imóveis diretamente"
-        speech = "Destaque a isenção de IR, diversificação imobiliária, liquidez em bolsa (D+3) e distribuição mensal. Enfatize que o cliente pode começar com valores acessíveis e construir um portfólio imobiliário robusto."
+        condicoes = f"• Emissor: Gestora especializada em FII\n• Prazo: Indeterminado\n• Taxa: 0,5% a 1,0% a.a.\n• Liquidez: D+30\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
+        perfil = "Ideal para investidores que buscam renda mensal passiva, isenta de IR para PF"
+        speech = "Destaque a isenção de IR, diversificação imobiliária e distribuição mensal."
     elif 'CRI' in nome_ativo or 'Renda' in nome_ativo:
-        resumo = "Fundo de renda fixa que investe predominantemente em Certificados de Recebíveis Imobiliários (CRI), títulos públicos e crédito privado de primeira linha, com estratégia conservadora e foco em previsibilidade."
-        condicoes = f"• Emissor: Gestora com expertise em renda fixa\n• Prazo: Indeterminado (cotização diária ou semanal)\n• Taxa: Taxa de administração: 0,5% a 1,0% a.a.\n• Liquidez: D+30 (típico)\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
-        perfil = "Conservadores e moderados que buscam rentabilidade acima do CDI com baixa volatilidade. Excelente para reserva de emergência de médio prazo e alocação tática"
-        speech = "Posicione como alternativa superior à poupança e CDB tradicional. Mostre histórico de rentabilidade consistente e benefícios da diversificação do fundo."
+        resumo = "Fundo de renda fixa que investe em CRI, títulos públicos e crédito privado de primeira linha."
+        condicoes = f"• Emissor: Gestora com expertise em renda fixa\n• Prazo: Indeterminado\n• Taxa: 0,5% a 1,0% a.a.\n• Liquidez: D+30\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
+        perfil = "Conservadores que buscam rentabilidade acima do CDI"
+        speech = "Alternativa superior à poupança com rentabilidade consistente."
     else:
-        resumo = "Fundo de investimento com gestão profissional ativa, estratégia macro diversificada e foco em gerar retornos consistentes através de alocação tática em múltiplas classes de ativos."
-        condicoes = f"• Emissor: Casa de gestão independente\n• Prazo: Variável conforme estratégia\n• Taxa: Taxa de administração: 1,0% a 2,0% a.a.\n• Liquidez: D+30 (típico)\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
-        perfil = "Investidores com perfil moderado que buscam diversificação e gestão ativa. Patrimônio mínimo sugerido: R$ 100 mil"
-        speech = "Posicione como 'core' do portfólio diversificado. Enfatize gestão profissional, rebalanceamento tático e histórico do gestor."
+        resumo = "Fundo com gestão ativa e estratégia diversificada."
+        condicoes = f"• Emissor: Casa de gestão independente\n• Prazo: Variável\n• Taxa: 1,0% a 2,0% a.a.\n• Liquidez: D+30\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
+        perfil = "Investidores com perfil moderado"
+        speech = "Gestão profissional e rebalanceamento tático."
     
     return {
         'resumo': resumo,
@@ -567,22 +628,48 @@ def main():
     if df_base is None:
         st.stop()
     
-    # CABEÇALHO
-    st.markdown("""
+    # FILTRAR CLIENTES DO ASSESSOR LOGADO
+    assessor_logado = st.session_state.assessor_logado
+    
+    # Converter coluna Assessor para string para comparação
+    df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip()
+    
+    df_base_filtrado = df_base[df_base['Assessor'] == str(assessor_logado)]
+    
+    if df_base_filtrado.empty:
+        st.error(f"❌ Nenhum cliente encontrado para o Assessor {assessor_logado}")
+        st.info("💡 Verifique se há clientes vinculados ao seu código na planilha")
+        st.stop()
+    
+    # CABEÇALHO COM INFO DO ASSESSOR
+    st.markdown(f"""
     <div class="header-verde">
-        <div class="logo">🌳</div>
-        <div class="texto">
-            <h1>📅 CALENDÁRIO DE PAGAMENTOS - RENDA MAIS</h1>
-            <h2>TAUARI INVESTIMENTOS</h2>
+        <div class="header-content">
+            <div class="logo">🌳</div>
+            <div class="texto">
+                <h1>📅 CALENDÁRIO DE PAGAMENTOS - RENDA MAIS</h1>
+                <h2>TAUARI INVESTIMENTOS</h2>
+            </div>
+        </div>
+        <div class="assessor-info">
+            👤 Assessor: <strong>{assessor_logado}</strong>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
+    # Botão de sair no canto
+    col_sair = st.columns([10, 1])
+    with col_sair[1]:
+        if st.button("🚪 Sair"):
+            st.session_state.autenticado = False
+            st.session_state.assessor_logado = None
+            st.rerun()
+    
     # BARRA DE SELEÇÃO
     st.markdown('<div class="barra-selecao">', unsafe_allow_html=True)
-    st.markdown('<label>👤 SELECIONE O CLIENTE:</label>', unsafe_allow_html=True)
+    st.markdown(f'<label>👤 SELECIONE O CLIENTE ({len(df_base_filtrado)} clientes):</label>', unsafe_allow_html=True)
     
-    clientes = sorted(df_base['Cliente'].unique())
+    clientes = sorted(df_base_filtrado['Cliente'].unique())
     cliente_selecionado = st.selectbox("Selecione o Cliente", [""] + list(clientes), label_visibility="collapsed", key="cliente_select")
     
     st.markdown('</div>', unsafe_allow_html=True)
@@ -590,7 +677,7 @@ def main():
     if not cliente_selecionado:
         st.stop()
     
-    fundos_cliente = df_base[df_base['Cliente'] == cliente_selecionado]
+    fundos_cliente = df_base_filtrado[df_base_filtrado['Cliente'] == cliente_selecionado]
 
     if 'fundo_selecionado' not in st.session_state or st.session_state.fundo_selecionado not in fundos_cliente['Ativo'].values:
         if not fundos_cliente.empty:
@@ -630,7 +717,7 @@ def main():
                 </div>
             """, unsafe_allow_html=True)
             
-            if st.button(" ", key=f"select_{ativo}", help=f"Clique para ver a tese do {ativo}"):
+            if st.button(" ", key=f"select_{ativo}", help=f"Ver tese: {ativo}"):
                 st.session_state.fundo_selecionado = ativo
                 st.rerun()
             
@@ -661,7 +748,7 @@ def main():
             </div>
             """, unsafe_allow_html=True)
         else:
-            st.markdown('<div class="tese-texto"><p>Selecione um fundo na coluna ao lado.</p></div>', unsafe_allow_html=True)
+            st.markdown('<div class="tese-texto"><p>Selecione um fundo.</p></div>', unsafe_allow_html=True)
 
         st.markdown('</div>', unsafe_allow_html=True)
     
@@ -684,7 +771,7 @@ def main():
                 st.rerun()
         
         with col_p2:
-            st.markdown(f'<div class="calendario-mes" style="text-align: center; padding: 8px 0;">{MESES_PT[st.session_state.mes_atual-1]} {st.session_state.ano_atual}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="text-align: center; padding: 8px; font-size: 16px; font-weight: bold; color: #1e4d2b;">{MESES_PT[st.session_state.mes_atual-1]} {st.session_state.ano_atual}</div>', unsafe_allow_html=True)
         
         with col_p3:
             if st.button("Próximo Mês ▶", key="next_mes"):
@@ -714,7 +801,7 @@ def main():
                     eventos_mes[dia].append({'sigla': info['sigla'], 'cor': info['cor']})
         
         for semana in cal:
-            for i, dia in enumerate(semana):
+            for dia in semana:
                 if dia == 0:
                     html_cal += '<div class="cal-dia" style="background: #f8f9fa;"></div>'
                 else:
