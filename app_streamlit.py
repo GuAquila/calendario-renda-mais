@@ -107,28 +107,29 @@ st.markdown("""
         font-family: 'Segoe UI', sans-serif;
     }
     
-    /* BARRA DE SELEÇÃO - MENOR E MAIS VISÍVEL */
+    /* BARRA DE SELEÇÃO - COMPACTA */
     .barra-selecao {
         background: #ecf0f1;
-        padding: 10px 40px;
+        padding: 8px 40px;
         font-family: 'Segoe UI', sans-serif;
     }
     
     .barra-selecao label {
         font-weight: bold;
         color: #1e4d2b;
-        font-size: 13px;
+        font-size: 12px;
         display: block;
-        margin-bottom: 5px;
+        margin-bottom: 4px;
     }
 
-    /* SELECTBOX - CORES CORRIGIDAS */
+    /* SELECTBOX - MENOR E NÚMEROS VISÍVEIS */
     .stSelectbox {
         margin: 0 !important;
     }
     
     .stSelectbox [data-baseweb="select"] {
-        min-height: 38px !important;
+        min-height: 32px !important;
+        height: 32px !important;
     }
     
     .stSelectbox [data-baseweb="select"] > div:first-child {
@@ -136,22 +137,33 @@ st.markdown("""
         border: 2px solid #27ae60 !important;
         color: #2c3e50 !important;
         box-shadow: none !important;
-        min-height: 38px !important;
-        padding: 6px 12px !important;
+        min-height: 32px !important;
+        height: 32px !important;
+        padding: 4px 10px !important;
+        display: flex !important;
+        align-items: center !important;
     }
     
     .stSelectbox [data-baseweb="select"] div {
         color: #2c3e50 !important;
-        font-weight: 600 !important;
-        font-size: 14px !important;
+        font-weight: 700 !important;
+        font-size: 15px !important;
+        line-height: 24px !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        white-space: nowrap !important;
     }
     
     .stSelectbox [data-baseweb="select"] span {
         color: #2c3e50 !important;
+        font-weight: 700 !important;
+        font-size: 15px !important;
     }
     
     .stSelectbox svg {
         fill: #27ae60 !important;
+        width: 18px !important;
+        height: 18px !important;
     }
     
     [data-baseweb="popover"] {
@@ -162,6 +174,8 @@ st.markdown("""
     [data-baseweb="popover"] ul li {
         color: #2c3e50 !important;
         background: white !important;
+        padding: 8px 12px !important;
+        font-size: 14px !important;
     }
     
     [data-baseweb="popover"] ul li:hover {
