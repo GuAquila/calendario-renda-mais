@@ -21,13 +21,46 @@ st.set_page_config(
 # AUTENTICAÇÃO POR ASSESSOR
 # ============================================
 
+# Dicionário com os dados dos assessores: código -> (nome, senha)
+ASSESSORES = {
+    '21743': ('Andre Miyada', 'AM2025'),
+    '22359': ('Giuliano Hissnauer Vieira', 'GHV2025'),
+    '21685': ('Rudney Vicente de Araujo', 'RVA2025'),
+    '31321': ('Adriana Ourique Giraldelli Miranda', 'AOGM2025'),
+    '23496': ('Ana Carolina Falcao Nagoshi', 'ACFN2025'),
+    '73735': ('Jeferson de Carvalho', 'JC2025'),
+    '72197': ('Jose Eduardo Monteiro de Vasconcelos', 'JEMV2025'),
+    '74644': ('Marcelo Fontes de Almeida', 'MFA2025'),
+    '39586': ('Marco Antonio de Moraes', 'MAM2025'),
+    '46857': ('Gustavo Aquila', 'GA2025'),
+    '29871': ('Jonathan Francesco Barletta', 'JFB2025'),
+    '97495': ('Luana Peres Ribeiro', 'LPR2025'),
+    '90410': ('Marta Maria Acquisti Guarido', 'MMAG2025'),
+    '46604': ('Roberto da Silva Junior', 'RSJ2025'),
+    '51594': ('Bruna Rafaela Teixeira Mateos', 'BRTM2025'),
+    '91796': ('Jose Dy Carlos Bueno Chiroza', 'JDCBC2025'),
+    '47104': ('Kamila Munhoz Adario', 'KMA2025'),
+    '21635': ('Lucas Chede Garcia', 'LCG2025'),
+    '24931': ('Paula Pellegrini Reimao', 'PPR2025'),
+    '91476': ('Rafael Iran Gomes Januario', 'RIGJ2025'),
+    '42596': ('Ricardo Salles de Godoy', 'RSG2025'),
+    '94296': ('Vanessa Alves Mattar Calfat', 'VAMC2025'),
+    '67756': ('Vinicius Nunes Palacios', 'VNP2025'),
+}
+
 def validar_senha_assessor(codigo_assessor, senha):
     """
-    Valida a senha do assessor no formato K + código
-    Exemplo: Assessor 47104 → Senha K47104
+    Valida a senha do assessor usando o dicionário ASSESSORES
+    A senha é formada pelas iniciais dos nomes + 2025
+    Exemplo: Andre Miyada → AM2025
     """
-    senha_esperada = f"K{codigo_assessor}"
-    return senha == senha_esperada
+    if codigo_assessor not in ASSESSORES:
+        return False, None
+    
+    nome_assessor, senha_esperada = ASSESSORES[codigo_assessor]
+    if senha == senha_esperada:
+        return True, nome_assessor
+    return False, None
 
 def verificar_autenticacao():
     """Tela de login por assessor"""
@@ -37,6 +70,8 @@ def verificar_autenticacao():
         st.session_state.autenticado = False
     if 'assessor_logado' not in st.session_state:
         st.session_state.assessor_logado = None
+    if 'nome_assessor' not in st.session_state:
+        st.session_state.nome_assessor = None
     
     if not st.session_state.autenticado:
         st.markdown("""
@@ -84,35 +119,38 @@ def verificar_autenticacao():
             # Campos de login
             codigo_assessor = st.text_input(
                 "👤 Código do Assessor:",
-                placeholder="Ex: 47104",
+                placeholder="Coloque seu código, exemplo: 46857",
                 max_chars=10
             )
             
             senha_assessor = st.text_input(
                 "🔐 Senha do Assessor:",
                 type="password",
-                placeholder="Ex: K47104",
+                placeholder="Digite sua senha",
                 max_chars=20
             )
             
             if st.button("🔓 Entrar", use_container_width=True):
                 if not codigo_assessor or not senha_assessor:
                     st.error("❌ Preencha todos os campos!")
-                elif validar_senha_assessor(codigo_assessor, senha_assessor):
-                    st.session_state.autenticado = True
-                    st.session_state.assessor_logado = codigo_assessor
-                    st.success(f"✅ Bem-vindo, Assessor {codigo_assessor}!")
-                    st.rerun()
                 else:
-                    st.error("❌ Código ou senha incorretos!")
+                    valido, nome_assessor = validar_senha_assessor(codigo_assessor, senha_assessor)
+                    if valido:
+                        st.session_state.autenticado = True
+                        st.session_state.assessor_logado = codigo_assessor
+                        st.session_state.nome_assessor = nome_assessor
+                        st.success(f"✅ Bem-vindo, {nome_assessor}!")
+                        st.rerun()
+                    else:
+                        st.error("❌ Código ou senha incorretos!")
             
             # Informações de ajuda
             st.markdown("""
             <div class="login-info">
                 <strong>ℹ️ Como acessar:</strong><br>
-                • Digite seu código de assessor<br>
-                • Senha: K + seu código<br>
-                • Exemplo: Assessor <strong>47104</strong> → Senha <strong>K47104</strong>
+                • Digite seu código de assessor (apenas números)<br>
+                • Digite sua senha pessoal<br>
+                • Em caso de dúvidas, entre em contato com o suporte
             </div>
             """, unsafe_allow_html=True)
         
@@ -651,6 +689,7 @@ def main():
         st.stop()
     
     # CABEÇALHO COM INFO DO ASSESSOR
+    assessor_nome = st.session_state.get('nome_assessor', 'Assessor')
     st.markdown(f"""
     <div class="header-verde">
         <div class="header-content">
@@ -661,7 +700,7 @@ def main():
             </div>
         </div>
         <div class="assessor-info">
-            👤 Assessor: <strong>{assessor_logado}</strong>
+            👤 Assessor: <strong>{assessor_nome}</strong> ({assessor_logado})
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -677,6 +716,11 @@ def main():
     
     # BARRA DE SELEÇÃO
     st.markdown('<div class="barra-selecao">', unsafe_allow_html=True)
+    
+    # Saudação personalizada
+    nome_assessor = st.session_state.get('nome_assessor', 'Assessor')
+    st.markdown(f'<p style="font-size: 14px; color: #1e4d2b; margin-bottom: 8px; font-weight: 600;">👋 Olá, {nome_assessor}!</p>', unsafe_allow_html=True)
+    
     st.markdown(f'<label>👤 SELECIONE O CLIENTE ({len(df_base_filtrado)} clientes):</label>', unsafe_allow_html=True)
     
     clientes = sorted(df_base_filtrado['Cliente'].unique())
