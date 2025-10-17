@@ -53,7 +53,7 @@ def verificar_senha():
 verificar_senha()
 
 # ============================================
-# CSS IDÊNTICO À VERSÃO DESKTOP (COM CORREÇÕES REFINADAS)
+# CSS IDÊNTICO À VERSÃO DESKTOP (CORREÇÕES EXTREMAS)
 # ============================================
 
 st.markdown("""
@@ -116,27 +116,37 @@ st.markdown("""
         margin-bottom: 5px;
     }
 
-    /* CORREÇÃO DO SELECTBOX PRETO (Fundo e Borda) */
+    /* ************************************** */
+    /* CORREÇÃO DO SELECTBOX (Força Máxima) */
+    /* ************************************** */
+    
+    /* 1. O PRÓPRIO SELECTBOX (fundo e borda) */
     .stSelectbox [data-baseweb="select"] > div:first-child {
         background: white !important;
         border: 2px solid #27ae60 !important;
-        color: #2c3e50 !important; /* Cor do texto selecionado */
+        color: #2c3e50 !important; 
+        box-shadow: none !important; /* Remove qualquer sombra preta que possa ter */
     }
     
-    .stSelectbox [data-baseweb="select"] > div {
-        font-family: 'Segoe UI', sans-serif;
-        font-size: 13px;
-    }
-    
-    /* CORREÇÃO PARA O DROPDOWN (LISTA DE OPÇÕES) PRETO */
+    /* 2. O DROPDOWN (Lista de Opções) */
     [data-baseweb="popover"] {
         background: white !important;
         color: #2c3e50 !important;
-        border: 1px solid #ddd;
+        border: 1px solid #ddd !important;
     }
+    
+    /* 3. AS OPÇÕES DENTRO DO DROPDOWN */
     [data-baseweb="popover"] ul li div {
         color: #2c3e50 !important;
+        background: white !important;
     }
+    
+    /* 4. Opção em Hover */
+    [data-baseweb="popover"] ul li:hover div {
+        background: #f0f0f0 !important;
+    }
+    
+    /* ************************************** */
     
     /* CONTAINER PRINCIPAL */
     .container-principal {
@@ -170,7 +180,6 @@ st.markdown("""
     }
     
     /* CARDS DE FUNDOS */
-    /* Container para posicionar o botão invisível */
     .fundo-card-container {
         position: relative; 
         margin-bottom: 8px;
@@ -218,14 +227,14 @@ st.markdown("""
         font-weight: 600;
     }
 
-    /* TRUQUE DO BOTÃO PARA CLICAR NO FUNDO-CARD (TORNA O BOTÃO INVISÍVEL) */
+    /* TRUQUE DO BOTÃO PARA CLICAR NO FUNDO-CARD */
     .fundo-card-container .stButton button {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: transparent !important; /* Totalmente transparente */
+        background: transparent !important; 
         border: none !important;
         color: transparent !important;
         cursor: pointer;
@@ -233,8 +242,8 @@ st.markdown("""
         padding: 0 !important;
         margin: 0 !important;
     }
-    .fundo-card-container .stButton button:focus {
-        outline: none; /* Remove o foco padrão para evitar outline azul */
+    .fundo-card-container .stButton button:hover {
+        background: rgba(0, 0, 0, 0.05) !important; /* Adiciona um leve hover para feedback visual de clique */
     }
 
     /* TESE */
@@ -253,13 +262,99 @@ st.markdown("""
         margin: 15px 0 8px 0;
     }
     
-    /* CALENDÁRIO... (o restante do CSS está ok) */
-
+    .tese-texto p {
+        margin: 0 0 10px 0;
+    }
+    
+    /* CALENDÁRIO */
+    .calendario-nav {
+        background: #f8f9fa;
+        padding: 10px 15px;
+        border-bottom: 2px solid #e0e0e0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .calendario-mes {
+        font-size: 16px;
+        font-weight: bold;
+        color: #1e4d2b;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    
+    .calendario-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0;
+        border: 1px solid #ddd;
+    }
+    
+    .cal-header {
+        background: #27ae60;
+        color: white;
+        padding: 8px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 11px;
+        border: 1px solid #1e8449;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    
+    .cal-dia {
+        border: 1px solid #ddd;
+        padding: 8px;
+        min-height: 90px;
+        background: white;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    
+    .cal-dia.fim-semana {
+        background: #f8f9fa;
+    }
+    
+    .cal-dia .numero {
+        font-size: 14px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 4px;
+    }
+    
+    .cal-evento {
+        background: #27ae60;
+        color: white;
+        padding: 3px 6px;
+        border-radius: 3px;
+        font-size: 10px;
+        font-weight: bold;
+        margin: 2px 0;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    /* BOTÕES GERAIS (MÊS ANTERIOR/PRÓXIMO MÊS) */
+    .stButton button {
+        background: #27ae60 !important;
+        color: white !important;
+        border: none !important;
+        padding: 8px 15px !important;
+        border-radius: 4px !important;
+        font-weight: 600 !important;
+        font-size: 11px !important;
+        font-family: 'Segoe UI', sans-serif !important;
+    }
+    
+    .stButton button:hover {
+        background: #1e8449 !important;
+    }
+    
 </style>
 """, unsafe_allow_html=True)
 
 # ============================================
-# DADOS E LÓGICA
+# DADOS E LÓGICA (Mantido do anterior, pois a lógica estava correta)
 # ============================================
 
 CORES_FUNDOS = [
@@ -342,7 +437,7 @@ def carregar_dados():
         return None, None, None, None, None, None
 
 def criar_tese(nome_ativo, dia_util_int):
-    # CORRIGIDO: Removidas tags HTML dos textos para evitar renderização incorreta
+    # Texto sem tags HTML
     if 'FII' in nome_ativo or 'Imobiliário' in nome_ativo:
         resumo = "Fundo de Investimento Imobiliário que investe em imóveis comerciais de alto padrão, galpões logísticos em regiões estratégicas e Certificados de Recebíveis Imobiliários (CRI) de emissores sólidos."
         condicoes = f"• Emissor: Gestora especializada em FII\n• Prazo: Indeterminado (cotização diária ou semanal)\n• Taxa: Taxa de administração: 0,5% a 1,0% a.a. | Performance: Pode haver\n• Liquidez: D+30 (típico)\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
@@ -423,11 +518,12 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # BARRA DE SELEÇÃO (CORREÇÃO DE COR)
+    # BARRA DE SELEÇÃO 
     st.markdown('<div class="barra-selecao">', unsafe_allow_html=True)
     st.markdown('<label>👤 SELECIONE O CLIENTE:</label>', unsafe_allow_html=True)
     
     clientes = sorted(df_base['Cliente'].unique())
+    # O CSS forte irá garantir o visual aqui.
     cliente_selecionado = st.selectbox("Selecione o Cliente", [""] + list(clientes), label_visibility="collapsed", key="cliente_select")
     
     st.markdown('</div>', unsafe_allow_html=True)
@@ -437,53 +533,56 @@ def main():
     
     fundos_cliente = df_base[df_base['Cliente'] == cliente_selecionado]
 
-    # Inicializa st.session_state.fundo_selecionado
     if 'fundo_selecionado' not in st.session_state or st.session_state.fundo_selecionado not in fundos_cliente['Ativo'].values:
         if not fundos_cliente.empty:
             st.session_state.fundo_selecionado = fundos_cliente['Ativo'].iloc[0]
         else:
             st.session_state.fundo_selecionado = None
     
+    
     # CONTAINER PRINCIPAL
     st.markdown('<div class="container-principal">', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1.2, 1.5, 3])
     
-    # COLUNA 1: FUNDOS (CORREÇÃO DE CLIQUE)
+    # COLUNA 1: FUNDOS (Lógica de Clique)
     with col1:
         st.markdown('<div class="box"><div class="box-titulo">📊 FUNDOS DO CLIENTE</div><div class="box-conteudo">', unsafe_allow_html=True)
         
-        # Lista para armazenar o estado do botão
-        botoes_clicados = {}
-
+        # O truque é renderizar o card e o botão dentro de um container com CSS
         for _, fundo in fundos_cliente.iterrows():
             ativo = fundo['Ativo']
-            posicao = float(fundo['Financeiro'])
+            # Garante formatação como float e tratamento de erro
+            try:
+                posicao = float(fundo['Financeiro'])
+            except:
+                posicao = 0.0
+                
             info = buscar_info_fundo(ativo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
             
             dia_texto = f"{info['dia_util']}º dia útil" if info['dia_util'] else "Não definido"
             
-            # Adiciona classe de destaque se for o fundo selecionado
             classe_selecao = 'fundo-card-selecionado' if ativo == st.session_state.fundo_selecionado else ''
             
-            # Usando st.columns para garantir que o botão invisível fique sobre o card
-            col_card_wrap = st.columns([1])[0]
-            with col_card_wrap:
-                st.markdown(f"""
-                <div class="fundo-card-container">
-                    <div class="fundo-card {classe_selecao}" style="border-left-color: {info['cor']}">
-                        <div class="nome">{ativo}</div>
-                        <div class="info">
-                            💰 Posição: <span class="valor">R$ {posicao:,.2f}</span> | 📅 {dia_texto}
-                        </div>
+            # Bloco do Card
+            st.markdown(f"""
+            <div class="fundo-card-container">
+                <div class="fundo-card {classe_selecao}" style="border-left-color: {info['cor']}">
+                    <div class="nome">{ativo}</div>
+                    <div class="info">
+                        💰 Posição: <span class="valor">R$ {posicao:,.2f}</span> | 📅 {dia_texto}
                     </div>
-                    </div>
-                """, unsafe_allow_html=True)
-                
-                # Criamos o botão fora do markdown e o CSS o posiciona sobre o card
-                if st.button(" ", key=f"select_{ativo}"):
-                    st.session_state.fundo_selecionado = ativo
-                    st.rerun()
+                </div>
+            """, unsafe_allow_html=True)
+            
+            # Botão invisível posicionado sobre o card (A tag de fechamento </div> é colocada no fim do bloco de botão)
+            # O Streamlit renderiza o botão logo após o markdown acima, e o CSS o sobrepõe.
+            if st.button(" ", key=f"select_{ativo}", help=f"Clique para ver a tese do {ativo}"):
+                st.session_state.fundo_selecionado = ativo
+                st.rerun()
+            
+            st.markdown("</div>", unsafe_allow_html=True) # Fechamento do fundo-card-container
+
 
         st.markdown('</div></div>', unsafe_allow_html=True)
     
@@ -497,32 +596,35 @@ def main():
             info = buscar_info_fundo(fundo_para_tese, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
             tese = info['tese']
             
-            # Corrigido: Uso de HTML/Markdown e white-space: pre-line para quebras de linha
+            # Renderiza o conteúdo usando Markdown dentro do bloco HTML, o que evita quebra de tags
             st.markdown(f"""
             <div class="tese-texto">
                 <strong style="color: {info['cor']}; font-size: 13px;">{fundo_para_tese}</strong>
                 <p style="margin: 10px 0;">{tese.get('resumo', '')}</p>
-                
-                <h4>📋 Resumo de Condições</h4>
-                <p style="white-space: pre-line; font-size: 11px;">{tese.get('condicoes', '')}</p>
-                
-                <h4>🎯 Perfil do Cliente</h4>
-                <p>{tese.get('perfil', '')}</p>
-                
-                <h4>💡 Speech de Venda</h4>
-                <p>{tese.get('speech', '')}</p>
-            </div>
-            """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True) # Abre a div tese-texto
+
+            st.markdown('<h4>📋 Resumo de Condições</h4>', unsafe_allow_html=True)
+            # Usa `st.text` ou `st.markdown` (sem unsafe_allow_html=True) para renderizar texto puro, 
+            # respeitando as quebras de linha (`\n` no `condicoes`)
+            st.markdown(f'<p style="white-space: pre-line; font-size: 11px;">{tese.get("condicoes", "")}</p>', unsafe_allow_html=True)
+            
+            st.markdown('<h4>🎯 Perfil do Cliente</h4>', unsafe_allow_html=True)
+            st.markdown(f'<p>{tese.get("perfil", "")}</p>', unsafe_allow_html=True)
+            
+            st.markdown('<h4>💡 Speech de Venda</h4>', unsafe_allow_html=True)
+            st.markdown(f'<p>{tese.get("speech", "")}</p>', unsafe_allow_html=True)
+            
+            st.markdown("</div>", unsafe_allow_html=True) # Fecha a div tese-texto
+
         else:
              st.markdown('<div class="tese-texto">Selecione um fundo na coluna ao lado para visualizar a tese.</div>', unsafe_allow_html=True)
 
         st.markdown('</div>', unsafe_allow_html=True)
     
-    # COLUNA 3: CALENDÁRIO
+    # COLUNA 3: CALENDÁRIO (Mantido o anterior)
     with col3:
         st.markdown('<div class="box"><div class="box-titulo">📅 CALENDÁRIO</div>', unsafe_allow_html=True)
         
-        # Navegação
         if 'mes_atual' not in st.session_state:
             st.session_state.mes_atual = datetime.now().month
             st.session_state.ano_atual = datetime.now().year
@@ -548,17 +650,14 @@ def main():
                     st.session_state.ano_atual += 1
                 st.rerun()
         
-        # Grid do calendário
         cal = calendar.monthcalendar(st.session_state.ano_atual, st.session_state.mes_atual)
         
-        # Headers
         dias_semana = ['seg.', 'ter.', 'qua.', 'qui.', 'sex.', 'sáb.', 'dom.']
         html_cal = '<div class="calendario-grid">'
         
         for dia in dias_semana:
             html_cal += f'<div class="cal-header">{dia}</div>'
         
-        # Eventos
         eventos_mes = {}
         for _, fundo in fundos_cliente.iterrows():
             info = buscar_info_fundo(fundo['Ativo'], mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
@@ -570,7 +669,6 @@ def main():
                         eventos_mes[dia] = []
                     eventos_mes[dia].append({'sigla': info['sigla'], 'cor': info['cor']})
         
-        # Renderizar dias
         for semana in cal:
             for i, dia in enumerate(semana):
                 if dia == 0:
