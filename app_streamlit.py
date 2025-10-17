@@ -62,7 +62,7 @@ def validar_senha_assessor(codigo_assessor, senha):
         return True, nome_assessor
     return False, None
 
-def verificar_autenticacao():
+def verificar_autenticacao(df_base):
     """Tela de login por assessor"""
     
     # Inicializar session_state se não existir
@@ -136,11 +136,23 @@ def verificar_autenticacao():
                 else:
                     valido, nome_assessor = validar_senha_assessor(codigo_assessor, senha_assessor)
                     if valido:
-                        st.session_state.autenticado = True
-                        st.session_state.assessor_logado = codigo_assessor
-                        st.session_state.nome_assessor = nome_assessor
-                        st.success(f"✅ Bem-vindo, {nome_assessor}!")
-                        st.rerun()
+                        # Verificar se o assessor tem clientes na base ANTES de autenticar
+                        if df_base is not None:
+                            df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip()
+                            clientes_assessor = df_base[df_base['Assessor'] == str(codigo_assessor)]
+                            
+                            if clientes_assessor.empty:
+                                st.error(f"❌ Nenhum cliente encontrado para o Assessor {codigo_assessor}")
+                                st.info("💡 Verifique se há clientes vinculados ao seu código na planilha")
+                            else:
+                                # Só autentica se tiver clientes
+                                st.session_state.autenticado = True
+                                st.session_state.assessor_logado = codigo_assessor
+                                st.session_state.nome_assessor = nome_assessor
+                                st.success(f"✅ Bem-vindo, {nome_assessor}!")
+                                st.rerun()
+                        else:
+                            st.error("❌ Erro ao carregar a base de dados!")
                     else:
                         st.error("❌ Código ou senha incorretos!")
             
@@ -156,7 +168,85 @@ def verificar_autenticacao():
         
         st.stop()
 
-verificar_autenticacao()
+# ============================================
+# CARREGAR DADOS ANTES DA AUTENTICAÇÃO
+# ============================================
+
+# Carregar dados primeiro para poder validar na tela de login
+@st.cache_data
+def carregar_dados():
+    try:
+        NOME_ARQUIVO = 'calendario_Renda_mais.xlsx'
+        
+        if not os.path.exists(NOME_ARQUIVO):
+            st.error(f"❌ Erro: O arquivo '{NOME_ARQUIVO}' não foi encontrado.")
+            return None, None, None, None, None, None
+
+        df_base = pd.read_excel(NOME_ARQUIVO, sheet_name='Base')
+        df_base.columns = df_base.columns.str.strip()
+        
+        df_suporte = pd.read_excel(NOME_ARQUIVO, sheet_name='Suporte')
+        
+        try:
+            df_feriados = pd.read_excel(NOME_ARQUIVO, sheet_name='Feriados')
+            feriados = set()
+            for col in df_feriados.columns:
+                for val in df_feriados[col]:
+                    if pd.notna(val) and isinstance(val, datetime):
+                        feriados.add(val.date())
+        except:
+            feriados = set()
+        
+        mapa_pagamentos = {}
+        mapa_cores = {}
+        mapa_siglas = {}
+        mapa_teses = {}
+        
+        colunas = list(df_suporte.columns)
+        col_ativo = colunas[7] if len(colunas) > 7 else None
+        col_dia_util = colunas[8] if len(colunas) > 8 else None
+        col_sigla = colunas[6] if len(colunas) > 6 else None
+        
+        cor_index = 0
+        
+        for index, row in df_suporte.iterrows():
+            if col_ativo and col_dia_util:
+                nome_ativo = str(row[col_ativo]).strip()
+                dia_util = row[col_dia_util]
+                
+                if pd.isna(nome_ativo) or nome_ativo == '' or nome_ativo == 'nan':
+                    continue
+                
+                try:
+                    dia_util_int = int(float(dia_util))
+                    mapa_pagamentos[nome_ativo] = dia_util_int
+                    mapa_cores[nome_ativo] = CORES_FUNDOS[cor_index % len(CORES_FUNDOS)]
+                    
+                    if col_sigla:
+                        sigla = str(row[col_sigla]).strip() if pd.notna(row[col_sigla]) else nome_ativo[:10]
+                    else:
+                        palavras = nome_ativo.split()
+                        sigla = ''.join([p[0].upper() for p in palavras[:3]])
+                    mapa_siglas[nome_ativo] = sigla.upper()
+                    
+                    tese = criar_tese(nome_ativo, dia_util_int)
+                    mapa_teses[nome_ativo] = tese
+                    
+                    cor_index += 1
+                except:
+                    pass
+        
+        return df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses
+        
+    except Exception as e:
+        st.error(f"❌ Erro ao carregar dados: {e}")
+        return None, None, None, None, None, None
+
+# Carregar dados primeiro
+df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses = carregar_dados()
+
+# Verificar autenticação passando df_base
+verificar_autenticacao(df_base)
 
 # ============================================
 # CSS
@@ -530,75 +620,6 @@ MESES_PT = [
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ]
 
-@st.cache_data
-def carregar_dados():
-    try:
-        NOME_ARQUIVO = 'calendario_Renda_mais.xlsx'
-        
-        if not os.path.exists(NOME_ARQUIVO):
-            st.error(f"❌ Erro: O arquivo '{NOME_ARQUIVO}' não foi encontrado.")
-            return None, None, None, None, None, None
-
-        df_base = pd.read_excel(NOME_ARQUIVO, sheet_name='Base')
-        df_base.columns = df_base.columns.str.strip()
-        
-        df_suporte = pd.read_excel(NOME_ARQUIVO, sheet_name='Suporte')
-        
-        try:
-            df_feriados = pd.read_excel(NOME_ARQUIVO, sheet_name='Feriados')
-            feriados = set()
-            for col in df_feriados.columns:
-                for val in df_feriados[col]:
-                    if pd.notna(val) and isinstance(val, datetime):
-                        feriados.add(val.date())
-        except:
-            feriados = set()
-        
-        mapa_pagamentos = {}
-        mapa_cores = {}
-        mapa_siglas = {}
-        mapa_teses = {}
-        
-        colunas = list(df_suporte.columns)
-        col_ativo = colunas[7] if len(colunas) > 7 else None
-        col_dia_util = colunas[8] if len(colunas) > 8 else None
-        col_sigla = colunas[6] if len(colunas) > 6 else None
-        
-        cor_index = 0
-        
-        for index, row in df_suporte.iterrows():
-            if col_ativo and col_dia_util:
-                nome_ativo = str(row[col_ativo]).strip()
-                dia_util = row[col_dia_util]
-                
-                if pd.isna(nome_ativo) or nome_ativo == '' or nome_ativo == 'nan':
-                    continue
-                
-                try:
-                    dia_util_int = int(float(dia_util))
-                    mapa_pagamentos[nome_ativo] = dia_util_int
-                    mapa_cores[nome_ativo] = CORES_FUNDOS[cor_index % len(CORES_FUNDOS)]
-                    
-                    if col_sigla:
-                        sigla = str(row[col_sigla]).strip() if pd.notna(row[col_sigla]) else nome_ativo[:10]
-                    else:
-                        palavras = nome_ativo.split()
-                        sigla = ''.join([p[0].upper() for p in palavras[:3]])
-                    mapa_siglas[nome_ativo] = sigla.upper()
-                    
-                    tese = criar_tese(nome_ativo, dia_util_int)
-                    mapa_teses[nome_ativo] = tese
-                    
-                    cor_index += 1
-                except:
-                    pass
-        
-        return df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses
-        
-    except Exception as e:
-        st.error(f"❌ Erro ao carregar dados: {e}")
-        return None, None, None, None, None, None
-
 def criar_tese(nome_ativo, dia_util_int):
     if 'FII' in nome_ativo or 'Imobiliário' in nome_ativo:
         resumo = "Fundo de Investimento Imobiliário que investe em imóveis comerciais de alto padrão, galpões logísticos em regiões estratégicas e Certificados de Recebíveis Imobiliários (CRI) de emissores sólidos."
@@ -663,7 +684,8 @@ def calcular_dia_util(ano, mes, numero_dia_util, feriados):
 # ============================================
 
 def main():
-    df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses = carregar_dados()
+    # Os dados já foram carregados globalmente
+    global df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses
     
     if df_base is None:
         st.stop()
@@ -682,11 +704,6 @@ def main():
     df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip()
     
     df_base_filtrado = df_base[df_base['Assessor'] == str(assessor_logado)]
-    
-    if df_base_filtrado.empty:
-        st.error(f"❌ Nenhum cliente encontrado para o Assessor {assessor_logado}")
-        st.info("💡 Verifique se há clientes vinculados ao seu código na planilha")
-        st.stop()
     
     # CABEÇALHO COM INFO DO ASSESSOR
     assessor_nome = st.session_state.get('nome_assessor', 'Assessor')
