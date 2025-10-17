@@ -1,12 +1,8 @@
-"""
-CALENDÁRIO RENDA MAIS - INTERFACE 100% IDÊNTICA À VERSÃO DESKTOP
-================================================================
-"""
-
 import streamlit as st
 import pandas as pd
 from datetime import datetime, date, timedelta
 import calendar
+import os # Importar para checar a existência do arquivo
 
 st.set_page_config(
     page_title="Calendário Renda Mais - TAUARI",
@@ -57,7 +53,7 @@ def verificar_senha():
 verificar_senha()
 
 # ============================================
-# CSS IDÊNTICO À VERSÃO DESKTOP
+# CSS IDÊNTICO À VERSÃO DESKTOP (COM CORREÇÕES)
 # ============================================
 
 st.markdown("""
@@ -119,6 +115,29 @@ st.markdown("""
         display: block;
         margin-bottom: 5px;
     }
+
+    /* CORREÇÃO DO SELECTBOX PRETO */
+    /* Garante que o selectbox principal tenha as cores corretas */
+    .stSelectbox [data-baseweb="select"] {
+        background: white !important;
+        border: 2px solid #27ae60 !important;
+    }
+    
+    .stSelectbox [data-baseweb="select"] > div {
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 13px;
+    }
+    
+    /* CORREÇÃO PARA O DROPDOWN (LISTA DE OPÇÕES) PRETO */
+    [data-baseweb="popover"] {
+        background: white !important;
+        color: #2c3e50 !important;
+        font-family: 'Segoe UI', sans-serif;
+        border: 1px solid #ddd;
+    }
+    [data-baseweb="popover"] ul li div {
+        color: #2c3e50 !important;
+    }
     
     /* CONTAINER PRINCIPAL */
     .container-principal {
@@ -152,13 +171,18 @@ st.markdown("""
     }
     
     /* CARDS DE FUNDOS */
+    .fundo-card-container {
+        /* Container para posicionar o botão invisível */
+        position: relative; 
+        margin-bottom: 8px;
+    }
+    
     .fundo-card {
         background: white;
         border: 1px solid #ddd;
         border-left: 6px solid #27ae60;
         border-radius: 4px;
         padding: 12px;
-        margin-bottom: 8px;
         font-family: 'Segoe UI', sans-serif;
         cursor: pointer;
         transition: all 0.2s;
@@ -167,6 +191,15 @@ st.markdown("""
     .fundo-card:hover {
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         transform: translateX(3px);
+    }
+
+    /* DESTAQUE DO CARD SELECIONADO */
+    .fundo-card.fundo-card-selecionado {
+        border-right: 2px solid #3498db;
+        border-top: 1px solid #3498db;
+        border-bottom: 1px solid #3498db;
+        box-shadow: 0 0 5px rgba(52, 152, 219, 0.5); 
+        transform: translateX(0px); 
     }
     
     .fundo-card .nome {
@@ -185,6 +218,23 @@ st.markdown("""
     .fundo-card .info .valor {
         color: #27ae60;
         font-weight: 600;
+    }
+
+    /* TRUQUE DO BOTÃO PARA CLICAR NO FUNDO-CARD (TORNA O BOTÃO QUASE INVISÍVEL) */
+    .fundo-card-container .stButton button {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0) !important;
+        border: none !important;
+        color: transparent !important;
+        z-index: 10;
+    }
+
+    .fundo-card-container .stButton button:hover {
+        background: rgba(0,0,0,0.05) !important; /* Pequeno hover para feedback */
     }
     
     /* TESE */
@@ -280,7 +330,7 @@ st.markdown("""
         text-overflow: ellipsis;
     }
     
-    /* BOTÕES */
+    /* BOTÕES GERAIS */
     .stButton button {
         background: #27ae60 !important;
         color: white !important;
@@ -342,6 +392,10 @@ def carregar_dados():
     try:
         NOME_ARQUIVO = 'calendario_Renda_mais.xlsx'
         
+        if not os.path.exists(NOME_ARQUIVO):
+            st.error(f"❌ Erro: O arquivo '{NOME_ARQUIVO}' não foi encontrado.")
+            return None, None, None, None, None, None
+
         df_base = pd.read_excel(NOME_ARQUIVO, sheet_name='Base')
         df_base.columns = df_base.columns.str.strip()
         
@@ -387,7 +441,7 @@ def carregar_dados():
                     else:
                         palavras = nome_ativo.split()
                         sigla = ''.join([p[0].upper() for p in palavras[:3]])
-                    mapa_siglas[nome_ativo] = sigla
+                    mapa_siglas[nome_ativo] = sigla.upper()
                     
                     tese = criar_tese(nome_ativo, dia_util_int)
                     mapa_teses[nome_ativo] = tese
@@ -399,7 +453,7 @@ def carregar_dados():
         return df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses
         
     except Exception as e:
-        st.error(f"❌ Erro: {e}")
+        st.error(f"❌ Erro ao carregar dados do Excel: {e}")
         return None, None, None, None, None, None
 
 def criar_tese(nome_ativo, dia_util_int):
@@ -444,10 +498,8 @@ def calcular_dia_util(ano, mes, numero_dia_util, feriados):
     try:
         dia_atual = date(ano, mes, 1)
         contador_dias_uteis = 0
-        dias_no_mes = 0
         
-        while dia_atual.month == mes and dias_no_mes < 35:
-            dias_no_mes += 1
+        while dia_atual.month == mes:
             
             eh_fim_de_semana = dia_atual.weekday() >= 5
             eh_feriado = dia_atual in feriados
@@ -485,23 +537,35 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # BARRA DE SELEÇÃO
-    st.markdown('<div class="barra-selecao"><label>👤 SELECIONE O CLIENTE:</label></div>', unsafe_allow_html=True)
+    # BARRA DE SELEÇÃO (CORRIGIDA)
+    st.markdown('<div class="barra-selecao">', unsafe_allow_html=True)
+    st.markdown('<label>👤 SELECIONE O CLIENTE:</label>', unsafe_allow_html=True)
     
     clientes = sorted(df_base['Cliente'].unique())
-    cliente_selecionado = st.selectbox("", [""] + list(clientes), label_visibility="collapsed")
+    # O key="cliente_select" ajuda o Streamlit a gerenciar o estado
+    cliente_selecionado = st.selectbox("Selecione o Cliente", [""] + list(clientes), label_visibility="collapsed", key="cliente_select")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
     
     if not cliente_selecionado:
         st.stop()
     
     fundos_cliente = df_base[df_base['Cliente'] == cliente_selecionado]
+
+    # Inicializa st.session_state.fundo_selecionado (CORREÇÃO DE TESE)
+    if 'fundo_selecionado' not in st.session_state or st.session_state.fundo_selecionado not in fundos_cliente['Ativo'].values:
+        if not fundos_cliente.empty:
+            st.session_state.fundo_selecionado = fundos_cliente['Ativo'].iloc[0]
+        else:
+            st.session_state.fundo_selecionado = None
+    
     
     # CONTAINER PRINCIPAL
     st.markdown('<div class="container-principal">', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1.2, 1.5, 3])
     
-    # COLUNA 1: FUNDOS
+    # COLUNA 1: FUNDOS (CORRIGIDA PARA SELEÇÃO DE TESE)
     with col1:
         st.markdown('<div class="box"><div class="box-titulo">📊 FUNDOS DO CLIENTE</div><div class="box-conteudo">', unsafe_allow_html=True)
         
@@ -512,29 +576,43 @@ def main():
             
             dia_texto = f"{info['dia_util']}º dia útil" if info['dia_util'] else "Não definido"
             
+            # Adiciona classe de destaque se for o fundo selecionado
+            classe_selecao = 'fundo-card-selecionado' if ativo == st.session_state.fundo_selecionado else ''
+            
             st.markdown(f"""
-            <div class="fundo-card" style="border-left-color: {info['cor']}">
-                <div class="nome">{ativo}</div>
-                <div class="info">
-                    💰 Posição: <span class="valor">R$ {posicao:,.2f}</span> | 📅 {dia_texto}
+            <div class="fundo-card-container">
+                <div class="fundo-card {classe_selecao}" style="border-left-color: {info['cor']}">
+                    <div class="nome">{ativo}</div>
+                    <div class="info">
+                        💰 Posição: <span class="valor">R$ {posicao:,.2f}</span> | 📅 {dia_texto}
+                    </div>
                 </div>
+                {st.button(" ", key=f"select_{ativo}", help=f"Clique para ver a tese do {ativo}", use_container_width=True)}
             </div>
             """, unsafe_allow_html=True)
+            
+            # Se o botão for clicado, atualiza o estado e reruns (isso é resolvido no render)
+            if st.session_state.get(f"select_{ativo}"):
+                st.session_state.fundo_selecionado = ativo
+                # Limpa o estado do botão para evitar loop
+                st.session_state[f"select_{ativo}"] = False 
+                st.rerun()
         
         st.markdown('</div></div>', unsafe_allow_html=True)
     
-    # COLUNA 2: TESE
+    # COLUNA 2: TESE (CORRIGIDA PARA EXIBIR O FUNDO SELECIONADO)
     with col2:
         st.markdown('<div class="box"><div class="box-titulo">📝 TESE DO FUNDO</div>', unsafe_allow_html=True)
         
-        if len(fundos_cliente) > 0:
-            primeiro_fundo = fundos_cliente.iloc[0]
-            info = buscar_info_fundo(primeiro_fundo['Ativo'], mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
+        fundo_para_tese = st.session_state.fundo_selecionado
+        
+        if fundo_para_tese:
+            info = buscar_info_fundo(fundo_para_tese, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
             tese = info['tese']
             
             st.markdown(f"""
             <div class="tese-texto">
-                <strong style="color: {info['cor']}; font-size: 13px;">{primeiro_fundo['Ativo']}</strong>
+                <strong style="color: {info['cor']}; font-size: 13px;">{fundo_para_tese}</strong>
                 <p style="margin: 10px 0;">{tese.get('resumo', '')}</p>
                 
                 <h4>📋 Resumo de Condições</h4>
@@ -547,7 +625,9 @@ def main():
                 <p>{tese.get('speech', '')}</p>
             </div>
             """, unsafe_allow_html=True)
-        
+        else:
+             st.markdown('<div class="tese-texto">Selecione um fundo na coluna ao lado para visualizar a tese.</div>', unsafe_allow_html=True)
+
         st.markdown('</div>', unsafe_allow_html=True)
     
     # COLUNA 3: CALENDÁRIO
@@ -562,7 +642,7 @@ def main():
         col_p1, col_p2, col_p3 = st.columns([1, 3, 1])
         
         with col_p1:
-            if st.button("◀ Mês Anterior"):
+            if st.button("◀ Mês Anterior", key="prev_mes"):
                 st.session_state.mes_atual -= 1
                 if st.session_state.mes_atual < 1:
                     st.session_state.mes_atual = 12
@@ -573,7 +653,7 @@ def main():
             st.markdown(f'<div class="calendario-mes" style="text-align: center; padding: 8px 0;">{MESES_PT[st.session_state.mes_atual-1]} {st.session_state.ano_atual}</div>', unsafe_allow_html=True)
         
         with col_p3:
-            if st.button("Próximo Mês ▶"):
+            if st.button("Próximo Mês ▶", key="next_mes"):
                 st.session_state.mes_atual += 1
                 if st.session_state.mes_atual > 12:
                     st.session_state.mes_atual = 1
@@ -604,12 +684,13 @@ def main():
         
         # Renderizar dias
         for semana in cal:
-            for dia in semana:
+            for i, dia in enumerate(semana):
                 if dia == 0:
                     html_cal += '<div class="cal-dia" style="background: #f8f9fa;"></div>'
                 else:
                     data = date(st.session_state.ano_atual, st.session_state.mes_atual, dia)
-                    classe = "cal-dia fim-semana" if data.weekday() >= 5 else "cal-dia"
+                    # Verifica se é Sábado (5) ou Domingo (6)
+                    classe = "cal-dia fim-semana" if data.weekday() >= 5 else "cal-dia" 
                     
                     eventos_html = ""
                     if dia in eventos_mes:
