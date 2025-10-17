@@ -1,6 +1,6 @@
 """
-CALENDÁRIO RENDA MAIS - INTERFACE IDÊNTICA À VERSÃO DESKTOP
-===========================================================
+CALENDÁRIO RENDA MAIS - INTERFACE 100% IDÊNTICA À VERSÃO DESKTOP
+================================================================
 """
 
 import streamlit as st
@@ -11,7 +11,8 @@ import calendar
 st.set_page_config(
     page_title="Calendário Renda Mais - TAUARI",
     page_icon="🌳",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
 # ============================================
@@ -27,7 +28,10 @@ def verificar_senha():
     if not st.session_state.autenticado:
         st.markdown("""
         <style>
-            .login-container {
+            .stApp {
+                background: white;
+            }
+            .login-box {
                 max-width: 400px;
                 margin: 150px auto;
                 padding: 40px;
@@ -35,42 +39,19 @@ def verificar_senha():
                 border-radius: 10px;
                 box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             }
-            .login-header {
-                text-align: center;
-                color: #1e4d2b;
-                margin-bottom: 30px;
-            }
-            .stTextInput input {
-                padding: 12px !important;
-                font-size: 14px !important;
-            }
         </style>
         """, unsafe_allow_html=True)
         
         col1, col2, col3 = st.columns([1, 2, 1])
-        
         with col2:
-            st.markdown("""
-            <div class="login-header">
-                <h1 style="font-size: 60px; margin: 0;">🌳</h1>
-                <h2 style="margin: 10px 0;">Calendário Renda Mais</h2>
-                <h3 style="color: #7dcea0; margin: 0;">TAUARI INVESTIMENTOS</h3>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            senha_digitada = st.text_input(
-                "Digite a senha de acesso:",
-                type="password",
-                placeholder="Senha"
-            )
-            
+            st.markdown("<div style='text-align: center;'><h1 style='font-size: 60px;'>🌳</h1><h2>Calendário Renda Mais</h2><h3 style='color: #7dcea0;'>TAUARI INVESTIMENTOS</h3></div>", unsafe_allow_html=True)
+            senha = st.text_input("Digite a senha:", type="password", placeholder="Senha")
             if st.button("🔓 Entrar", use_container_width=True):
-                if senha_digitada == SENHA_CORRETA:
+                if senha == SENHA_CORRETA:
                     st.session_state.autenticado = True
                     st.rerun()
                 else:
                     st.error("❌ Senha incorreta!")
-        
         st.stop()
 
 verificar_senha()
@@ -81,200 +62,254 @@ verificar_senha()
 
 st.markdown("""
 <style>
-    /* Remover padding padrão */
+    /* RESET COMPLETO */
+    .stApp {
+        background: white !important;
+    }
+    
     .main .block-container {
         padding: 0 !important;
         max-width: 100% !important;
     }
     
-    /* Esconder menu e footer */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
+    /* Esconder elementos do Streamlit */
+    #MainMenu, footer, header {visibility: hidden;}
+    .stDeployButton {display: none;}
     
-    /* Cabeçalho verde IDÊNTICO */
-    .header-tauari {
-        background: linear-gradient(135deg, #1e4d2b 0%, #27ae60 100%);
-        padding: 25px 40px;
-        color: white;
-        margin: 0;
-    }
-    
-    .header-content {
+    /* CABEÇALHO VERDE */
+    .header-verde {
+        background: #1e4d2b;
+        padding: 20px 40px;
         display: flex;
         align-items: center;
-        gap: 25px;
+        gap: 20px;
     }
     
-    .header-logo {
+    .header-verde .logo {
         font-size: 50px;
     }
     
-    .header-text h1 {
-        font-size: 20px;
-        margin: 0 0 5px 0;
+    .header-verde .texto h1 {
+        color: white;
+        font-size: 18px;
         font-weight: bold;
+        margin: 0 0 5px 0;
+        font-family: 'Segoe UI', sans-serif;
     }
     
-    .header-text h2 {
-        font-size: 16px;
-        margin: 0;
+    .header-verde .texto h2 {
         color: #7dcea0;
+        font-size: 15px;
         font-weight: 600;
+        margin: 0;
+        font-family: 'Segoe UI', sans-serif;
     }
     
-    /* Seletor de cliente */
-    .cliente-bar {
+    /* BARRA DE SELEÇÃO */
+    .barra-selecao {
         background: #ecf0f1;
         padding: 15px 40px;
-        margin: 0;
+        font-family: 'Segoe UI', sans-serif;
     }
     
-    .cliente-label {
+    .barra-selecao label {
         font-weight: bold;
         color: #1e4d2b;
-        font-size: 13px;
+        font-size: 12px;
+        display: block;
         margin-bottom: 5px;
     }
     
-    /* Container principal */
-    .main-content {
-        display: flex;
-        gap: 15px;
+    /* CONTAINER PRINCIPAL */
+    .container-principal {
         padding: 20px 40px;
-        background: #f5f5f5;
-    }
-    
-    /* Colunas */
-    .column-box {
         background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-        overflow: hidden;
     }
     
-    .column-title {
+    /* BOXES */
+    .box {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        overflow: hidden;
+        height: 100%;
+    }
+    
+    .box-titulo {
         background: #f8f9fa;
-        padding: 12px 20px;
+        padding: 10px 15px;
+        border-bottom: 2px solid #e0e0e0;
         font-weight: bold;
         color: #2c3e50;
-        font-size: 14px;
-        border-bottom: 2px solid #e0e0e0;
+        font-size: 13px;
+        font-family: 'Segoe UI', sans-serif;
     }
     
-    /* Cards de fundos IDÊNTICOS */
+    .box-conteudo {
+        padding: 10px;
+        overflow-y: auto;
+        max-height: 600px;
+    }
+    
+    /* CARDS DE FUNDOS */
     .fundo-card {
         background: white;
-        border: 1px solid #e0e0e0;
+        border: 1px solid #ddd;
         border-left: 6px solid #27ae60;
         border-radius: 4px;
-        padding: 12px 15px;
-        margin: 8px;
-        transition: all 0.2s;
+        padding: 12px;
+        margin-bottom: 8px;
+        font-family: 'Segoe UI', sans-serif;
         cursor: pointer;
+        transition: all 0.2s;
     }
     
     .fundo-card:hover {
-        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         transform: translateX(3px);
     }
     
-    .fundo-nome {
+    .fundo-card .nome {
         font-weight: bold;
-        color: #2c3e50;
         font-size: 12px;
-        margin-bottom: 6px;
-        line-height: 1.4;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        line-height: 1.3;
     }
     
-    .fundo-info {
+    .fundo-card .info {
         font-size: 11px;
         color: #7f8c8d;
     }
     
-    .fundo-posicao {
+    .fundo-card .info .valor {
         color: #27ae60;
         font-weight: 600;
     }
     
-    /* Tese */
-    .tese-content {
-        padding: 15px 20px;
-        max-height: 580px;
-        overflow-y: auto;
+    /* TESE */
+    .tese-texto {
+        padding: 15px;
+        font-family: 'Segoe UI', sans-serif;
         font-size: 12px;
         line-height: 1.6;
+        color: #2c3e50;
     }
     
-    /* Calendário */
+    .tese-texto h4 {
+        font-size: 13px;
+        font-weight: bold;
+        color: #1e4d2b;
+        margin: 15px 0 8px 0;
+    }
+    
+    .tese-texto ul {
+        margin: 8px 0;
+        padding-left: 20px;
+    }
+    
+    .tese-texto li {
+        margin: 4px 0;
+    }
+    
+    /* CALENDÁRIO */
     .calendario-nav {
+        background: #f8f9fa;
+        padding: 10px 15px;
+        border-bottom: 2px solid #e0e0e0;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 12px 20px;
-        background: #f8f9fa;
-        border-bottom: 2px solid #e0e0e0;
     }
     
-    .mes-ano-display {
+    .calendario-mes {
         font-size: 16px;
         font-weight: bold;
         color: #1e4d2b;
-        text-align: center;
-        flex: 1;
+        font-family: 'Segoe UI', sans-serif;
     }
     
     .calendario-grid {
-        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0;
+        border: 1px solid #ddd;
     }
     
-    .dia-header {
+    .cal-header {
         background: #27ae60;
         color: white;
         padding: 8px;
         text-align: center;
         font-weight: bold;
         font-size: 11px;
+        border: 1px solid #1e8449;
+        font-family: 'Segoe UI', sans-serif;
     }
     
-    .dia-celula {
-        border: 1px solid #e0e0e0;
+    .cal-dia {
+        border: 1px solid #ddd;
         padding: 8px;
-        min-height: 85px;
+        min-height: 90px;
         background: white;
-        position: relative;
+        font-family: 'Segoe UI', sans-serif;
     }
     
-    .dia-celula.fim-semana {
-        background: #ecf0f1;
+    .cal-dia.fim-semana {
+        background: #f8f9fa;
     }
     
-    .dia-numero {
+    .cal-dia .numero {
         font-size: 14px;
         font-weight: 600;
         color: #2c3e50;
         margin-bottom: 4px;
     }
     
-    .evento {
+    .cal-evento {
         background: #27ae60;
         color: white;
-        padding: 2px 6px;
+        padding: 3px 6px;
         border-radius: 3px;
         font-size: 10px;
         font-weight: bold;
         margin: 2px 0;
-        display: block;
         text-align: center;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
     }
     
-    /* Scrollbar */
+    /* BOTÕES */
+    .stButton button {
+        background: #27ae60 !important;
+        color: white !important;
+        border: none !important;
+        padding: 8px 15px !important;
+        border-radius: 4px !important;
+        font-weight: 600 !important;
+        font-size: 11px !important;
+        font-family: 'Segoe UI', sans-serif !important;
+    }
+    
+    .stButton button:hover {
+        background: #1e8449 !important;
+    }
+    
+    /* SELECTBOX */
+    .stSelectbox [data-baseweb="select"] {
+        background: white;
+        border: 2px solid #27ae60 !important;
+    }
+    
+    .stSelectbox [data-baseweb="select"] > div {
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 13px;
+    }
+    
+    /* SCROLLBAR */
     ::-webkit-scrollbar {
         width: 8px;
-        height: 8px;
     }
     
     ::-webkit-scrollbar-track {
@@ -284,33 +319,6 @@ st.markdown("""
     ::-webkit-scrollbar-thumb {
         background: #27ae60;
         border-radius: 4px;
-    }
-    
-    /* Botões */
-    .stButton button {
-        background: #27ae60 !important;
-        color: white !important;
-        border: none !important;
-        padding: 8px 20px !important;
-        border-radius: 5px !important;
-        font-weight: bold !important;
-        font-size: 12px !important;
-    }
-    
-    .stButton button:hover {
-        background: #1e8449 !important;
-    }
-    
-    /* Selectbox */
-    .stSelectbox {
-        margin: 0 !important;
-    }
-    
-    .stSelectbox > div > div {
-        background: white !important;
-        border: 2px solid #27ae60 !important;
-        border-radius: 5px !important;
-        font-size: 13px !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -397,23 +405,23 @@ def carregar_dados():
 def criar_tese(nome_ativo, dia_util_int):
     if 'FII' in nome_ativo or 'Imobiliário' in nome_ativo:
         resumo = "Fundo de Investimento Imobiliário que investe em imóveis comerciais de alto padrão, galpões logísticos em regiões estratégicas e Certificados de Recebíveis Imobiliários (CRI) de emissores sólidos."
-        emissor = "Gestora especializada em FII"
-        perfil = "Ideal para investidores que buscam renda mensal passiva, isenta de IR para PF"
-        speech = "Destaque a isenção de IR, diversificação imobiliária, liquidez em bolsa (D+3) e distribuição mensal."
+        condicoes = f"• Emissor: Gestora especializada em FII\n• Prazo: Indeterminado (cotização diária ou semanal)\n• Taxa: Taxa de administração: 0,5% a 1,0% a.a. | Performance: Pode haver\n• Liquidez: D+30 (típico)\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
+        perfil = "Ideal para: investidores que buscam renda mensal passiva, isenta de IR para PF, com exposição ao mercado imobiliário sem precisar comprar imóveis diretamente"
+        speech = "Destaque a isenção de IR, diversificação imobiliária, liquidez em bolsa (D+3) e distribuição mensal. Enfatize que o cliente pode começar com valores acessíveis e construir um portfólio imobiliário robusto. Compare com aluguel de imóveis próprios mostrando vantagens de não ter vacância, manutenção ou inadimplência."
     elif 'CRI' in nome_ativo or 'Renda' in nome_ativo:
-        resumo = "Fundo de renda fixa que investe predominantemente em Certificados de Recebíveis Imobiliários (CRI), títulos públicos e crédito privado de primeira linha."
-        emissor = "Gestora com expertise em renda fixa"
-        perfil = "Conservadores e moderados que buscam rentabilidade acima do CDI"
-        speech = "Posicione como alternativa superior à poupança e CDB tradicional."
+        resumo = "Fundo de renda fixa que investe predominantemente em Certificados de Recebíveis Imobiliários (CRI), títulos públicos e crédito privado de primeira linha, com estratégia conservadora e foco em previsibilidade."
+        condicoes = f"• Emissor: Gestora com expertise em renda fixa\n• Prazo: Indeterminado (cotização diária ou semanal)\n• Taxa: Taxa de administração: 0,5% a 1,0% a.a. | Performance: Pode haver\n• Liquidez: D+30 (típico)\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
+        perfil = "Conservadores e moderados que buscam rentabilidade acima do CDI com baixa volatilidade. Excelente para reserva de emergência de médio prazo e alocação tática"
+        speech = "Posicione como alternativa superior à poupança e CDB tradicional. Mostre histórico de rentabilidade consistente, benefícios da diversificação do fundo vs título único, e gestão ativa. Use simulações comparativas mostrando diferença acumulada ao longo de 3-5 anos. Ideal para complementar renda fixa de clientes conservadores."
     else:
-        resumo = "Fundo de investimento com gestão profissional ativa e estratégia macro diversificada."
-        emissor = "Casa de gestão independente"
-        perfil = "Investidores com perfil moderado"
-        speech = "Gestão profissional e rebalanceamento tático."
+        resumo = "Fundo de investimento com gestão profissional ativa, estratégia macro diversificada e foco em gerar retornos consistentes através de alocação tática em múltiplas classes de ativos conforme cenário econômico."
+        condicoes = f"• Emissor: Casa de gestão independente\n• Prazo: Variável conforme estratégia\n• Taxa: Taxa de administração: 1,0% a 2,0% a.a. | Performance: conforme mandato\n• Liquidez: D+30 (típico)\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
+        perfil = "Investidores com perfil moderado que buscam diversificação e gestão ativa. Patrimônio mínimo sugerido: R$ 100 mil"
+        speech = "Posicione como 'core' do portfólio diversificado. Enfatize gestão profissional, rebalanceamento tático, e histórico do gestor. Use para clientes que não têm tempo ou conhecimento para gerir investimentos ativamente. Mostre como o fundo se comportou em diferentes cenários (alta de juros, crise, etc). Compare custo-benefício vs consultoria independente."
     
     return {
         'resumo': resumo,
-        'emissor': emissor,
+        'condicoes': condicoes,
         'perfil': perfil,
         'speech': speech
     }
@@ -461,46 +469,41 @@ def calcular_dia_util(ano, mes, numero_dia_util, feriados):
 # ============================================
 
 def main():
-    # Carregar dados
     df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses = carregar_dados()
     
     if df_base is None:
         st.stop()
     
-    # CABEÇALHO VERDE
+    # CABEÇALHO
     st.markdown("""
-    <div class="header-tauari">
-        <div class="header-content">
-            <div class="header-logo">🌳</div>
-            <div class="header-text">
-                <h1>📅 CALENDÁRIO DE PAGAMENTOS - RENDA MAIS</h1>
-                <h2>TAUARI INVESTIMENTOS</h2>
-            </div>
+    <div class="header-verde">
+        <div class="logo">🌳</div>
+        <div class="texto">
+            <h1>📅 CALENDÁRIO DE PAGAMENTOS - RENDA MAIS</h1>
+            <h2>TAUARI INVESTIMENTOS</h2>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
     # BARRA DE SELEÇÃO
-    st.markdown('<div class="cliente-bar">', unsafe_allow_html=True)
-    st.markdown('<div class="cliente-label">👤 SELECIONE O CLIENTE:</div>', unsafe_allow_html=True)
+    st.markdown('<div class="barra-selecao"><label>👤 SELECIONE O CLIENTE:</label></div>', unsafe_allow_html=True)
     
     clientes = sorted(df_base['Cliente'].unique())
     cliente_selecionado = st.selectbox("", [""] + list(clientes), label_visibility="collapsed")
-    
-    st.markdown('</div>', unsafe_allow_html=True)
     
     if not cliente_selecionado:
         st.stop()
     
     fundos_cliente = df_base[df_base['Cliente'] == cliente_selecionado]
     
-    # LAYOUT 3 COLUNAS
-    col1, col2, col3 = st.columns([25, 25, 50])
+    # CONTAINER PRINCIPAL
+    st.markdown('<div class="container-principal">', unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1.2, 1.5, 3])
     
     # COLUNA 1: FUNDOS
     with col1:
-        st.markdown('<div class="column-box">', unsafe_allow_html=True)
-        st.markdown('<div class="column-title">📊 FUNDOS DO CLIENTE</div>', unsafe_allow_html=True)
+        st.markdown('<div class="box"><div class="box-titulo">📊 FUNDOS DO CLIENTE</div><div class="box-conteudo">', unsafe_allow_html=True)
         
         for _, fundo in fundos_cliente.iterrows():
             ativo = fundo['Ativo']
@@ -511,59 +514,81 @@ def main():
             
             st.markdown(f"""
             <div class="fundo-card" style="border-left-color: {info['cor']}">
-                <div class="fundo-nome">{ativo}</div>
-                <div class="fundo-info">
-                    <span class="fundo-posicao">💰 R$ {posicao:,.2f}</span> | 📅 {dia_texto}
+                <div class="nome">{ativo}</div>
+                <div class="info">
+                    💰 Posição: <span class="valor">R$ {posicao:,.2f}</span> | 📅 {dia_texto}
                 </div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown('</div></div>', unsafe_allow_html=True)
+    
+    # COLUNA 2: TESE
+    with col2:
+        st.markdown('<div class="box"><div class="box-titulo">📝 TESE DO FUNDO</div>', unsafe_allow_html=True)
+        
+        if len(fundos_cliente) > 0:
+            primeiro_fundo = fundos_cliente.iloc[0]
+            info = buscar_info_fundo(primeiro_fundo['Ativo'], mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
+            tese = info['tese']
+            
+            st.markdown(f"""
+            <div class="tese-texto">
+                <strong style="color: {info['cor']}; font-size: 13px;">{primeiro_fundo['Ativo']}</strong>
+                <p style="margin: 10px 0;">{tese.get('resumo', '')}</p>
+                
+                <h4>📋 Resumo de Condições</h4>
+                <p style="white-space: pre-line; font-size: 11px;">{tese.get('condicoes', '')}</p>
+                
+                <h4>🎯 Perfil do Cliente</h4>
+                <p>{tese.get('perfil', '')}</p>
+                
+                <h4>💡 Speech de Venda</h4>
+                <p>{tese.get('speech', '')}</p>
             </div>
             """, unsafe_allow_html=True)
         
         st.markdown('</div>', unsafe_allow_html=True)
     
-    # COLUNA 2: TESE
-    with col2:
-        st.markdown('<div class="column-box">', unsafe_allow_html=True)
-        st.markdown('<div class="column-title">📝 TESE DO FUNDO</div>', unsafe_allow_html=True)
-        st.markdown('<div class="tese-content">Passe o mouse sobre um fundo</div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-    
     # COLUNA 3: CALENDÁRIO
     with col3:
-        st.markdown('<div class="column-box">', unsafe_allow_html=True)
-        st.markdown('<div class="column-title">📅 CALENDÁRIO</div>', unsafe_allow_html=True)
+        st.markdown('<div class="box"><div class="box-titulo">📅 CALENDÁRIO</div>', unsafe_allow_html=True)
         
         # Navegação
         if 'mes_atual' not in st.session_state:
             st.session_state.mes_atual = datetime.now().month
             st.session_state.ano_atual = datetime.now().year
         
-        col_prev, col_mes, col_next = st.columns([15, 70, 15])
+        col_p1, col_p2, col_p3 = st.columns([1, 3, 1])
         
-        with col_prev:
+        with col_p1:
             if st.button("◀ Mês Anterior"):
                 st.session_state.mes_atual -= 1
                 if st.session_state.mes_atual < 1:
                     st.session_state.mes_atual = 12
                     st.session_state.ano_atual -= 1
+                st.rerun()
         
-        with col_mes:
-            st.markdown(f'<div class="mes-ano-display">{MESES_PT[st.session_state.mes_atual-1]} {st.session_state.ano_atual}</div>', unsafe_allow_html=True)
+        with col_p2:
+            st.markdown(f'<div class="calendario-mes" style="text-align: center; padding: 8px 0;">{MESES_PT[st.session_state.mes_atual-1]} {st.session_state.ano_atual}</div>', unsafe_allow_html=True)
         
-        with col_next:
+        with col_p3:
             if st.button("Próximo Mês ▶"):
                 st.session_state.mes_atual += 1
                 if st.session_state.mes_atual > 12:
                     st.session_state.mes_atual = 1
                     st.session_state.ano_atual += 1
+                st.rerun()
         
-        # Calendário
+        # Grid do calendário
         cal = calendar.monthcalendar(st.session_state.ano_atual, st.session_state.mes_atual)
         
         # Headers
         dias_semana = ['seg.', 'ter.', 'qua.', 'qui.', 'sex.', 'sáb.', 'dom.']
-        cols_header = st.columns(7)
-        for i, dia in enumerate(dias_semana):
-            cols_header[i].markdown(f'<div class="dia-header">{dia}</div>', unsafe_allow_html=True)
+        html_cal = '<div class="calendario-grid">'
+        
+        for dia in dias_semana:
+            html_cal += f'<div class="cal-header">{dia}</div>'
         
         # Eventos
         eventos_mes = {}
@@ -577,29 +602,28 @@ def main():
                         eventos_mes[dia] = []
                     eventos_mes[dia].append({'sigla': info['sigla'], 'cor': info['cor']})
         
-        # Renderizar
+        # Renderizar dias
         for semana in cal:
-            cols = st.columns(7)
-            for i, dia in enumerate(semana):
+            for dia in semana:
                 if dia == 0:
-                    cols[i].markdown('<div style="height: 85px;"></div>', unsafe_allow_html=True)
+                    html_cal += '<div class="cal-dia" style="background: #f8f9fa;"></div>'
                 else:
                     data = date(st.session_state.ano_atual, st.session_state.mes_atual, dia)
-                    classe_extra = " fim-semana" if data.weekday() >= 5 else ""
+                    classe = "cal-dia fim-semana" if data.weekday() >= 5 else "cal-dia"
                     
                     eventos_html = ""
                     if dia in eventos_mes:
                         for evento in eventos_mes[dia]:
-                            eventos_html += f'<div class="evento" style="background: {evento["cor"]}">{evento["sigla"]}</div>'
+                            eventos_html += f'<div class="cal-evento" style="background: {evento["cor"]}">{evento["sigla"]}</div>'
                     
-                    cols[i].markdown(f'''
-                    <div class="dia-celula{classe_extra}">
-                        <div class="dia-numero">{dia}</div>
-                        {eventos_html}
-                    </div>
-                    ''', unsafe_allow_html=True)
+                    html_cal += f'<div class="{classe}"><div class="numero">{dia}</div>{eventos_html}</div>'
+        
+        html_cal += '</div>'
+        st.markdown(html_cal, unsafe_allow_html=True)
         
         st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
