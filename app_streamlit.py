@@ -831,16 +831,17 @@ def pagina_conheca_fundos():
                 
                 st.markdown("<br>", unsafe_allow_html=True)
                 
-                # Resumo de Condições
-                st.markdown('<p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 8px;">📋 Resumo de Condições</p>', unsafe_allow_html=True)
-                condicoes_texto = tese.get('condicoes', 'Informações não disponíveis').replace('\n', '<br>')
-                st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.6;">{condicoes_texto}</p>', unsafe_allow_html=True)
+                # Dividir em duas colunas: Resumo de Condições e Venda em 1 Minuto
+                col_condicoes, col_venda = st.columns(2)
                 
-                st.markdown("<br>", unsafe_allow_html=True)
+                with col_condicoes:
+                    st.markdown('<p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 8px;">📋 Resumo de Condições</p>', unsafe_allow_html=True)
+                    condicoes_texto = tese.get('condicoes', 'Informações não disponíveis').replace('\n', '<br>')
+                    st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.6;">{condicoes_texto}</p>', unsafe_allow_html=True)
                 
-                # Venda em 1 Minuto
-                st.markdown('<p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 8px;">⚡ Venda em 1 Minuto</p>', unsafe_allow_html=True)
-                st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.6;">{tese.get("venda_1min", "Informações não disponíveis")}</p>', unsafe_allow_html=True)
+                with col_venda:
+                    st.markdown('<p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 8px;">⚡ Venda em 1 Minuto</p>', unsafe_allow_html=True)
+                    st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.6;">{tese.get("venda_1min", "Informações não disponíveis")}</p>', unsafe_allow_html=True)
                 
                 st.markdown("<br>", unsafe_allow_html=True)
                 
@@ -1023,32 +1024,12 @@ def main():
             <div class="tese-texto">
                 <strong style="color: {info['cor']};">{fundo_para_tese}</strong>
                 <p>{tese.get('resumo', '')}</p>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            # Dividir em duas colunas: Resumo de Condições e Venda em 1 Minuto
-            col_condicoes, col_venda = st.columns(2)
-            
-            with col_condicoes:
-                st.markdown("""
-                <div class="tese-texto" style="padding: 10px;">
-                    <h4 style="font-size: 13px; font-weight: bold; color: #1e4d2b; margin: 0 0 8px 0; background: #f0f8f4; padding: 6px 10px; border-left: 4px solid #27ae60;">📋 Resumo de Condições</h4>
-                """, unsafe_allow_html=True)
-                st.markdown(f'<p style="white-space: pre-line; font-size: 12px; color: #34495e; line-height: 1.7; margin: 0;">{tese.get("condicoes", "")}</p>', unsafe_allow_html=True)
-                st.markdown("</div>", unsafe_allow_html=True)
-            
-            with col_venda:
-                st.markdown("""
-                <div class="tese-texto" style="padding: 10px;">
-                    <h4 style="font-size: 13px; font-weight: bold; color: #1e4d2b; margin: 0 0 8px 0; background: #f0f8f4; padding: 6px 10px; border-left: 4px solid #27ae60;">⚡ Venda em 1 Minuto</h4>
-                """, unsafe_allow_html=True)
-                st.markdown(f'<p style="font-size: 12px; color: #34495e; line-height: 1.7; margin: 0;">{tese.get("venda_1min", "")}</p>', unsafe_allow_html=True)
-                st.markdown("</div>", unsafe_allow_html=True)
-            
-            st.markdown("""
-            <div class="tese-texto">
-                <h4 style="font-size: 13px; font-weight: bold; color: #1e4d2b; margin: 15px 0 8px 0; background: #f0f8f4; padding: 6px 10px; border-left: 4px solid #27ae60;">🎯 Perfil do Cliente</h4>
-                <p style="margin: 0 0 12px 0; color: #34495e; line-height: 1.7; font-size: 12px;">{tese.get('perfil', '')}</p>
+                <h4>📋 Resumo de Condições</h4>
+                <p style="white-space: pre-line;">{tese.get('condicoes', '')}</p>
+                <h4>⚡ Venda em 1 Minuto</h4>
+                <p>{tese.get('venda_1min', '')}</p>
+                <h4>🎯 Perfil do Cliente</h4>
+                <p>{tese.get('perfil', '')}</p>
             </div>
             """, unsafe_allow_html=True)
         else:
