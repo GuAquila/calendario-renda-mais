@@ -44,6 +44,7 @@ ASSESSORES = {
     '24931': ('Paula Pellegrini Reimao', 'PPR2025'),
     '91476': ('Rafael Iran Gomes Januario', 'RIGJ2025'),
     '42596': ('Ricardo Salles de Godoy', 'RSG2025'),
+    '94296': ('Vanessa Alves Mattar Calfat', 'VAMC2025'),
     '67756': ('Vinicius Nunes Palacios', 'VNP2025'),
 }
 
@@ -186,7 +187,7 @@ def verificar_autenticacao(df_base):
                 <strong>ℹ️ Como acessar:</strong><br>
                 • Digite seu código de assessor (apenas números)<br>
                 • Digite sua senha pessoal<br>
-                • Em caso de dúvidas, entre em contato com o suporte: gustavo.aquila@tauariinvestimentos.com.br
+                • Em caso de dúvidas, entre em contato com o suporte
             </div>
             """, unsafe_allow_html=True)
         
@@ -226,12 +227,12 @@ st.markdown("""
     }
     
     .header-verde .logo {
-        font-size: 50px;
+        font-size: 60px;
     }
     
     .header-verde .texto h1 {
         color: white;
-        font-size: 18px;
+        font-size: 22px;
         font-weight: bold;
         margin: 0 0 5px 0;
         font-family: 'Segoe UI', sans-serif;
@@ -239,7 +240,7 @@ st.markdown("""
     
     .header-verde .texto h2 {
         color: #7dcea0;
-        font-size: 15px;
+        font-size: 18px;
         font-weight: 600;
         margin: 0;
         font-family: 'Segoe UI', sans-serif;
@@ -247,9 +248,9 @@ st.markdown("""
     
     .assessor-info {
         color: white;
-        font-size: 13px;
+        font-size: 16px;
         background: rgba(255,255,255,0.1);
-        padding: 8px 15px;
+        padding: 10px 18px;
         border-radius: 5px;
         font-family: 'Segoe UI', sans-serif;
     }
@@ -294,7 +295,7 @@ st.markdown("""
     .stSelectbox [data-baseweb="select"] div {
         color: #000000 !important;
         font-weight: 700 !important;
-        font-size: 15px !important;
+        font-size: 16px !important;
         line-height: 24px !important;
         overflow: visible !important;
         text-overflow: clip !important;
@@ -316,7 +317,7 @@ st.markdown("""
         color: #000000 !important;
         background: white !important;
         padding: 8px 12px !important;
-        font-size: 14px !important;
+        font-size: 15px !important;
     }
     
     [data-baseweb="popover"] ul li:hover {
@@ -345,7 +346,7 @@ st.markdown("""
         border-bottom: 2px solid #e0e0e0;
         font-weight: bold;
         color: #2c3e50;
-        font-size: 13px;
+        font-size: 15px;
         font-family: 'Segoe UI', sans-serif;
     }
     
@@ -386,14 +387,14 @@ st.markdown("""
     
     .fundo-card .nome {
         font-weight: bold;
-        font-size: 12px;
+        font-size: 13px;
         color: #2c3e50;
         margin-bottom: 8px;
         line-height: 1.3;
     }
     
     .fundo-card .info {
-        font-size: 11px;
+        font-size: 12px;
         color: #7f8c8d;
     }
     
@@ -425,21 +426,21 @@ st.markdown("""
     .tese-texto {
         padding: 15px;
         font-family: 'Segoe UI', sans-serif;
-        font-size: 12px;
+        font-size: 13px;
         line-height: 1.6;
         color: #2c3e50;
         background: white;
     }
     
     .tese-texto strong {
-        font-size: 13px;
+        font-size: 14px;
         font-weight: bold;
         display: block;
         margin-bottom: 10px;
     }
     
     .tese-texto h4 {
-        font-size: 13px;
+        font-size: 14px;
         font-weight: bold;
         color: #1e4d2b;
         margin: 15px 0 8px 0;
@@ -468,7 +469,7 @@ st.markdown("""
         padding: 8px;
         text-align: center;
         font-weight: bold;
-        font-size: 11px;
+        font-size: 12px;
         border: 1px solid #1e8449;
         font-family: 'Segoe UI', sans-serif;
     }
@@ -486,7 +487,7 @@ st.markdown("""
     }
     
     .cal-dia .numero {
-        font-size: 14px;
+        font-size: 15px;
         font-weight: 600;
         color: #2c3e50;
         margin-bottom: 4px;
@@ -497,7 +498,7 @@ st.markdown("""
         color: white;
         padding: 3px 6px;
         border-radius: 3px;
-        font-size: 10px;
+        font-size: 11px;
         font-weight: bold;
         margin: 2px 0;
         text-align: center;
@@ -511,10 +512,10 @@ st.markdown("""
         background: #27ae60 !important;
         color: white !important;
         border: none !important;
-        padding: 8px 15px !important;
+        padding: 10px 18px !important;
         border-radius: 4px !important;
         font-weight: 600 !important;
-        font-size: 11px !important;
+        font-size: 13px !important;
         font-family: 'Segoe UI', sans-serif !important;
     }
     
@@ -526,8 +527,8 @@ st.markdown("""
     div[data-testid="column"]:last-child .stButton button {
         background: #e74c3c !important;
         color: white !important;
-        padding: 10px 20px !important;
-        font-size: 13px !important;
+        padding: 12px 24px !important;
+        font-size: 15px !important;
     }
     
     div[data-testid="column"]:last-child .stButton button:hover {
@@ -931,7 +932,7 @@ def main():
     
     with col_saudacao:
         nome_assessor = st.session_state.get('nome_assessor', 'Assessor')
-        st.markdown(f'<p style="font-size: 22px; color: #1e4d2b; margin: 15px 0 15px 40px; font-weight: 700;">👋 Olá, {nome_assessor}!</p>', unsafe_allow_html=True)
+        st.markdown(f'<p style="font-size: 26px; color: #1e4d2b; margin: 15px 0 15px 40px; font-weight: 700;">👋 Olá, {nome_assessor}!</p>', unsafe_allow_html=True)
     
     with col_btn_sair:
         st.markdown('<div style="margin-top: 10px; margin-right: 40px;">', unsafe_allow_html=True)
@@ -950,7 +951,7 @@ def main():
     # Contar clientes únicos (sem repetir)
     num_clientes_unicos = df_base_filtrado['Cliente'].nunique()
     
-    st.markdown(f'<label style="font-weight: bold; color: #000000; font-size: 14px; display: block; margin-bottom: 6px;">👤 SELECIONE O CLIENTE ({num_clientes_unicos} clientes):</label>', unsafe_allow_html=True)
+    st.markdown(f'<label style="font-weight: bold; color: #000000; font-size: 16px; display: block; margin-bottom: 6px;">👤 SELECIONE O CLIENTE ({num_clientes_unicos} clientes):</label>', unsafe_allow_html=True)
     
     clientes = sorted(df_base_filtrado['Cliente'].unique())
     cliente_selecionado = st.selectbox("Selecione o Cliente", [""] + list(clientes), label_visibility="collapsed", key="cliente_select")
@@ -1022,12 +1023,32 @@ def main():
             <div class="tese-texto">
                 <strong style="color: {info['cor']};">{fundo_para_tese}</strong>
                 <p>{tese.get('resumo', '')}</p>
-                <h4>📋 Resumo de Condições</h4>
-                <p style="white-space: pre-line;">{tese.get('condicoes', '')}</p>
-                <h4>⚡ Venda em 1 Minuto</h4>
-                <p>{tese.get('venda_1min', '')}</p>
-                <h4>🎯 Perfil do Cliente</h4>
-                <p>{tese.get('perfil', '')}</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Dividir em duas colunas: Resumo de Condições e Venda em 1 Minuto
+            col_condicoes, col_venda = st.columns(2)
+            
+            with col_condicoes:
+                st.markdown("""
+                <div class="tese-texto" style="padding: 10px;">
+                    <h4 style="font-size: 13px; font-weight: bold; color: #1e4d2b; margin: 0 0 8px 0; background: #f0f8f4; padding: 6px 10px; border-left: 4px solid #27ae60;">📋 Resumo de Condições</h4>
+                """, unsafe_allow_html=True)
+                st.markdown(f'<p style="white-space: pre-line; font-size: 12px; color: #34495e; line-height: 1.7; margin: 0;">{tese.get("condicoes", "")}</p>', unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
+            
+            with col_venda:
+                st.markdown("""
+                <div class="tese-texto" style="padding: 10px;">
+                    <h4 style="font-size: 13px; font-weight: bold; color: #1e4d2b; margin: 0 0 8px 0; background: #f0f8f4; padding: 6px 10px; border-left: 4px solid #27ae60;">⚡ Venda em 1 Minuto</h4>
+                """, unsafe_allow_html=True)
+                st.markdown(f'<p style="font-size: 12px; color: #34495e; line-height: 1.7; margin: 0;">{tese.get("venda_1min", "")}</p>', unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
+            
+            st.markdown("""
+            <div class="tese-texto">
+                <h4 style="font-size: 13px; font-weight: bold; color: #1e4d2b; margin: 15px 0 8px 0; background: #f0f8f4; padding: 6px 10px; border-left: 4px solid #27ae60;">🎯 Perfil do Cliente</h4>
+                <p style="margin: 0 0 12px 0; color: #34495e; line-height: 1.7; font-size: 12px;">{tese.get('perfil', '')}</p>
             </div>
             """, unsafe_allow_html=True)
         else:
@@ -1054,7 +1075,7 @@ def main():
                 st.rerun()
         
         with col_p2:
-            st.markdown(f'<div style="text-align: center; padding: 8px; font-size: 16px; font-weight: bold; color: #1e4d2b;">{MESES_PT[st.session_state.mes_atual-1]} {st.session_state.ano_atual}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="text-align: center; padding: 8px; font-size: 18px; font-weight: bold; color: #1e4d2b;">{MESES_PT[st.session_state.mes_atual-1]} {st.session_state.ano_atual}</div>', unsafe_allow_html=True)
         
         with col_p3:
             if st.button("Próximo Mês ▶", key="next_mes"):
