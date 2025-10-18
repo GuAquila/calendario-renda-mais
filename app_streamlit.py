@@ -125,9 +125,14 @@ def verificar_autenticacao(df_base):
         col1, col2, col3 = st.columns([1, 2, 1])
         
         with col2:
+            # Logo Tauari (salve a imagem como 'logo_tauari.png' na mesma pasta do código)
+            try:
+                st.image("logo_tauari.png", width=350)
+            except:
+                st.markdown("<div style='text-align: center; padding: 20px;'><div style='background: #2d5a3d; color: white; padding: 40px; border-radius: 10px; font-size: 14px;'>📁 Salve a logo como 'logo_tauari.png'<br>na mesma pasta do código</div></div>", unsafe_allow_html=True)
+            
             st.markdown("""
             <div class="login-titulo">
-                <h1 style='font-size: 60px; margin: 0;'>🌳</h1>
                 <h2 style='margin: 10px 0;'>Calendário Renda Mais</h2>
                 <h3 style='color: #7dcea0; margin: 0;'>TAUARI INVESTIMENTOS</h3>
                 <p style='color: #7f8c8d; font-size: 14px; margin-top: 15px;'>Acesso Restrito por Assessor</p>
@@ -161,7 +166,6 @@ def verificar_autenticacao(df_base):
                             
                             if clientes_assessor.empty:
                                 st.error(f"❌ Nenhum cliente encontrado para o Assessor {codigo_assessor}")
-                                st.info("💡 Verifique se há clientes vinculados ao seu código na planilha")
                             else:
                                 # Só autentica se tiver clientes
                                 st.session_state.autenticado = True
@@ -792,8 +796,19 @@ def pagina_conheca_fundos():
     
     # Header
     st.markdown("""
-    <div style="background: #1e4d2b; padding: 30px 40px; color: white; text-align: center;">
-        <h1 style="font-size: 32px; margin: 0 0 10px 0; font-family: 'Segoe UI', sans-serif;">🌳 Conheça Nossos Fundos</h1>
+    <div style="background: #1e4d2b; padding: 30px 40px; text-align: center;">
+    """, unsafe_allow_html=True)
+    
+    # Logo centralizada
+    col_logo = st.columns([1, 2, 1])
+    with col_logo[1]:
+        try:
+            st.image("logo_tauari.png", width=400)
+        except:
+            st.markdown('<h1 style="font-size: 60px; color: white; margin: 0;">🌳</h1>', unsafe_allow_html=True)
+    
+    st.markdown("""
+        <h1 style="font-size: 32px; margin: 20px 0 10px 0; font-family: 'Segoe UI', sans-serif; color: white;">Conheça Nossos Fundos</h1>
         <p style="font-size: 16px; margin: 0; color: #7dcea0;">Todos os fundos disponíveis na Tauari Investimentos</p>
     </div>
     """, unsafe_allow_html=True)
@@ -912,20 +927,40 @@ def main():
     
     # CABEÇALHO COM INFO DO ASSESSOR
     assessor_nome = st.session_state.get('nome_assessor', 'Assessor')
-    st.markdown(f"""
-    <div class="header-verde">
-        <div class="header-content">
-            <div class="logo">🌳</div>
-            <div class="texto">
-                <h1>📅 CALENDÁRIO DE PAGAMENTOS - RENDA MAIS</h1>
-                <h2>TAUARI INVESTIMENTOS</h2>
+    
+    st.markdown('<div style="background: #1e4d2b; padding: 20px 40px;">', unsafe_allow_html=True)
+    
+    # Criar colunas para logo e texto
+    col_header = st.columns([1, 4, 2])
+    
+    with col_header[0]:
+        try:
+            st.image("logo_tauari.png", width=80)
+        except:
+            st.markdown('<div style="font-size: 50px; padding: 10px;">🌳</div>', unsafe_allow_html=True)
+    
+    with col_header[1]:
+        st.markdown(f"""
+        <div style="padding: 15px 0;">
+            <h1 style="color: white; font-size: 22px; font-weight: bold; margin: 0 0 5px 0; font-family: 'Segoe UI', sans-serif;">
+                📅 CALENDÁRIO DE PAGAMENTOS - RENDA MAIS
+            </h1>
+            <h2 style="color: #7dcea0; font-size: 18px; font-weight: 600; margin: 0; font-family: 'Segoe UI', sans-serif;">
+                TAUARI INVESTIMENTOS
+            </h2>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col_header[2]:
+        st.markdown(f"""
+        <div style="padding: 15px 0; text-align: right;">
+            <div style="color: white; font-size: 16px; background: rgba(255,255,255,0.1); padding: 10px 18px; border-radius: 5px; font-family: 'Segoe UI', sans-serif; display: inline-block;">
+                👤 Assessor: <strong>{assessor_nome}</strong> ({assessor_logado})
             </div>
         </div>
-        <div class="assessor-info">
-            👤 Assessor: <strong>{assessor_nome}</strong> ({assessor_logado})
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # BARRA DE SAUDAÇÃO E BOTÃO SAIR
     st.markdown('<div style="background: white; padding: 5px 0;">', unsafe_allow_html=True)
