@@ -947,7 +947,7 @@ def main():
     
     # BARRA DE SELEÇÃO
     st.markdown('<div class="barra-selecao">', unsafe_allow_html=True)
-    st.markdown(f'<label>👤 SELECIONE O CLIENTE ({len(df_base_filtrado)} clientes):</label>', unsafe_allow_html=True)
+    st.markdown(f'<label style="font-weight: bold; color: #000000; font-size: 14px; display: block; margin-bottom: 6px;">👤 SELECIONE O CLIENTE ({len(df_base_filtrado)} clientes do seu portfólio):</label>', unsafe_allow_html=True)
     
     clientes = sorted(df_base_filtrado['Cliente'].unique())
     cliente_selecionado = st.selectbox("Selecione o Cliente", [""] + list(clientes), label_visibility="collapsed", key="cliente_select")
