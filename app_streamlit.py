@@ -44,7 +44,6 @@ ASSESSORES = {
     '24931': ('Paula Pellegrini Reimao', 'PPR2025'),
     '91476': ('Rafael Iran Gomes Januario', 'RIGJ2025'),
     '42596': ('Ricardo Salles de Godoy', 'RSG2025'),
-    '94296': ('Vanessa Alves Mattar Calfat', 'VAMC2025'),
     '67756': ('Vinicius Nunes Palacios', 'VNP2025'),
 }
 
@@ -187,7 +186,7 @@ def verificar_autenticacao(df_base):
                 <strong>ℹ️ Como acessar:</strong><br>
                 • Digite seu código de assessor (apenas números)<br>
                 • Digite sua senha pessoal<br>
-                • Em caso de dúvidas, entre em contato com o suporte
+                • Em caso de dúvidas, entre em contato com o suporte: gustavo.aquila@tauariinvestimentos.com.br
             </div>
             """, unsafe_allow_html=True)
         
