@@ -790,23 +790,22 @@ df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses = carreg
 def pagina_conheca_fundos():
     """Página pública com informações de todos os fundos"""
     
+    # Header
     st.markdown("""
-    <div class="fundos-header">
-        <h1>🌳 Conheça Nossos Fundos</h1>
-        <p>Todos os fundos disponíveis na Tauari Investimentos</p>
+    <div style="background: #1e4d2b; padding: 30px 40px; color: white; text-align: center;">
+        <h1 style="font-size: 32px; margin: 0 0 10px 0; font-family: 'Segoe UI', sans-serif;">🌳 Conheça Nossos Fundos</h1>
+        <p style="font-size: 16px; margin: 0; color: #7dcea0;">Todos os fundos disponíveis na Tauari Investimentos</p>
     </div>
     """, unsafe_allow_html=True)
     
     # Botão voltar
-    col_voltar = st.columns([6, 1])
-    with col_voltar[1]:
-        st.markdown('<div style="margin: 20px 40px 0 0;">', unsafe_allow_html=True)
+    col_space, col_btn = st.columns([6, 1])
+    with col_btn:
         if st.button("🔙 Voltar ao Login", key="btn_voltar_login"):
             st.session_state.pagina_atual = 'login'
             st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
     
-    st.markdown('<div style="padding: 20px 40px;">', unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
     
     if mapa_pagamentos:
         # Listar todos os fundos
@@ -814,51 +813,66 @@ def pagina_conheca_fundos():
             cor = mapa_cores.get(nome_fundo, '#27ae60')
             tese = mapa_teses.get(nome_fundo, {})
             
-            # Pegar os links
-            expert_url = '#'
-            lamina_url = '#'
-            material_url = '#'
-            if 'links' in tese and isinstance(tese['links'], dict):
-                expert_url = tese['links'].get('expert', '#')
-                lamina_url = tese['links'].get('lamina', '#')
-                material_url = tese['links'].get('material', '#')
-            
-            # Renderizar todo o card de uma vez
-            html_completo = f"""
-            <div class="fundo-card-full" style="border-left-color: {cor}">
-                <h3>📊 {nome_fundo}</h3>
-                
-                <div class="info-section">
-                    <h4>📝 Sobre o Fundo</h4>
-                    <p>{tese.get('resumo', 'Informações não disponíveis')}</p>
+            # Container para cada fundo
+            with st.container():
+                st.markdown(f"""
+                <div style="background: white; border: 1px solid #ddd; border-left: 6px solid {cor}; 
+                     border-radius: 8px; padding: 20px; margin-bottom: 20px; 
+                     box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #1e4d2b; font-size: 20px; margin: 0 0 20px 0; font-weight: bold;">
+                        📊 {nome_fundo}
+                    </h3>
                 </div>
+                """, unsafe_allow_html=True)
                 
-                <div class="info-section">
-                    <h4>📋 Resumo de Condições</h4>
-                    <p style="white-space: pre-line;">{tese.get('condicoes', 'Informações não disponíveis')}</p>
-                </div>
+                # Sobre o Fundo
+                st.markdown("**📝 Sobre o Fundo**")
+                st.write(tese.get('resumo', 'Informações não disponíveis'))
                 
-                <div class="info-section">
-                    <h4>⚡ Venda em 1 Minuto</h4>
-                    <p>{tese.get('venda_1min', 'Informações não disponíveis')}</p>
-                </div>
+                st.markdown("<br>", unsafe_allow_html=True)
                 
-                <div class="info-section">
-                    <h4 style="color: #2c3e50; font-size: 14px; margin-bottom: 12px; font-weight: bold;">📎 Materiais e Conteúdos</h4>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px;">
-                        <a href="{expert_url}" target="_blank" style="display: block; background: #e74c3c; color: white; padding: 12px; border-radius: 6px; text-decoration: none; text-align: center; font-weight: 600; font-size: 13px;">🎯 Expert</a>
-                        <a href="{lamina_url}" target="_blank" style="display: block; background: #27ae60; color: white; padding: 12px; border-radius: 6px; text-decoration: none; text-align: center; font-weight: 600; font-size: 13px;">📄 Lâmina</a>
-                        <a href="{material_url}" target="_blank" style="display: block; background: #3498db; color: white; padding: 12px; border-radius: 6px; text-decoration: none; text-align: center; font-weight: 600; font-size: 13px;">📢 Material Publicitário</a>
-                    </div>
-                </div>
-            </div>
-            """
-            
-            st.markdown(html_completo, unsafe_allow_html=True)
+                # Resumo de Condições
+                st.markdown("**📋 Resumo de Condições**")
+                st.text(tese.get('condicoes', 'Informações não disponíveis'))
+                
+                st.markdown("<br>", unsafe_allow_html=True)
+                
+                # Venda em 1 Minuto
+                st.markdown("**⚡ Venda em 1 Minuto**")
+                st.write(tese.get('venda_1min', 'Informações não disponíveis'))
+                
+                st.markdown("<br>", unsafe_allow_html=True)
+                
+                # Materiais e Conteúdos
+                st.markdown("**📎 Materiais e Conteúdos**")
+                
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    if 'links' in tese and isinstance(tese['links'], dict):
+                        expert_url = tese['links'].get('expert', '#')
+                        st.link_button("🎯 Expert", expert_url, use_container_width=True)
+                    else:
+                        st.button("🎯 Expert", disabled=True, use_container_width=True)
+                
+                with col2:
+                    if 'links' in tese and isinstance(tese['links'], dict):
+                        lamina_url = tese['links'].get('lamina', '#')
+                        st.link_button("📄 Lâmina", lamina_url, use_container_width=True)
+                    else:
+                        st.button("📄 Lâmina", disabled=True, use_container_width=True)
+                
+                with col3:
+                    if 'links' in tese and isinstance(tese['links'], dict):
+                        material_url = tese['links'].get('material', '#')
+                        st.link_button("📢 Material Publicitário", material_url, use_container_width=True)
+                    else:
+                        st.button("📢 Material Publicitário", disabled=True, use_container_width=True)
+                
+                st.markdown("<hr style='margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;'>", unsafe_allow_html=True)
     else:
         st.warning("⚠️ Nenhum fundo disponível no momento")
     
-    st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
 # Verificar qual página mostrar
