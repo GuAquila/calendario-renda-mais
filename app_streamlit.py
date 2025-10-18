@@ -610,23 +610,6 @@ st.markdown("""
         border-top: 1px solid #e0e0e0;
     }
     
-    .fundo-card-full .links-section a {
-        display: inline-block;
-        background: #3498db;
-        color: white !important;
-        padding: 8px 15px;
-        border-radius: 4px;
-        text-decoration: none;
-        margin-right: 10px;
-        margin-bottom: 10px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-    
-    .fundo-card-full .links-section a:hover {
-        background: #2980b9;
-    }
-    
 </style>
 """, unsafe_allow_html=True)
 
@@ -650,36 +633,41 @@ def criar_tese(nome_ativo, dia_util_int):
         condicoes = f"• Emissor: Gestora especializada em FII\n• Prazo: Indeterminado\n• Taxa: 0,5% a 1,0% a.a.\n• Liquidez: D+30\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
         perfil = "Ideal para investidores que buscam renda mensal passiva, isenta de IR para PF"
         speech = "Destaque a isenção de IR, diversificação imobiliária e distribuição mensal."
-        links = [
-            ("📄 Lâmina do Fundo", "https://exemplo.com/lamina"),
-            ("📊 Relatório Mensal", "https://exemplo.com/relatorio"),
-            ("🎥 Vídeo Institucional", "https://exemplo.com/video")
-        ]
+        venda_1min = "Este FII oferece renda mensal isenta de IR para pessoa física, investindo em imóveis de alta qualidade com inquilinos sólidos. Ideal para quem busca diversificação e rendimentos previsíveis acima da poupança."
+        links = {
+            'expert': 'https://exemplo.com/expert-fii',
+            'lamina': 'https://exemplo.com/lamina-fii',
+            'material': 'https://exemplo.com/material-fii'
+        }
     elif 'CRI' in nome_ativo or 'Renda' in nome_ativo:
         resumo = "Fundo de renda fixa que investe em CRI, títulos públicos e crédito privado de primeira linha."
         condicoes = f"• Emissor: Gestora com expertise em renda fixa\n• Prazo: Indeterminado\n• Taxa: 0,5% a 1,0% a.a.\n• Liquidez: D+30\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
         perfil = "Conservadores que buscam rentabilidade acima do CDI"
         speech = "Alternativa superior à poupança com rentabilidade consistente."
-        links = [
-            ("📄 Lâmina do Fundo", "https://exemplo.com/lamina"),
-            ("📈 Rentabilidade", "https://exemplo.com/rentabilidade"),
-            ("📋 Regulamento", "https://exemplo.com/regulamento")
-        ]
+        venda_1min = "Fundo de renda fixa que busca rentabilidade superior ao CDI através de uma carteira diversificada de CRI e crédito privado. Gestão profissional com foco em segurança e liquidez, perfeito para o investidor conservador que quer mais do que a poupança oferece."
+        links = {
+            'expert': 'https://exemplo.com/expert-cri',
+            'lamina': 'https://exemplo.com/lamina-cri',
+            'material': 'https://exemplo.com/material-cri'
+        }
     else:
         resumo = "Fundo com gestão ativa e estratégia diversificada."
         condicoes = f"• Emissor: Casa de gestão independente\n• Prazo: Variável\n• Taxa: 1,0% a 2,0% a.a.\n• Liquidez: D+30\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
         perfil = "Investidores com perfil moderado"
         speech = "Gestão profissional e rebalanceamento tático."
-        links = [
-            ("📄 Apresentação", "https://exemplo.com/apresentacao"),
-            ("📊 Performance", "https://exemplo.com/performance")
-        ]
+        venda_1min = "Fundo com gestão ativa que busca as melhores oportunidades do mercado através de análise criteriosa e rebalanceamento constante. Diversificação automática com equipe especializada cuidando do seu patrimônio."
+        links = {
+            'expert': 'https://exemplo.com/expert-fundo',
+            'lamina': 'https://exemplo.com/lamina-fundo',
+            'material': 'https://exemplo.com/material-fundo'
+        }
     
     return {
         'resumo': resumo,
         'condicoes': condicoes,
         'perfil': perfil,
         'speech': speech,
+        'venda_1min': venda_1min,
         'links': links
     }
 
@@ -836,28 +824,31 @@ def pagina_conheca_fundos():
                 </div>
                 
                 <div class="info-section">
-                    <h4>📋 Condições</h4>
+                    <h4>📋 Resumo de Condições</h4>
                     <p style="white-space: pre-line;">{tese.get('condicoes', 'Informações não disponíveis')}</p>
                 </div>
                 
                 <div class="info-section">
-                    <h4>🎯 Perfil Recomendado</h4>
-                    <p>{tese.get('perfil', 'Informações não disponíveis')}</p>
-                </div>
-                
-                <div class="info-section">
-                    <h4>💡 Principais Diferenciais</h4>
-                    <p>{tese.get('speech', 'Informações não disponíveis')}</p>
+                    <h4>⚡ Venda em 1 Minuto</h4>
+                    <p>{tese.get('venda_1min', 'Informações não disponíveis')}</p>
                 </div>
                 
                 <div class="links-section">
-                    <h4 style="color: #2c3e50; font-size: 13px; margin-bottom: 10px;">📎 Materiais e Links</h4>
+                    <h4 style="color: #2c3e50; font-size: 14px; margin-bottom: 12px; font-weight: bold;">📎 Materiais e Conteúdos</h4>
             """, unsafe_allow_html=True)
             
             # Links do fundo
-            if 'links' in tese:
-                for titulo_link, url_link in tese['links']:
-                    st.markdown(f'<a href="{url_link}" target="_blank">{titulo_link}</a>', unsafe_allow_html=True)
+            if 'links' in tese and isinstance(tese['links'], dict):
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    expert_url = tese['links'].get('expert', '#')
+                    st.markdown(f'<a href="{expert_url}" target="_blank" style="display: block; background: #e74c3c; color: white; padding: 12px; border-radius: 6px; text-decoration: none; text-align: center; font-weight: 600; font-size: 13px; margin-bottom: 10px;">🎯 Expert</a>', unsafe_allow_html=True)
+                with col2:
+                    lamina_url = tese['links'].get('lamina', '#')
+                    st.markdown(f'<a href="{lamina_url}" target="_blank" style="display: block; background: #27ae60; color: white; padding: 12px; border-radius: 6px; text-decoration: none; text-align: center; font-weight: 600; font-size: 13px; margin-bottom: 10px;">📄 Lâmina</a>', unsafe_allow_html=True)
+                with col3:
+                    material_url = tese['links'].get('material', '#')
+                    st.markdown(f'<a href="{material_url}" target="_blank" style="display: block; background: #3498db; color: white; padding: 12px; border-radius: 6px; text-decoration: none; text-align: center; font-weight: 600; font-size: 13px; margin-bottom: 10px;">📢 Material Publicitário</a>', unsafe_allow_html=True)
             
             st.markdown("""
                 </div>
@@ -1014,10 +1005,10 @@ def main():
                 <p>{tese.get('resumo', '')}</p>
                 <h4>📋 Resumo de Condições</h4>
                 <p style="white-space: pre-line;">{tese.get('condicoes', '')}</p>
+                <h4>⚡ Venda em 1 Minuto</h4>
+                <p>{tese.get('venda_1min', '')}</p>
                 <h4>🎯 Perfil do Cliente</h4>
                 <p>{tese.get('perfil', '')}</p>
-                <h4>💡 Speech de Venda</h4>
-                <p>{tese.get('speech', '')}</p>
             </div>
             """, unsafe_allow_html=True)
         else:
