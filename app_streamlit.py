@@ -826,48 +826,49 @@ def pagina_conheca_fundos():
                 """, unsafe_allow_html=True)
                 
                 # Sobre o Fundo
-                st.markdown("**📝 Sobre o Fundo**")
-                st.write(tese.get('resumo', 'Informações não disponíveis'))
+                st.markdown('<p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 8px;">📝 Sobre o Fundo</p>', unsafe_allow_html=True)
+                st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.6;">{tese.get("resumo", "Informações não disponíveis")}</p>', unsafe_allow_html=True)
                 
                 st.markdown("<br>", unsafe_allow_html=True)
                 
                 # Resumo de Condições
-                st.markdown("**📋 Resumo de Condições**")
-                st.text(tese.get('condicoes', 'Informações não disponíveis'))
+                st.markdown('<p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 8px;">📋 Resumo de Condições</p>', unsafe_allow_html=True)
+                condicoes_texto = tese.get('condicoes', 'Informações não disponíveis').replace('\n', '<br>')
+                st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.6;">{condicoes_texto}</p>', unsafe_allow_html=True)
                 
                 st.markdown("<br>", unsafe_allow_html=True)
                 
                 # Venda em 1 Minuto
-                st.markdown("**⚡ Venda em 1 Minuto**")
-                st.write(tese.get('venda_1min', 'Informações não disponíveis'))
+                st.markdown('<p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 8px;">⚡ Venda em 1 Minuto</p>', unsafe_allow_html=True)
+                st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.6;">{tese.get("venda_1min", "Informações não disponíveis")}</p>', unsafe_allow_html=True)
                 
                 st.markdown("<br>", unsafe_allow_html=True)
                 
                 # Materiais e Conteúdos
-                st.markdown("**📎 Materiais e Conteúdos**")
+                st.markdown('<p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 12px;">📎 Materiais e Conteúdos</p>', unsafe_allow_html=True)
                 
                 col1, col2, col3 = st.columns(3)
                 
                 with col1:
                     if 'links' in tese and isinstance(tese['links'], dict):
                         expert_url = tese['links'].get('expert', '#')
-                        st.link_button("🎯 Expert", expert_url, use_container_width=True)
+                        st.link_button("🎯 Expert", expert_url, use_container_width=True, key=f"expert_{idx}")
                     else:
-                        st.button("🎯 Expert", disabled=True, use_container_width=True)
+                        st.button("🎯 Expert", disabled=True, use_container_width=True, key=f"expert_dis_{idx}")
                 
                 with col2:
                     if 'links' in tese and isinstance(tese['links'], dict):
                         lamina_url = tese['links'].get('lamina', '#')
-                        st.link_button("📄 Lâmina", lamina_url, use_container_width=True)
+                        st.link_button("📄 Lâmina", lamina_url, use_container_width=True, key=f"lamina_{idx}")
                     else:
-                        st.button("📄 Lâmina", disabled=True, use_container_width=True)
+                        st.button("📄 Lâmina", disabled=True, use_container_width=True, key=f"lamina_dis_{idx}")
                 
                 with col3:
                     if 'links' in tese and isinstance(tese['links'], dict):
                         material_url = tese['links'].get('material', '#')
-                        st.link_button("📢 Material Publicitário", material_url, use_container_width=True)
+                        st.link_button("📢 Material Publicitário", material_url, use_container_width=True, key=f"material_{idx}")
                     else:
-                        st.button("📢 Material Publicitário", disabled=True, use_container_width=True)
+                        st.button("📢 Material Publicitário", disabled=True, use_container_width=True, key=f"material_dis_{idx}")
                 
                 st.markdown("<hr style='margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;'>", unsafe_allow_html=True)
     else:
