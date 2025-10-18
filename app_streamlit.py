@@ -1082,7 +1082,7 @@ def main():
                     classe = "cal-dia fim-semana" if data.weekday() >= 5 else "cal-dia" 
                     
                     eventos_html = ""
-                    if dia em eventos_mes:
+                    if dia in eventos_mes:
                         for evento in eventos_mes[dia]:
                             eventos_html += f'<div class="cal-evento" style="background: {evento["cor"]}">{evento["sigla"]}</div>'
                     
