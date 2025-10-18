@@ -814,6 +814,7 @@ def pagina_conheca_fundos():
             cor = mapa_cores.get(nome_fundo, '#27ae60')
             tese = mapa_teses.get(nome_fundo, {})
             
+            # Card do fundo
             st.markdown(f"""
             <div class="fundo-card-full" style="border-left-color: {cor}">
                 <h3>📊 {nome_fundo}</h3>
@@ -833,24 +834,25 @@ def pagina_conheca_fundos():
                     <p>{tese.get('venda_1min', 'Informações não disponíveis')}</p>
                 </div>
                 
-                <div class="links-section">
+                <div class="info-section">
                     <h4 style="color: #2c3e50; font-size: 14px; margin-bottom: 12px; font-weight: bold;">📎 Materiais e Conteúdos</h4>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px;">
             """, unsafe_allow_html=True)
             
             # Links do fundo
             if 'links' in tese and isinstance(tese['links'], dict):
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    expert_url = tese['links'].get('expert', '#')
-                    st.markdown(f'<a href="{expert_url}" target="_blank" style="display: block; background: #e74c3c; color: white; padding: 12px; border-radius: 6px; text-decoration: none; text-align: center; font-weight: 600; font-size: 13px; margin-bottom: 10px;">🎯 Expert</a>', unsafe_allow_html=True)
-                with col2:
-                    lamina_url = tese['links'].get('lamina', '#')
-                    st.markdown(f'<a href="{lamina_url}" target="_blank" style="display: block; background: #27ae60; color: white; padding: 12px; border-radius: 6px; text-decoration: none; text-align: center; font-weight: 600; font-size: 13px; margin-bottom: 10px;">📄 Lâmina</a>', unsafe_allow_html=True)
-                with col3:
-                    material_url = tese['links'].get('material', '#')
-                    st.markdown(f'<a href="{material_url}" target="_blank" style="display: block; background: #3498db; color: white; padding: 12px; border-radius: 6px; text-decoration: none; text-align: center; font-weight: 600; font-size: 13px; margin-bottom: 10px;">📢 Material Publicitário</a>', unsafe_allow_html=True)
+                expert_url = tese['links'].get('expert', '#')
+                lamina_url = tese['links'].get('lamina', '#')
+                material_url = tese['links'].get('material', '#')
+                
+                st.markdown(f"""
+                        <a href="{expert_url}" target="_blank" style="display: block; background: #e74c3c; color: white; padding: 12px; border-radius: 6px; text-decoration: none; text-align: center; font-weight: 600; font-size: 13px;">🎯 Expert</a>
+                        <a href="{lamina_url}" target="_blank" style="display: block; background: #27ae60; color: white; padding: 12px; border-radius: 6px; text-decoration: none; text-align: center; font-weight: 600; font-size: 13px;">📄 Lâmina</a>
+                        <a href="{material_url}" target="_blank" style="display: block; background: #3498db; color: white; padding: 12px; border-radius: 6px; text-decoration: none; text-align: center; font-weight: 600; font-size: 13px;">📢 Material Publicitário</a>
+                """, unsafe_allow_html=True)
             
             st.markdown("""
+                    </div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
