@@ -72,6 +72,8 @@ def verificar_autenticacao(df_base):
         st.session_state.assessor_logado = None
     if 'nome_assessor' not in st.session_state:
         st.session_state.nome_assessor = None
+    if 'pagina_atual' not in st.session_state:
+        st.session_state.pagina_atual = 'login'
     
     if not st.session_state.autenticado:
         st.markdown("""
@@ -100,6 +102,22 @@ def verificar_autenticacao(df_base):
                 margin-top: 20px;
                 font-size: 12px;
                 color: #2c3e50;
+            }
+            .btn-conhecer-fundos {
+                background: #3498db !important;
+                color: white !important;
+                border: none !important;
+                padding: 10px 20px !important;
+                border-radius: 5px !important;
+                font-weight: 600 !important;
+                font-size: 13px !important;
+                cursor: pointer !important;
+                width: 100% !important;
+                margin-top: 15px !important;
+                text-align: center !important;
+            }
+            .btn-conhecer-fundos:hover {
+                background: #2980b9 !important;
             }
         </style>
         """, unsafe_allow_html=True)
@@ -153,6 +171,7 @@ def verificar_autenticacao(df_base):
                                 st.session_state.autenticado = True
                                 st.session_state.assessor_logado = codigo_assessor
                                 st.session_state.nome_assessor = nome_assessor
+                                st.session_state.pagina_atual = 'sistema'
                                 st.success(f"✅ Bem-vindo, {nome_assessor}!")
                                 st.rerun()
                         else:
