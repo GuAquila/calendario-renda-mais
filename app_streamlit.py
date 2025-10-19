@@ -833,8 +833,8 @@ def pagina_conheca_fundos():
             cor = mapa_cores.get(nome_fundo, '#27ae60')
             tese = mapa_teses.get(nome_fundo, {})
             
-            # Criar ID único baseado no nome do fundo
-            fundo_id = abs(hash(nome_fundo)) % 10000
+            # Criar ID único simples baseado no nome
+            fundo_key = nome_fundo.replace(' ', '_').replace('(', '').replace(')', '').replace('ª', '').replace('º', '')[:30]
             
             # Container para cada fundo
             with st.container():
@@ -877,31 +877,31 @@ def pagina_conheca_fundos():
                     if 'links' in tese and isinstance(tese['links'], dict):
                         expert_url = tese['links'].get('expert', '#')
                         if expert_url and expert_url != '#':
-                            st.link_button("🎯 Expert", expert_url, use_container_width=True, key=f"exp_{fundo_id}")
+                            st.link_button("🎯 Expert", expert_url, use_container_width=True, key="exp_" + fundo_key)
                         else:
-                            st.button("🎯 Expert", disabled=True, use_container_width=True, key=f"exp_dis_{fundo_id}")
+                            st.button("🎯 Expert", disabled=True, use_container_width=True, key="expd_" + fundo_key)
                     else:
-                        st.button("🎯 Expert", disabled=True, use_container_width=True, key=f"exp_dis_{fundo_id}")
+                        st.button("🎯 Expert", disabled=True, use_container_width=True, key="expd_" + fundo_key)
                 
                 with col2:
                     if 'links' in tese and isinstance(tese['links'], dict):
                         lamina_url = tese['links'].get('lamina', '#')
                         if lamina_url and lamina_url != '#':
-                            st.link_button("📄 Lâmina", lamina_url, use_container_width=True, key=f"lam_{fundo_id}")
+                            st.link_button("📄 Lâmina", lamina_url, use_container_width=True, key="lam_" + fundo_key)
                         else:
-                            st.button("📄 Lâmina", disabled=True, use_container_width=True, key=f"lam_dis_{fundo_id}")
+                            st.button("📄 Lâmina", disabled=True, use_container_width=True, key="lamd_" + fundo_key)
                     else:
-                        st.button("📄 Lâmina", disabled=True, use_container_width=True, key=f"lam_dis_{fundo_id}")
+                        st.button("📄 Lâmina", disabled=True, use_container_width=True, key="lamd_" + fundo_key)
                 
                 with col3:
                     if 'links' in tese and isinstance(tese['links'], dict):
                         material_url = tese['links'].get('material', '#')
                         if material_url and material_url != '#':
-                            st.link_button("📢 Material Publicitário", material_url, use_container_width=True, key=f"mat_{fundo_id}")
+                            st.link_button("📢 Material Publicitário", material_url, use_container_width=True, key="mat_" + fundo_key)
                         else:
-                            st.button("📢 Material Publicitário", disabled=True, use_container_width=True, key=f"mat_dis_{fundo_id}")
+                            st.button("📢 Material Publicitário", disabled=True, use_container_width=True, key="matd_" + fundo_key)
                     else:
-                        st.button("📢 Material Publicitário", disabled=True, use_container_width=True, key=f"mat_dis_{fundo_id}")
+                        st.button("📢 Material Publicitário", disabled=True, use_container_width=True, key="matd_" + fundo_key)
                 
                 st.markdown("<hr style='margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;'>", unsafe_allow_html=True)
     else:
