@@ -135,7 +135,7 @@ def verificar_autenticacao(df_base):
             <div class="login-titulo">
                 <h2 style='margin: 10px 0;'>Calendário Renda Mais</h2>
                 <h3 style='color: #7dcea0; margin: 0;'>TAUARI INVESTIMENTOS</h3>
-                <p style='color: #7f8c8d; font-size: 14px; margin-top: 15px;'>Acesso Restrito por Assessor</p>
+                <p style='color: #7f8c8d; font-size: 14px; margin-top: 15px;'>Acesso Restrito por Assessor (uso interno)</p>
             </div>
             """, unsafe_allow_html=True)
             
@@ -191,7 +191,7 @@ def verificar_autenticacao(df_base):
                 <strong>ℹ️ Como acessar:</strong><br>
                 • Digite seu código de assessor (apenas números)<br>
                 • Digite sua senha pessoal<br>
-                • Em caso de dúvidas, entre em contato com o suporte
+                • Em caso de dúvidas, entre em contato com o suporte: <strong>gustavo.aquila@tauariinvestimentos.com.br</strong>
             </div>
             """, unsafe_allow_html=True)
         
@@ -796,7 +796,7 @@ def pagina_conheca_fundos():
     
     # Header
     st.markdown("""
-    <div style="background: #1e4d2b; padding: 30px 40px; text-align: center;">
+    <div style="background: white; padding: 30px 40px; text-align: center; border-bottom: 3px solid #1e4d2b;">
     """, unsafe_allow_html=True)
     
     # Logo centralizada
@@ -808,8 +808,8 @@ def pagina_conheca_fundos():
             st.markdown('<h1 style="font-size: 60px; color: white; margin: 0;">🌳</h1>', unsafe_allow_html=True)
     
     st.markdown("""
-        <h1 style="font-size: 32px; margin: 20px 0 10px 0; font-family: 'Segoe UI', sans-serif; color: white;">Conheça Nossos Fundos</h1>
-        <p style="font-size: 16px; margin: 0; color: #7dcea0;">Todos os fundos disponíveis na Tauari Investimentos</p>
+        <h1 style="font-size: 32px; margin: 20px 0 10px 0; font-family: 'Segoe UI', sans-serif; color: #000000;">Conheça Nossos Fundos</h1>
+        <p style="font-size: 16px; margin: 0; color: #000000;">Todos os fundos disponíveis na Tauari Investimentos</p>
     </div>
     """, unsafe_allow_html=True)
     
