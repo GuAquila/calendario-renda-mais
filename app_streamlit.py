@@ -873,23 +873,23 @@ def pagina_conheca_fundos():
                 with col1:
                     if 'links' in tese and isinstance(tese['links'], dict):
                         expert_url = tese['links'].get('expert', '#')
-                        st.link_button("🎯 Expert", expert_url, use_container_width=True, key=f"expert_{idx}")
+                        st.link_button("🎯 Expert", expert_url, use_container_width=True, key=f"expert_pub_{idx}")
                     else:
-                        st.button("🎯 Expert", disabled=True, use_container_width=True, key=f"expert_dis_{idx}")
+                        st.button("🎯 Expert", disabled=True, use_container_width=True, key=f"expert_dis_pub_{idx}")
                 
                 with col2:
                     if 'links' in tese and isinstance(tese['links'], dict):
                         lamina_url = tese['links'].get('lamina', '#')
-                        st.link_button("📄 Lâmina", lamina_url, use_container_width=True, key=f"lamina_{idx}")
+                        st.link_button("📄 Lâmina", lamina_url, use_container_width=True, key=f"lamina_pub_{idx}")
                     else:
-                        st.button("📄 Lâmina", disabled=True, use_container_width=True, key=f"lamina_dis_{idx}")
+                        st.button("📄 Lâmina", disabled=True, use_container_width=True, key=f"lamina_dis_pub_{idx}")
                 
                 with col3:
                     if 'links' in tese and isinstance(tese['links'], dict):
                         material_url = tese['links'].get('material', '#')
-                        st.link_button("📢 Material Publicitário", material_url, use_container_width=True, key=f"material_{idx}")
+                        st.link_button("📢 Material Publicitário", material_url, use_container_width=True, key=f"material_pub_{idx}")
                     else:
-                        st.button("📢 Material Publicitário", disabled=True, use_container_width=True, key=f"material_dis_{idx}")
+                        st.button("📢 Material Publicitário", disabled=True, use_container_width=True, key=f"material_dis_pub_{idx}")
                 
                 st.markdown("<hr style='margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;'>", unsafe_allow_html=True)
     else:
