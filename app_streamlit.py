@@ -179,6 +179,12 @@ def verificar_autenticacao(df_base):
                     else:
                         st.error("❌ Código ou senha incorretos!")
             
+            # Botão para conhecer os fundos
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.button("📚 Conheça os Fundos", key="btn_conhecer_fundos", use_container_width=True):
+                st.session_state.pagina_atual = 'fundos'
+                st.rerun()
+            
             # Informações de ajuda
             st.markdown("""
             <div class="login-info">
@@ -546,68 +552,6 @@ st.markdown("""
         border-radius: 4px;
     }
     
-    /* PÁGINA DE FUNDOS */
-    .fundos-header {
-        background: #1e4d2b;
-        padding: 30px 40px;
-        color: white;
-        text-align: center;
-    }
-    
-    .fundos-header h1 {
-        font-size: 32px;
-        margin: 0 0 10px 0;
-        font-family: 'Segoe UI', sans-serif;
-    }
-    
-    .fundos-header p {
-        font-size: 16px;
-        margin: 0;
-        color: #7dcea0;
-    }
-    
-    .fundo-card-full {
-        background: white;
-        border: 1px solid #ddd;
-        border-left: 6px solid #27ae60;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 20px;
-        font-family: 'Segoe UI', sans-serif;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    .fundo-card-full h3 {
-        color: #1e4d2b;
-        font-size: 18px;
-        margin: 0 0 15px 0;
-        font-weight: bold;
-    }
-    
-    .fundo-card-full .info-section {
-        margin-bottom: 15px;
-    }
-    
-    .fundo-card-full .info-section h4 {
-        color: #27ae60;
-        font-size: 14px;
-        margin: 0 0 8px 0;
-        font-weight: 600;
-    }
-    
-    .fundo-card-full .info-section p {
-        color: #2c3e50;
-        font-size: 13px;
-        line-height: 1.6;
-        margin: 0;
-    }
-    
-    .fundo-card-full .links-section {
-        margin-top: 15px;
-        padding-top: 15px;
-        border-top: 1px solid #e0e0e0;
-    }
-    
 </style>
 """, unsafe_allow_html=True)
 
@@ -786,8 +730,113 @@ if 'reload_count' not in st.session_state:
 
 df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses = carregar_dados(st.session_state.reload_count)
 
-# Verificar autenticação passando df_base
-verificar_autenticacao(df_base)
+# ============================================
+# PÁGINA DE FUNDOS (SEM BOTÕES - APENAS LINKS HTML)
+# ============================================
+
+def pagina_conheca_fundos():
+    """Página pública com informações de todos os fundos"""
+    
+    # Header
+    st.markdown("""
+    <div style="background: white; padding: 30px 40px; text-align: center; border-bottom: 3px solid #1e4d2b;">
+    """, unsafe_allow_html=True)
+    
+    # Logo centralizada
+    col_logo = st.columns([1, 2, 1])
+    with col_logo[1]:
+        try:
+            st.image("logo_tauari.png", width=400)
+        except:
+            st.markdown('<h1 style="font-size: 60px; color: #1e4d2b; margin: 0;">🌳</h1>', unsafe_allow_html=True)
+    
+    st.markdown("""
+        <h1 style="font-size: 32px; margin: 20px 0 10px 0; font-family: 'Segoe UI', sans-serif; color: #000000;">Conheça Nossos Fundos</h1>
+        <p style="font-size: 16px; margin: 0; color: #000000;">Todos os fundos disponíveis na Tauari Investimentos</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Botão voltar
+    col_space, col_btn = st.columns([6, 1])
+    with col_btn:
+        if st.button("🔙 Voltar ao Login", key="btn_voltar_login_fundos"):
+            st.session_state.pagina_atual = 'login'
+            st.rerun()
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    if mapa_pagamentos:
+        # Listar todos os fundos
+        for nome_fundo, dia_util in mapa_pagamentos.items():
+            cor = mapa_cores.get(nome_fundo, '#27ae60')
+            tese = mapa_teses.get(nome_fundo, {})
+            
+            # Extrair informações
+            resumo = tese.get("resumo", "Informações não disponíveis")
+            condicoes = tese.get('condicoes', 'Informações não disponíveis')
+            venda = tese.get("venda_1min", "Informações não disponíveis")
+            
+            # Links
+            links = tese.get('links', {})
+            expert_url = links.get('expert', '#') if isinstance(links, dict) else '#'
+            lamina_url = links.get('lamina', '#') if isinstance(links, dict) else '#'
+            material_url = links.get('material', '#') if isinstance(links, dict) else '#'
+            
+            # Container para cada fundo - TUDO EM HTML, SEM BOTÕES STREAMLIT
+            html_fundo = f"""
+            <div style="background: white; border: 1px solid #ddd; border-left: 6px solid {cor}; 
+                 border-radius: 8px; padding: 20px; margin-bottom: 20px; 
+                 box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h3 style="color: #1e4d2b; font-size: 20px; margin: 0 0 20px 0; font-weight: bold;">
+                    📊 {nome_fundo}
+                </h3>
+                
+                <p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 8px;">📝 Sobre o Fundo</p>
+                <p style="color: #000000; font-size: 14px; line-height: 1.6; margin-bottom: 20px;">{resumo}</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                    <div>
+                        <p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 8px;">📋 Resumo de Condições</p>
+                        <p style="color: #000000; font-size: 14px; line-height: 1.6; white-space: pre-line;">{condicoes}</p>
+                    </div>
+                    <div>
+                        <p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 8px;">⚡ Venda em 1 Minuto</p>
+                        <p style="color: #000000; font-size: 14px; line-height: 1.6;">{venda}</p>
+                    </div>
+                </div>
+                
+                <p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 12px;">📎 Materiais e Conteúdos</p>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            """
+            
+            # Adicionar links apenas se existirem
+            if expert_url and expert_url != '#':
+                html_fundo += f'<a href="{expert_url}" target="_blank" style="background: #e74c3c; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: 600; font-size: 13px;">🎯 Expert</a>'
+            
+            if lamina_url and lamina_url != '#':
+                html_fundo += f'<a href="{lamina_url}" target="_blank" style="background: #27ae60; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: 600; font-size: 13px;">📄 Lâmina</a>'
+            
+            if material_url and material_url != '#':
+                html_fundo += f'<a href="{material_url}" target="_blank" style="background: #3498db; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: 600; font-size: 13px;">📢 Material Publicitário</a>'
+            
+            html_fundo += """
+                </div>
+            </div>
+            <hr style='margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;'>
+            """
+            
+            st.markdown(html_fundo, unsafe_allow_html=True)
+    else:
+        st.warning("⚠️ Nenhum fundo disponível no momento")
+    
+    st.stop()
+
+# Verificar qual página mostrar
+if st.session_state.get('pagina_atual') == 'fundos':
+    pagina_conheca_fundos()
+else:
+    # Verificar autenticação passando df_base
+    verificar_autenticacao(df_base)
 
 # ============================================
 # INTERFACE PRINCIPAL
