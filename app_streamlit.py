@@ -735,24 +735,13 @@ df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses = carreg
 # ============================================
 
 def pagina_conheca_fundos():
-    """Página pública com informações de todos os fundos - VERSÃO CORRIGIDA"""
+    """Página pública com informações de todos os fundos - VERSÃO TOTALMENTE REESCRITA"""
     
-    # Header
+    # Cabeçalho da página
     st.markdown("""
     <div style="background: white; padding: 30px 40px; text-align: center; border-bottom: 3px solid #1e4d2b;">
-    """, unsafe_allow_html=True)
-    
-    # Logo centralizada
-    col_logo = st.columns([1, 2, 1])
-    with col_logo[1]:
-        try:
-            st.image("logo_tauari.png", width=400)
-        except:
-            st.markdown('<h1 style="font-size: 60px; color: #1e4d2b; margin: 0;">🌳</h1>', unsafe_allow_html=True)
-    
-    st.markdown("""
         <h1 style="font-size: 32px; margin: 20px 0 10px 0; font-family: 'Segoe UI', sans-serif; color: #000000;">Conheça Nossos Fundos</h1>
-        <p style="font-size: 16px; margin: 0; color: #000000;">Todos os fundos disponíveis na Tauari Investimentos</p>
+        <p style="font-size: 16px; margin: 0 0 20px 0; color: #000000;">Todos os fundos disponíveis na Tauari Investimentos</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -765,73 +754,78 @@ def pagina_conheca_fundos():
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    if mapa_pagamentos:
-        # Listar todos os fundos
-        for nome_fundo, dia_util in mapa_pagamentos.items():
-            cor = mapa_cores.get(nome_fundo, '#27ae60')
-            tese = mapa_teses.get(nome_fundo, {})
-            
-            # Extrair informações
-            resumo = tese.get("resumo", "Informações não disponíveis")
-            condicoes = tese.get('condicoes', 'Informações não disponíveis')
-            venda = tese.get("venda_1min", "Informações não disponíveis")
-            
-            # Links
-            links = tese.get('links', {})
-            expert_url = links.get('expert', '#') if isinstance(links, dict) else '#'
-            lamina_url = links.get('lamina', '#') if isinstance(links, dict) else '#'
-            material_url = links.get('material', '#') if isinstance(links, dict) else '#'
-            
-            # CORRIGIDO: Apenas 1 div é aberta, então apenas 1 deve ser fechada
-            html_fundo = f"""
+    # Verificar se há fundos disponíveis
+    if not mapa_pagamentos:
+        st.warning("⚠️ Nenhum fundo disponível no momento")
+        st.stop()
+    
+    # Listar todos os fundos usando APENAS componentes Streamlit
+    for nome_fundo, dia_util in mapa_pagamentos.items():
+        cor = mapa_cores.get(nome_fundo, '#27ae60')
+        tese = mapa_teses.get(nome_fundo, {})
+        
+        # Extrair informações
+        resumo = tese.get("resumo", "Informações não disponíveis")
+        condicoes = tese.get('condicoes', 'Informações não disponíveis')
+        venda = tese.get("venda_1min", "Informações não disponíveis")
+        perfil = tese.get("perfil", "Não especificado")
+        
+        # Links
+        links = tese.get('links', {})
+        expert_url = links.get('expert', '') if isinstance(links, dict) else ''
+        lamina_url = links.get('lamina', '') if isinstance(links, dict) else ''
+        material_url = links.get('material', '') if isinstance(links, dict) else ''
+        
+        # Container do fundo
+        with st.container():
+            # Cabeçalho do fundo
+            st.markdown(f"""
             <div style="background: white; border: 1px solid #ddd; border-left: 6px solid {cor}; 
-                 border-radius: 8px; padding: 20px; margin-bottom: 20px; 
+                 border-radius: 8px; padding: 20px; margin-bottom: 10px; 
                  box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                 <h3 style="color: #1e4d2b; font-size: 20px; margin: 0 0 20px 0; font-weight: bold;">
                     📊 {nome_fundo}
                 </h3>
-                
-                <p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 8px;">📝 Sobre o Fundo</p>
-                <p style="color: #000000; font-size: 14px; line-height: 1.6; margin-bottom: 20px;">{resumo}</p>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                    <div>
-                        <p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 8px;">📋 Resumo de Condições</p>
-                        <p style="color: #000000; font-size: 14px; line-height: 1.6; white-space: pre-line;">{condicoes}</p>
-                    </div>
-                    <div>
-                        <p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 8px;">⚡ Venda em 1 Minuto</p>
-                        <p style="color: #000000; font-size: 14px; line-height: 1.6;">{venda}</p>
-                    </div>
-                </div>
-                
-                <p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 12px;">📎 Materiais e Conteúdos</p>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            """
-            
-            # Adicionar links apenas se existirem
-            if expert_url and expert_url != '#':
-                html_fundo += f'<a href="{expert_url}" target="_blank" style="background: #e74c3c; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: 600; font-size: 13px;">🎯 Expert</a>'
-            
-            if lamina_url and lamina_url != '#':
-                html_fundo += f'<a href="{lamina_url}" target="_blank" style="background: #27ae60; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: 600; font-size: 13px;">📄 Lâmina</a>'
-            
-            if material_url and material_url != '#':
-                html_fundo += f'<a href="{material_url}" target="_blank" style="background: #3498db; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: 600; font-size: 13px;">📢 Material Publicitário</a>'
-            
-            # CORRIGIDO: Fechar apenas as divs que foram abertas (2 divs: a de links e a principal)
-            html_fundo += """
-                </div>
             </div>
-            """
+            """, unsafe_allow_html=True)
             
-            # Renderizar o HTML
-            st.markdown(html_fundo, unsafe_allow_html=True)
+            # Sobre o fundo
+            st.markdown("**📝 Sobre o Fundo**")
+            st.write(resumo)
             
-            # Linha divisória entre fundos
+            # Criar duas colunas para condições e venda
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("**📋 Resumo de Condições**")
+                st.text(condicoes)
+            
+            with col2:
+                st.markdown("**⚡ Venda em 1 Minuto**")
+                st.write(venda)
+            
+            # Perfil do cliente
+            st.markdown("**🎯 Perfil do Cliente**")
+            st.write(perfil)
+            
+            # Botões de links
+            st.markdown("**📎 Materiais e Conteúdos**")
+            col_links = st.columns([1, 1, 1, 5])
+            
+            with col_links[0]:
+                if expert_url and expert_url != '#' and expert_url != '':
+                    st.markdown(f'<a href="{expert_url}" target="_blank" style="display: inline-block; background: #e74c3c; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: 600; font-size: 13px; text-align: center;">🎯 Expert</a>', unsafe_allow_html=True)
+            
+            with col_links[1]:
+                if lamina_url and lamina_url != '#' and lamina_url != '':
+                    st.markdown(f'<a href="{lamina_url}" target="_blank" style="display: inline-block; background: #27ae60; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: 600; font-size: 13px; text-align: center;">📄 Lâmina</a>', unsafe_allow_html=True)
+            
+            with col_links[2]:
+                if material_url and material_url != '#' and material_url != '':
+                    st.markdown(f'<a href="{material_url}" target="_blank" style="display: inline-block; background: #3498db; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: 600; font-size: 13px; text-align: center;">📢 Material</a>', unsafe_allow_html=True)
+            
+            # Linha divisória
             st.markdown("<hr style='margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;'>", unsafe_allow_html=True)
-    else:
-        st.warning("⚠️ Nenhum fundo disponível no momento")
     
     st.stop()
 
