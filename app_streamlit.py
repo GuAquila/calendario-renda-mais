@@ -9,6 +9,7 @@ import pandas as pd
 from datetime import datetime, date, timedelta
 import calendar
 import os
+import uuid
 
 st.set_page_config(
     page_title="Calendário Renda Mais - TAUARI",
@@ -828,13 +829,16 @@ def pagina_conheca_fundos():
     st.markdown("<br>", unsafe_allow_html=True)
     
     if mapa_pagamentos:
-        # Listar todos os fundos
-        for nome_fundo, dia_util in mapa_pagamentos.items():
+        # Listar todos os fundos com índice
+        lista_fundos = list(mapa_pagamentos.items())
+        
+        for idx in range(len(lista_fundos)):
+            nome_fundo, dia_util = lista_fundos[idx]
             cor = mapa_cores.get(nome_fundo, '#27ae60')
             tese = mapa_teses.get(nome_fundo, {})
             
-            # Criar ID único simples baseado no nome
-            fundo_key = nome_fundo.replace(' ', '_').replace('(', '').replace(')', '').replace('ª', '').replace('º', '')[:30]
+            # Usar UUID curto para garantir unicidade
+            base_id = str(uuid.uuid4())[:8]
             
             # Container para cada fundo
             with st.container():
@@ -850,7 +854,8 @@ def pagina_conheca_fundos():
                 
                 # Sobre o Fundo
                 st.markdown('<p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 8px;">📝 Sobre o Fundo</p>', unsafe_allow_html=True)
-                st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.6;">{tese.get("resumo", "Informações não disponíveis")}</p>', unsafe_allow_html=True)
+                resumo = tese.get("resumo", "Informações não disponíveis")
+                st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.6;">{resumo}</p>', unsafe_allow_html=True)
                 
                 st.markdown("<br>", unsafe_allow_html=True)
                 
@@ -859,12 +864,14 @@ def pagina_conheca_fundos():
                 
                 with col_condicoes:
                     st.markdown('<p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 8px;">📋 Resumo de Condições</p>', unsafe_allow_html=True)
-                    condicoes_texto = tese.get('condicoes', 'Informações não disponíveis').replace('\n', '<br>')
+                    condicoes = tese.get('condicoes', 'Informações não disponíveis')
+                    condicoes_texto = condicoes.replace('\n', '<br>')
                     st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.6;">{condicoes_texto}</p>', unsafe_allow_html=True)
                 
                 with col_venda:
                     st.markdown('<p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 8px;">⚡ Venda em 1 Minuto</p>', unsafe_allow_html=True)
-                    st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.6;">{tese.get("venda_1min", "Informações não disponíveis")}</p>', unsafe_allow_html=True)
+                    venda_1min = tese.get("venda_1min", "Informações não disponíveis")
+                    st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.6;">{venda_1min}</p>', unsafe_allow_html=True)
                 
                 st.markdown("<br>", unsafe_allow_html=True)
                 
@@ -873,35 +880,29 @@ def pagina_conheca_fundos():
                 
                 col1, col2, col3 = st.columns(3)
                 
+                # Links do fundo
+                links = tese.get('links', {})
+                expert_url = links.get('expert', '#') if isinstance(links, dict) else '#'
+                lamina_url = links.get('lamina', '#') if isinstance(links, dict) else '#'
+                material_url = links.get('material', '#') if isinstance(links, dict) else '#'
+                
                 with col1:
-                    if 'links' in tese and isinstance(tese['links'], dict):
-                        expert_url = tese['links'].get('expert', '#')
-                        if expert_url and expert_url != '#':
-                            st.link_button("🎯 Expert", expert_url, use_container_width=True, key="exp_" + fundo_key)
-                        else:
-                            st.button("🎯 Expert", disabled=True, use_container_width=True, key="expd_" + fundo_key)
+                    if expert_url and expert_url != '#':
+                        st.link_button("🎯 Expert", expert_url, use_container_width=True, key=base_id + "_exp")
                     else:
-                        st.button("🎯 Expert", disabled=True, use_container_width=True, key="expd_" + fundo_key)
+                        st.button("🎯 Expert", disabled=True, use_container_width=True, key=base_id + "_expd")
                 
                 with col2:
-                    if 'links' in tese and isinstance(tese['links'], dict):
-                        lamina_url = tese['links'].get('lamina', '#')
-                        if lamina_url and lamina_url != '#':
-                            st.link_button("📄 Lâmina", lamina_url, use_container_width=True, key="lam_" + fundo_key)
-                        else:
-                            st.button("📄 Lâmina", disabled=True, use_container_width=True, key="lamd_" + fundo_key)
+                    if lamina_url and lamina_url != '#':
+                        st.link_button("📄 Lâmina", lamina_url, use_container_width=True, key=base_id + "_lam")
                     else:
-                        st.button("📄 Lâmina", disabled=True, use_container_width=True, key="lamd_" + fundo_key)
+                        st.button("📄 Lâmina", disabled=True, use_container_width=True, key=base_id + "_lamd")
                 
                 with col3:
-                    if 'links' in tese and isinstance(tese['links'], dict):
-                        material_url = tese['links'].get('material', '#')
-                        if material_url and material_url != '#':
-                            st.link_button("📢 Material Publicitário", material_url, use_container_width=True, key="mat_" + fundo_key)
-                        else:
-                            st.button("📢 Material Publicitário", disabled=True, use_container_width=True, key="matd_" + fundo_key)
+                    if material_url and material_url != '#':
+                        st.link_button("📢 Material Publicitário", material_url, use_container_width=True, key=base_id + "_mat")
                     else:
-                        st.button("📢 Material Publicitário", disabled=True, use_container_width=True, key="matd_" + fundo_key)
+                        st.button("📢 Material Publicitário", disabled=True, use_container_width=True, key=base_id + "_matd")
                 
                 st.markdown("<hr style='margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;'>", unsafe_allow_html=True)
     else:
