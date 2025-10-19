@@ -731,11 +731,11 @@ if 'reload_count' not in st.session_state:
 df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses = carregar_dados(st.session_state.reload_count)
 
 # ============================================
-# PÁGINA DE FUNDOS (SEM BOTÕES - APENAS LINKS HTML)
+# PÁGINA DE FUNDOS (CORRIGIDA)
 # ============================================
 
 def pagina_conheca_fundos():
-    """Página pública com informações de todos os fundos"""
+    """Página pública com informações de todos os fundos - VERSÃO CORRIGIDA"""
     
     # Header
     st.markdown("""
@@ -782,7 +782,7 @@ def pagina_conheca_fundos():
             lamina_url = links.get('lamina', '#') if isinstance(links, dict) else '#'
             material_url = links.get('material', '#') if isinstance(links, dict) else '#'
             
-            # Container para cada fundo - TUDO EM HTML, SEM BOTÕES STREAMLIT
+            # CORRIGIDO: Apenas 1 div é aberta, então apenas 1 deve ser fechada
             html_fundo = f"""
             <div style="background: white; border: 1px solid #ddd; border-left: 6px solid {cor}; 
                  border-radius: 8px; padding: 20px; margin-bottom: 20px; 
@@ -819,13 +819,17 @@ def pagina_conheca_fundos():
             if material_url and material_url != '#':
                 html_fundo += f'<a href="{material_url}" target="_blank" style="background: #3498db; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: 600; font-size: 13px;">📢 Material Publicitário</a>'
             
+            # CORRIGIDO: Fechar apenas as divs que foram abertas (2 divs: a de links e a principal)
             html_fundo += """
                 </div>
             </div>
-            <hr style='margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;'>
             """
             
+            # Renderizar o HTML
             st.markdown(html_fundo, unsafe_allow_html=True)
+            
+            # Linha divisória entre fundos
+            st.markdown("<hr style='margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;'>", unsafe_allow_html=True)
     else:
         st.warning("⚠️ Nenhum fundo disponível no momento")
     
