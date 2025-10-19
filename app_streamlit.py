@@ -715,8 +715,9 @@ def calcular_dia_util(ano, mes, numero_dia_util, feriados):
 # ============================================
 
 # Carregar dados primeiro para poder validar na tela de login
-@st.cache_data
-def carregar_dados():
+# Adicionar timestamp para forçar reload quando necessário
+@st.cache_data(ttl=60)  # Cache por apenas 60 segundos
+def carregar_dados(force_reload=False):
     try:
         NOME_ARQUIVO = 'calendario_Renda_mais.xlsx'
         
@@ -785,7 +786,11 @@ def carregar_dados():
         return None, None, None, None, None, None
 
 # Carregar dados primeiro
-df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses = carregar_dados()
+# Criar uma chave de reload para forçar atualização
+if 'reload_count' not in st.session_state:
+    st.session_state.reload_count = 0
+
+df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses = carregar_dados(st.session_state.reload_count)
 
 # ============================================
 # PÁGINA DE FUNDOS
@@ -928,39 +933,26 @@ def main():
     # CABEÇALHO COM INFO DO ASSESSOR
     assessor_nome = st.session_state.get('nome_assessor', 'Assessor')
     
-    st.markdown('<div style="background: #1e4d2b; padding: 20px 40px;">', unsafe_allow_html=True)
-    
-    # Criar colunas para logo e texto
-    col_header = st.columns([1, 4, 2])
-    
-    with col_header[0]:
-        try:
-            st.image("logo_tauari.png", width=80)
-        except:
-            st.markdown('<div style="font-size: 50px; padding: 10px;">🌳</div>', unsafe_allow_html=True)
-    
-    with col_header[1]:
-        st.markdown(f"""
-        <div style="padding: 15px 0;">
-            <h1 style="color: white; font-size: 22px; font-weight: bold; margin: 0 0 5px 0; font-family: 'Segoe UI', sans-serif;">
-                📅 CALENDÁRIO DE PAGAMENTOS - RENDA MAIS
-            </h1>
-            <h2 style="color: #7dcea0; font-size: 18px; font-weight: 600; margin: 0; font-family: 'Segoe UI', sans-serif;">
-                TAUARI INVESTIMENTOS
-            </h2>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col_header[2]:
-        st.markdown(f"""
-        <div style="padding: 15px 0; text-align: right;">
-            <div style="color: white; font-size: 16px; background: rgba(255,255,255,0.1); padding: 10px 18px; border-radius: 5px; font-family: 'Segoe UI', sans-serif; display: inline-block;">
+    st.markdown(f"""
+    <div style="background: #1e4d2b; padding: 20px 40px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div style="font-size: 60px;">🌳</div>
+                <div>
+                    <h1 style="color: white; font-size: 22px; font-weight: bold; margin: 0 0 5px 0; font-family: 'Segoe UI', sans-serif;">
+                        📅 CALENDÁRIO DE PAGAMENTOS - RENDA MAIS
+                    </h1>
+                    <h2 style="color: #7dcea0; font-size: 18px; font-weight: 600; margin: 0; font-family: 'Segoe UI', sans-serif;">
+                        TAUARI INVESTIMENTOS
+                    </h2>
+                </div>
+            </div>
+            <div style="color: white; font-size: 16px; background: rgba(255,255,255,0.1); padding: 10px 18px; border-radius: 5px; font-family: 'Segoe UI', sans-serif;">
                 👤 Assessor: <strong>{assessor_nome}</strong> ({assessor_logado})
             </div>
         </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
     
     # BARRA DE SAUDAÇÃO E BOTÃO SAIR
     st.markdown('<div style="background: white; padding: 5px 0;">', unsafe_allow_html=True)
@@ -975,7 +967,12 @@ def main():
         col_reload, col_sair = st.columns(2)
         with col_reload:
             if st.button("🔄", key="btn_reload", help="Recarregar dados do Excel"):
+                # Incrementar contador para forçar reload
+                st.session_state.reload_count += 1
+                st.session_state.just_reloaded = True
+                # Limpar TODOS os caches
                 st.cache_data.clear()
+                st.cache_resource.clear()
                 st.rerun()
         with col_sair:
             if st.button("🚪 Sair", key="btn_sair"):
@@ -986,6 +983,11 @@ def main():
         st.markdown('</div>', unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Mostrar notificação se acabou de recarregar
+    if 'just_reloaded' in st.session_state and st.session_state.just_reloaded:
+        st.success("✅ Dados do Excel atualizados com sucesso!")
+        st.session_state.just_reloaded = False
     
     # BARRA DE SELEÇÃO
     st.markdown('<div class="barra-selecao">', unsafe_allow_html=True)
