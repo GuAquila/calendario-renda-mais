@@ -964,19 +964,25 @@ def main():
     
     # BARRA DE SAUDAÇÃO E BOTÃO SAIR
     st.markdown('<div style="background: white; padding: 5px 0;">', unsafe_allow_html=True)
-    col_saudacao, col_btn_sair = st.columns([5, 1])
+    col_saudacao, col_btns = st.columns([4, 1])
     
     with col_saudacao:
         nome_assessor = st.session_state.get('nome_assessor', 'Assessor')
         st.markdown(f'<p style="font-size: 26px; color: #1e4d2b; margin: 15px 0 15px 40px; font-weight: 700;">👋 Olá, {nome_assessor}!</p>', unsafe_allow_html=True)
     
-    with col_btn_sair:
+    with col_btns:
         st.markdown('<div style="margin-top: 10px; margin-right: 40px;">', unsafe_allow_html=True)
-        if st.button("🚪 Sair", key="btn_sair"):
-            # Limpar session_state
-            for key in list(st.session_state.keys()):
-                del st.session_state[key]
-            st.rerun()
+        col_reload, col_sair = st.columns(2)
+        with col_reload:
+            if st.button("🔄", key="btn_reload", help="Recarregar dados do Excel"):
+                st.cache_data.clear()
+                st.rerun()
+        with col_sair:
+            if st.button("🚪 Sair", key="btn_sair"):
+                # Limpar session_state
+                for key in list(st.session_state.keys()):
+                    del st.session_state[key]
+                st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
