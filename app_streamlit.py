@@ -735,7 +735,7 @@ df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses = carreg
 # ============================================
 
 def pagina_conheca_fundos():
-    """Página pública com informações de todos os fundos - VERSÃO TOTALMENTE REESCRITA"""
+    """Página pública com informações de todos os fundos - VERSÃO APRIMORADA"""
     
     # Cabeçalho da página
     st.markdown("""
@@ -789,43 +789,107 @@ def pagina_conheca_fundos():
             </div>
             """, unsafe_allow_html=True)
             
-            # Sobre o fundo
-            st.markdown("**📝 Sobre o Fundo**")
-            st.write(resumo)
+            # Sobre o fundo - TEXTO PRETO
+            st.markdown('<p style="color: #000000; font-weight: bold; font-size: 16px; margin-bottom: 8px;">📝 Sobre o Fundo</p>', unsafe_allow_html=True)
+            st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.7;">{resumo}</p>', unsafe_allow_html=True)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
             
             # Criar duas colunas para condições e venda
             col1, col2 = st.columns(2)
             
             with col1:
-                st.markdown("**📋 Resumo de Condições**")
-                st.text(condicoes)
+                st.markdown('<p style="color: #000000; font-weight: bold; font-size: 16px; margin-bottom: 8px;">📋 Resumo de Condições</p>', unsafe_allow_html=True)
+                st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.7; white-space: pre-line;">{condicoes}</p>', unsafe_allow_html=True)
             
             with col2:
-                st.markdown("**⚡ Venda em 1 Minuto**")
-                st.write(venda)
+                st.markdown('<p style="color: #000000; font-weight: bold; font-size: 16px; margin-bottom: 8px;">⚡ Venda em 1 Minuto</p>', unsafe_allow_html=True)
+                st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.7;">{venda}</p>', unsafe_allow_html=True)
             
-            # Perfil do cliente
-            st.markdown("**🎯 Perfil do Cliente**")
-            st.write(perfil)
+            st.markdown("<br>", unsafe_allow_html=True)
             
-            # Botões de links
-            st.markdown("**📎 Materiais e Conteúdos**")
-            col_links = st.columns([1, 1, 1, 5])
+            # Perfil do cliente - TEXTO PRETO
+            st.markdown('<p style="color: #000000; font-weight: bold; font-size: 16px; margin-bottom: 8px;">🎯 Perfil do Cliente</p>', unsafe_allow_html=True)
+            st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.7;">{perfil}</p>', unsafe_allow_html=True)
             
-            with col_links[0]:
-                if expert_url and expert_url != '#' and expert_url != '':
-                    st.markdown(f'<a href="{expert_url}" target="_blank" style="display: inline-block; background: #e74c3c; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: 600; font-size: 13px; text-align: center;">🎯 Expert</a>', unsafe_allow_html=True)
+            st.markdown("<br>", unsafe_allow_html=True)
             
-            with col_links[1]:
-                if lamina_url and lamina_url != '#' and lamina_url != '':
-                    st.markdown(f'<a href="{lamina_url}" target="_blank" style="display: inline-block; background: #27ae60; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: 600; font-size: 13px; text-align: center;">📄 Lâmina</a>', unsafe_allow_html=True)
+            # Botões de links - MAIORES E MELHOR DISTRIBUÍDOS
+            st.markdown('<p style="color: #000000; font-weight: bold; font-size: 16px; margin-bottom: 15px;">📎 Materiais e Conteúdos</p>', unsafe_allow_html=True)
             
-            with col_links[2]:
-                if material_url and material_url != '#' and material_url != '':
-                    st.markdown(f'<a href="{material_url}" target="_blank" style="display: inline-block; background: #3498db; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: 600; font-size: 13px; text-align: center;">📢 Material</a>', unsafe_allow_html=True)
+            # Contar quantos botões temos
+            botoes_ativos = []
+            if expert_url and expert_url != '#' and expert_url != '':
+                botoes_ativos.append(('expert', expert_url))
+            if lamina_url and lamina_url != '#' and lamina_url != '':
+                botoes_ativos.append(('lamina', lamina_url))
+            if material_url and material_url != '#' and material_url != '':
+                botoes_ativos.append(('material', material_url))
+            
+            # Criar colunas baseado no número de botões ativos
+            if len(botoes_ativos) == 3:
+                col_links = st.columns([1, 1, 1])
+            elif len(botoes_ativos) == 2:
+                col_links = st.columns([1, 1, 2])
+            elif len(botoes_ativos) == 1:
+                col_links = st.columns([1, 3])
+            else:
+                col_links = [st.columns(1)[0]]
+            
+            # Renderizar os botões
+            for idx, (tipo, url) in enumerate(botoes_ativos):
+                with col_links[idx]:
+                    if tipo == 'expert':
+                        st.markdown(f'''
+                        <a href="{url}" target="_blank" style="
+                            display: block;
+                            background: #e74c3c;
+                            color: white;
+                            padding: 18px 30px;
+                            border-radius: 8px;
+                            text-decoration: none;
+                            font-weight: 700;
+                            font-size: 16px;
+                            text-align: center;
+                            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+                            transition: all 0.3s;
+                        ">🎯 Expert</a>
+                        ''', unsafe_allow_html=True)
+                    elif tipo == 'lamina':
+                        st.markdown(f'''
+                        <a href="{url}" target="_blank" style="
+                            display: block;
+                            background: #27ae60;
+                            color: white;
+                            padding: 18px 30px;
+                            border-radius: 8px;
+                            text-decoration: none;
+                            font-weight: 700;
+                            font-size: 16px;
+                            text-align: center;
+                            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+                            transition: all 0.3s;
+                        ">📄 Lâmina</a>
+                        ''', unsafe_allow_html=True)
+                    elif tipo == 'material':
+                        st.markdown(f'''
+                        <a href="{url}" target="_blank" style="
+                            display: block;
+                            background: #3498db;
+                            color: white;
+                            padding: 18px 30px;
+                            border-radius: 8px;
+                            text-decoration: none;
+                            font-weight: 700;
+                            font-size: 16px;
+                            text-align: center;
+                            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+                            transition: all 0.3s;
+                        ">📢 Material Publicitário</a>
+                        ''', unsafe_allow_html=True)
             
             # Linha divisória
-            st.markdown("<hr style='margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;'>", unsafe_allow_html=True)
+            st.markdown("<hr style='margin: 40px 0; border: none; border-top: 2px solid #e0e0e0;'>", unsafe_allow_html=True)
     
     st.stop()
 
