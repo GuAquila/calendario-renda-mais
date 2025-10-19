@@ -546,6 +546,68 @@ st.markdown("""
         border-radius: 4px;
     }
     
+    /* PÁGINA DE FUNDOS */
+    .fundos-header {
+        background: #1e4d2b;
+        padding: 30px 40px;
+        color: white;
+        text-align: center;
+    }
+    
+    .fundos-header h1 {
+        font-size: 32px;
+        margin: 0 0 10px 0;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    
+    .fundos-header p {
+        font-size: 16px;
+        margin: 0;
+        color: #7dcea0;
+    }
+    
+    .fundo-card-full {
+        background: white;
+        border: 1px solid #ddd;
+        border-left: 6px solid #27ae60;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        font-family: 'Segoe UI', sans-serif;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .fundo-card-full h3 {
+        color: #1e4d2b;
+        font-size: 18px;
+        margin: 0 0 15px 0;
+        font-weight: bold;
+    }
+    
+    .fundo-card-full .info-section {
+        margin-bottom: 15px;
+    }
+    
+    .fundo-card-full .info-section h4 {
+        color: #27ae60;
+        font-size: 14px;
+        margin: 0 0 8px 0;
+        font-weight: 600;
+    }
+    
+    .fundo-card-full .info-section p {
+        color: #2c3e50;
+        font-size: 13px;
+        line-height: 1.6;
+        margin: 0;
+    }
+    
+    .fundo-card-full .links-section {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #e0e0e0;
+    }
+    
 </style>
 """, unsafe_allow_html=True)
 
