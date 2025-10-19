@@ -72,8 +72,6 @@ def verificar_autenticacao(df_base):
         st.session_state.assessor_logado = None
     if 'nome_assessor' not in st.session_state:
         st.session_state.nome_assessor = None
-    if 'pagina_atual' not in st.session_state:
-        st.session_state.pagina_atual = 'login'
     
     if not st.session_state.autenticado:
         st.markdown("""
@@ -102,22 +100,6 @@ def verificar_autenticacao(df_base):
                 margin-top: 20px;
                 font-size: 12px;
                 color: #2c3e50;
-            }
-            .btn-conhecer-fundos {
-                background: #3498db !important;
-                color: white !important;
-                border: none !important;
-                padding: 10px 20px !important;
-                border-radius: 5px !important;
-                font-weight: 600 !important;
-                font-size: 13px !important;
-                cursor: pointer !important;
-                width: 100% !important;
-                margin-top: 15px !important;
-                text-align: center !important;
-            }
-            .btn-conhecer-fundos:hover {
-                background: #2980b9 !important;
             }
         </style>
         """, unsafe_allow_html=True)
@@ -171,19 +153,12 @@ def verificar_autenticacao(df_base):
                                 st.session_state.autenticado = True
                                 st.session_state.assessor_logado = codigo_assessor
                                 st.session_state.nome_assessor = nome_assessor
-                                st.session_state.pagina_atual = 'sistema'
                                 st.success(f"✅ Bem-vindo, {nome_assessor}!")
                                 st.rerun()
                         else:
                             st.error("❌ Erro ao carregar a base de dados!")
                     else:
                         st.error("❌ Código ou senha incorretos!")
-            
-            # Botão para conhecer os fundos
-            st.markdown("<br>", unsafe_allow_html=True)
-            if st.button("📚 Conheça os Fundos", key="btn_conhecer_fundos", use_container_width=True):
-                st.session_state.pagina_atual = 'fundos'
-                st.rerun()
             
             # Informações de ajuda
             st.markdown("""
@@ -552,68 +527,6 @@ st.markdown("""
         border-radius: 4px;
     }
     
-    /* PÁGINA DE FUNDOS */
-    .fundos-header {
-        background: #1e4d2b;
-        padding: 30px 40px;
-        color: white;
-        text-align: center;
-    }
-    
-    .fundos-header h1 {
-        font-size: 32px;
-        margin: 0 0 10px 0;
-        font-family: 'Segoe UI', sans-serif;
-    }
-    
-    .fundos-header p {
-        font-size: 16px;
-        margin: 0;
-        color: #7dcea0;
-    }
-    
-    .fundo-card-full {
-        background: white;
-        border: 1px solid #ddd;
-        border-left: 6px solid #27ae60;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 20px;
-        font-family: 'Segoe UI', sans-serif;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    .fundo-card-full h3 {
-        color: #1e4d2b;
-        font-size: 18px;
-        margin: 0 0 15px 0;
-        font-weight: bold;
-    }
-    
-    .fundo-card-full .info-section {
-        margin-bottom: 15px;
-    }
-    
-    .fundo-card-full .info-section h4 {
-        color: #27ae60;
-        font-size: 14px;
-        margin: 0 0 8px 0;
-        font-weight: 600;
-    }
-    
-    .fundo-card-full .info-section p {
-        color: #2c3e50;
-        font-size: 13px;
-        line-height: 1.6;
-        margin: 0;
-    }
-    
-    .fundo-card-full .links-section {
-        margin-top: 15px;
-        padding-top: 15px;
-        border-top: 1px solid #e0e0e0;
-    }
-    
 </style>
 """, unsafe_allow_html=True)
 
@@ -792,135 +705,8 @@ if 'reload_count' not in st.session_state:
 
 df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses = carregar_dados(st.session_state.reload_count)
 
-# ============================================
-# PÁGINA DE FUNDOS
-# ============================================
-
-def pagina_conheca_fundos():
-    """Página pública com informações de todos os fundos"""
-    
-    # Header
-    st.markdown("""
-    <div style="background: white; padding: 30px 40px; text-align: center; border-bottom: 3px solid #1e4d2b;">
-    """, unsafe_allow_html=True)
-    
-    # Logo centralizada
-    col_logo = st.columns([1, 2, 1])
-    with col_logo[1]:
-        try:
-            st.image("logo_tauari.png", width=400)
-        except:
-            st.markdown('<h1 style="font-size: 60px; color: white; margin: 0;">🌳</h1>', unsafe_allow_html=True)
-    
-    st.markdown("""
-        <h1 style="font-size: 32px; margin: 20px 0 10px 0; font-family: 'Segoe UI', sans-serif; color: #000000;">Conheça Nossos Fundos</h1>
-        <p style="font-size: 16px; margin: 0; color: #000000;">Todos os fundos disponíveis na Tauari Investimentos</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Botão voltar
-    col_space, col_btn = st.columns([6, 1])
-    with col_btn:
-        if st.button("🔙 Voltar ao Login", key="btn_voltar_login"):
-            st.session_state.pagina_atual = 'login'
-            st.rerun()
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    if mapa_pagamentos:
-        # Listar todos os fundos com enumerate
-        fundos_lista = list(mapa_pagamentos.items())
-        
-        for idx, (nome_fundo, dia_util) in enumerate(fundos_lista):
-            cor = mapa_cores.get(nome_fundo, '#27ae60')
-            tese = mapa_teses.get(nome_fundo, {})
-            
-            # Container para cada fundo
-            with st.container():
-                st.markdown(f"""
-                <div style="background: white; border: 1px solid #ddd; border-left: 6px solid {cor}; 
-                     border-radius: 8px; padding: 20px; margin-bottom: 20px; 
-                     box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <h3 style="color: #1e4d2b; font-size: 20px; margin: 0 0 20px 0; font-weight: bold;">
-                        📊 {nome_fundo}
-                    </h3>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                # Sobre o Fundo
-                st.markdown('<p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 8px;">📝 Sobre o Fundo</p>', unsafe_allow_html=True)
-                resumo = tese.get("resumo", "Informações não disponíveis")
-                st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.6;">{resumo}</p>', unsafe_allow_html=True)
-                
-                st.markdown("<br>", unsafe_allow_html=True)
-                
-                # Dividir em duas colunas: Resumo de Condições e Venda em 1 Minuto
-                col_condicoes, col_venda = st.columns(2)
-                
-                with col_condicoes:
-                    st.markdown('<p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 8px;">📋 Resumo de Condições</p>', unsafe_allow_html=True)
-                    condicoes = tese.get('condicoes', 'Informações não disponíveis')
-                    condicoes_texto = condicoes.replace('\n', '<br>')
-                    st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.6;">{condicoes_texto}</p>', unsafe_allow_html=True)
-                
-                with col_venda:
-                    st.markdown('<p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 8px;">⚡ Venda em 1 Minuto</p>', unsafe_allow_html=True)
-                    venda = tese.get("venda_1min", "Informações não disponíveis")
-                    st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.6;">{venda}</p>', unsafe_allow_html=True)
-                
-                st.markdown("<br>", unsafe_allow_html=True)
-                
-                # Materiais e Conteúdos
-                st.markdown('<p style="color: #000000; font-weight: bold; font-size: 15px; margin-bottom: 12px;">📎 Materiais e Conteúdos</p>', unsafe_allow_html=True)
-                
-                # Extrair links
-                links = tese.get('links', {})
-                tem_links = isinstance(links, dict)
-                
-                col1, col2, col3 = st.columns(3)
-                
-                with col1:
-                    if tem_links:
-                        url_expert = links.get('expert', '#')
-                        if url_expert and url_expert != '#':
-                            st.link_button("🎯 Expert", url_expert, use_container_width=True, key=f"pubexp{idx}")
-                        else:
-                            st.button("🎯 Expert", disabled=True, use_container_width=True, key=f"pubexpd{idx}")
-                    else:
-                        st.button("🎯 Expert", disabled=True, use_container_width=True, key=f"pubexpd{idx}")
-                
-                with col2:
-                    if tem_links:
-                        url_lamina = links.get('lamina', '#')
-                        if url_lamina and url_lamina != '#':
-                            st.link_button("📄 Lâmina", url_lamina, use_container_width=True, key=f"publam{idx}")
-                        else:
-                            st.button("📄 Lâmina", disabled=True, use_container_width=True, key=f"publamd{idx}")
-                    else:
-                        st.button("📄 Lâmina", disabled=True, use_container_width=True, key=f"publamd{idx}")
-                
-                with col3:
-                    if tem_links:
-                        url_material = links.get('material', '#')
-                        if url_material and url_material != '#':
-                            st.link_button("📢 Material Publicitário", url_material, use_container_width=True, key=f"pubmat{idx}")
-                        else:
-                            st.button("📢 Material Publicitário", disabled=True, use_container_width=True, key=f"pubmatd{idx}")
-                    else:
-                        st.button("📢 Material Publicitário", disabled=True, use_container_width=True, key=f"pubmatd{idx}")
-                
-                st.markdown("<hr style='margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;'>", unsafe_allow_html=True)
-    else:
-        st.warning("⚠️ Nenhum fundo disponível no momento")
-    
-    st.stop()
-
-# Verificar qual página mostrar
-if st.session_state.get('pagina_atual') == 'fundos':
-    pagina_conheca_fundos()
-else:
-    # Verificar autenticação passando df_base
-    verificar_autenticacao(df_base)
+# Verificar autenticação passando df_base
+verificar_autenticacao(df_base)
 
 # ============================================
 # INTERFACE PRINCIPAL
