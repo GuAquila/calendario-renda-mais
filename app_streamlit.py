@@ -735,7 +735,7 @@ df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses = carreg
 # ============================================
 
 def pagina_conheca_fundos():
-    """Página pública com informações de todos os fundos - VERSÃO APRIMORADA"""
+    """Página pública com informações de todos os fundos - VERSÃO COM NAVEGAÇÃO FUNCIONAL"""
     
     # Cabeçalho da página
     st.markdown("""
@@ -761,66 +761,48 @@ def pagina_conheca_fundos():
     
     # FILTRO DE FUNDOS - Selectbox para navegar até o fundo
     st.markdown("""
-    <style>
-        /* Estilo para scroll suave */
-        html {
-            scroll-behavior: smooth;
-        }
-        /* Espaço no topo quando navegar para um elemento */
-        [id^="fundo_"] {
-            scroll-margin-top: 100px;
-        }
-    </style>
     <div style="background: #f8f9fa; padding: 20px 40px; border-radius: 8px; margin-bottom: 20px; border: 2px solid #27ae60;">
         <p style="color: #000000; font-weight: bold; font-size: 18px; margin: 0 0 15px 0;">🔍 Ir para o Fundo:</p>
     """, unsafe_allow_html=True)
     
-    # Criar lista de fundos para o selectbox
-    lista_fundos = ["📋 Selecione um fundo para navegar"] + sorted(list(mapa_pagamentos.keys()))
+    # Criar lista de fundos para o selectbox (ordenada alfabeticamente)
+    fundos_ordenados = sorted(list(mapa_pagamentos.keys()))
+    lista_fundos = ["📋 Todos os Fundos"] + fundos_ordenados
     
-    # Inicializar session_state para controlar navegação
-    if 'fundo_navegacao' not in st.session_state:
-        st.session_state.fundo_navegacao = lista_fundos[0]
+    # Inicializar session_state
+    if 'fundo_selecionado_nav' not in st.session_state:
+        st.session_state.fundo_selecionado_nav = lista_fundos[0]
     
     # Selectbox
-    fundo_selecionado = st.selectbox(
+    fundo_nav = st.selectbox(
         "Selecione um fundo para ir direto até ele:",
         lista_fundos,
         key="filtro_fundos_conheca",
-        label_visibility="collapsed",
-        index=0
+        label_visibility="collapsed"
     )
     
     st.markdown("</div>", unsafe_allow_html=True)
     
-    # Se um fundo foi selecionado, navegar até ele
-    if fundo_selecionado != "📋 Selecione um fundo para navegar":
-        # Criar ID seguro para o fundo
-        fundo_id = "fundo_" + str(abs(hash(fundo_selecionado)))[:10]
-        
-        st.success(f"🎯 Navegando para: **{fundo_selecionado}**")
-        
-        # Usar HTML anchor para navegar
-        st.markdown(f'<a href="#{fundo_id}" style="display:none;">link</a>', unsafe_allow_html=True)
-        
-        # Script JavaScript mais simples e eficaz
-        st.markdown(f"""
-        <script>
-            setTimeout(function() {{
-                window.location.hash = '#{fundo_id}';
-            }}, 100);
-        </script>
-        """, unsafe_allow_html=True)
+    # REORGANIZAR ORDEM DOS FUNDOS: fundo selecionado aparece primeiro
+    if fundo_nav != "📋 Todos os Fundos":
+        st.success(f"🎯 Mostrando: **{fundo_nav}** (primeiro da lista)")
+        # Colocar o fundo selecionado no início
+        fundos_para_exibir = [fundo_nav] + [f for f in fundos_ordenados if f != fundo_nav]
+    else:
+        fundos_para_exibir = fundos_ordenados
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # MOSTRAR TODOS OS FUNDOS (não filtrar, apenas mostrar todos)
-    for nome_fundo, dia_util in sorted(mapa_pagamentos.items()):
+    # MOSTRAR TODOS OS FUNDOS (com o selecionado no topo)
+    for idx, nome_fundo in enumerate(fundos_para_exibir):
+        dia_util = mapa_pagamentos[nome_fundo]
         cor = mapa_cores.get(nome_fundo, '#27ae60')
         tese = mapa_teses.get(nome_fundo, {})
         
-        # Criar ID único para este fundo
-        fundo_id = "fundo_" + str(abs(hash(nome_fundo)))[:10]
+        # Destacar visualmente o fundo selecionado
+        destaque = ""
+        if fundo_nav != "📋 Todos os Fundos" and nome_fundo == fundo_nav:
+            destaque = "border: 3px solid #f39c12; box-shadow: 0 0 20px rgba(243, 156, 18, 0.4);"
         
         # Extrair informações
         resumo = tese.get("resumo", "Informações não disponíveis")
@@ -836,11 +818,11 @@ def pagina_conheca_fundos():
         
         # Container do fundo
         with st.container():
-            # Cabeçalho do fundo COM ID para navegação
+            # Cabeçalho do fundo (com destaque se selecionado)
             st.markdown(f"""
-            <div id="{fundo_id}" style="background: white; border: 1px solid #ddd; border-left: 6px solid {cor}; 
+            <div style="background: white; border: 1px solid #ddd; border-left: 6px solid {cor}; 
                  border-radius: 8px; padding: 20px; margin-bottom: 10px; 
-                 box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                 box-shadow: 0 2px 4px rgba(0,0,0,0.1); {destaque}">
                 <h3 style="color: #1e4d2b; font-size: 20px; margin: 0 0 20px 0; font-weight: bold;">
                     📊 {nome_fundo}
                 </h3>
