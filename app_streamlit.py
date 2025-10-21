@@ -759,8 +759,45 @@ def pagina_conheca_fundos():
         st.warning("⚠️ Nenhum fundo disponível no momento")
         st.stop()
     
-    # Listar todos os fundos usando APENAS componentes Streamlit
-    for nome_fundo, dia_util in mapa_pagamentos.items():
+    # FILTRO DE FUNDOS - Adicionar selectbox para filtrar
+    st.markdown("""
+    <style>
+        /* Estilo para o selectbox de filtro */
+        div[data-testid="stSelectbox"][data-baseweb="select"] {
+            background: white;
+        }
+    </style>
+    <div style="background: #f8f9fa; padding: 20px 40px; border-radius: 8px; margin-bottom: 20px; border: 2px solid #27ae60;">
+        <p style="color: #000000; font-weight: bold; font-size: 18px; margin: 0 0 15px 0;">🔍 Filtrar por Fundo:</p>
+    """, unsafe_allow_html=True)
+    
+    # Criar lista de fundos para o selectbox
+    lista_fundos = ["📋 Todos os Fundos"] + sorted(list(mapa_pagamentos.keys()))
+    
+    # Selectbox com estilo customizado
+    fundo_filtrado = st.selectbox(
+        "Selecione um fundo específico ou veja todos:",
+        lista_fundos,
+        key="filtro_fundos_conheca",
+        label_visibility="collapsed"
+    )
+    
+    st.markdown("</div>", unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Determinar quais fundos mostrar
+    if fundo_filtrado == "📋 Todos os Fundos":
+        fundos_para_mostrar = list(mapa_pagamentos.items())
+        st.info(f"📊 Exibindo **{len(fundos_para_mostrar)} fundos** disponíveis")
+    else:
+        fundos_para_mostrar = [(fundo_filtrado, mapa_pagamentos[fundo_filtrado])]
+        st.success(f"🎯 Exibindo detalhes do fundo: **{fundo_filtrado}**")
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Listar fundos (todos ou apenas o filtrado)
+    for nome_fundo, dia_util in fundos_para_mostrar:
         cor = mapa_cores.get(nome_fundo, '#27ae60')
         tese = mapa_teses.get(nome_fundo, {})
         
