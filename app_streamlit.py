@@ -759,47 +759,68 @@ def pagina_conheca_fundos():
         st.warning("⚠️ Nenhum fundo disponível no momento")
         st.stop()
     
-    # FILTRO DE FUNDOS - Adicionar selectbox para filtrar
+    # FILTRO DE FUNDOS - Selectbox para navegar até o fundo
     st.markdown("""
     <style>
-        /* Estilo para o selectbox de filtro */
-        div[data-testid="stSelectbox"][data-baseweb="select"] {
-            background: white;
+        /* Estilo para scroll suave */
+        html {
+            scroll-behavior: smooth;
+        }
+        /* Espaço no topo quando navegar para um elemento */
+        [id^="fundo_"] {
+            scroll-margin-top: 100px;
         }
     </style>
     <div style="background: #f8f9fa; padding: 20px 40px; border-radius: 8px; margin-bottom: 20px; border: 2px solid #27ae60;">
-        <p style="color: #000000; font-weight: bold; font-size: 18px; margin: 0 0 15px 0;">🔍 Filtrar por Fundo:</p>
+        <p style="color: #000000; font-weight: bold; font-size: 18px; margin: 0 0 15px 0;">🔍 Ir para o Fundo:</p>
     """, unsafe_allow_html=True)
     
     # Criar lista de fundos para o selectbox
-    lista_fundos = ["📋 Todos os Fundos"] + sorted(list(mapa_pagamentos.keys()))
+    lista_fundos = ["📋 Selecione um fundo para navegar"] + sorted(list(mapa_pagamentos.keys()))
     
-    # Selectbox com estilo customizado
-    fundo_filtrado = st.selectbox(
-        "Selecione um fundo específico ou veja todos:",
+    # Inicializar session_state para controlar navegação
+    if 'fundo_navegacao' not in st.session_state:
+        st.session_state.fundo_navegacao = lista_fundos[0]
+    
+    # Selectbox
+    fundo_selecionado = st.selectbox(
+        "Selecione um fundo para ir direto até ele:",
         lista_fundos,
         key="filtro_fundos_conheca",
-        label_visibility="collapsed"
+        label_visibility="collapsed",
+        index=0
     )
     
     st.markdown("</div>", unsafe_allow_html=True)
     
+    # Se um fundo foi selecionado, navegar até ele
+    if fundo_selecionado != "📋 Selecione um fundo para navegar":
+        # Criar ID seguro para o fundo
+        fundo_id = "fundo_" + str(abs(hash(fundo_selecionado)))[:10]
+        
+        st.success(f"🎯 Navegando para: **{fundo_selecionado}**")
+        
+        # Usar HTML anchor para navegar
+        st.markdown(f'<a href="#{fundo_id}" style="display:none;">link</a>', unsafe_allow_html=True)
+        
+        # Script JavaScript mais simples e eficaz
+        st.markdown(f"""
+        <script>
+            setTimeout(function() {{
+                window.location.hash = '#{fundo_id}';
+            }}, 100);
+        </script>
+        """, unsafe_allow_html=True)
+    
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Determinar quais fundos mostrar
-    if fundo_filtrado == "📋 Todos os Fundos":
-        fundos_para_mostrar = list(mapa_pagamentos.items())
-        st.info(f"📊 Exibindo **{len(fundos_para_mostrar)} fundos** disponíveis")
-    else:
-        fundos_para_mostrar = [(fundo_filtrado, mapa_pagamentos[fundo_filtrado])]
-        st.success(f"🎯 Exibindo detalhes do fundo: **{fundo_filtrado}**")
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Listar fundos (todos ou apenas o filtrado)
-    for nome_fundo, dia_util in fundos_para_mostrar:
+    # MOSTRAR TODOS OS FUNDOS (não filtrar, apenas mostrar todos)
+    for nome_fundo, dia_util in sorted(mapa_pagamentos.items()):
         cor = mapa_cores.get(nome_fundo, '#27ae60')
         tese = mapa_teses.get(nome_fundo, {})
+        
+        # Criar ID único para este fundo
+        fundo_id = "fundo_" + str(abs(hash(nome_fundo)))[:10]
         
         # Extrair informações
         resumo = tese.get("resumo", "Informações não disponíveis")
@@ -815,9 +836,9 @@ def pagina_conheca_fundos():
         
         # Container do fundo
         with st.container():
-            # Cabeçalho do fundo
+            # Cabeçalho do fundo COM ID para navegação
             st.markdown(f"""
-            <div style="background: white; border: 1px solid #ddd; border-left: 6px solid {cor}; 
+            <div id="{fundo_id}" style="background: white; border: 1px solid #ddd; border-left: 6px solid {cor}; 
                  border-radius: 8px; padding: 20px; margin-bottom: 10px; 
                  box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                 <h3 style="color: #1e4d2b; font-size: 20px; margin: 0 0 20px 0; font-weight: bold;">
