@@ -2,6 +2,7 @@
 CALENDÁRIO RENDA MAIS - COM AUTENTICAÇÃO POR ASSESSOR
 ======================================================
 Sistema multi-assessor com senhas individuais
+VERSÃO FINAL COMPLETA E CORRIGIDA
 """
 
 import streamlit as st
@@ -579,47 +580,32 @@ MESES_PT = [
 ]
 
 def criar_tese(nome_ativo, dia_util_int):
+    """Cria tese de investimento para cada tipo de fundo"""
     if 'FII' in nome_ativo or 'Imobiliário' in nome_ativo:
         resumo = "Fundo de Investimento Imobiliário que investe em imóveis comerciais de alto padrão, galpões logísticos em regiões estratégicas e Certificados de Recebíveis Imobiliários (CRI) de emissores sólidos."
         condicoes = f"• Emissor: Gestora especializada em FII\n• Prazo: Indeterminado\n• Taxa: 0,5% a 1,0% a.a.\n• Liquidez: D+30\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
         perfil = "Ideal para investidores que buscam renda mensal passiva, isenta de IR para PF"
         speech = "Destaque a isenção de IR, diversificação imobiliária e distribuição mensal."
         venda_1min = "Este FII oferece renda mensal isenta de IR para pessoa física, investindo em imóveis de alta qualidade com inquilinos sólidos. Ideal para quem busca diversificação e rendimentos previsíveis acima da poupança."
-        links = {
-            'expert': 'https://exemplo.com/expert-fii',
-            'lamina': 'https://exemplo.com/lamina-fii',
-            'material': 'https://exemplo.com/material-fii'
-        }
     elif 'CRI' in nome_ativo or 'Renda' in nome_ativo:
         resumo = "Fundo de renda fixa que investe em CRI, títulos públicos e crédito privado de primeira linha."
         condicoes = f"• Emissor: Gestora com expertise em renda fixa\n• Prazo: Indeterminado\n• Taxa: 0,5% a 1,0% a.a.\n• Liquidez: D+30\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
         perfil = "Conservadores que buscam rentabilidade acima do CDI"
         speech = "Alternativa superior à poupança com rentabilidade consistente."
         venda_1min = "Fundo de renda fixa que busca rentabilidade superior ao CDI através de uma carteira diversificada de CRI e crédito privado. Gestão profissional com foco em segurança e liquidez, perfeito para o investidor conservador que quer mais do que a poupança oferece."
-        links = {
-            'expert': 'https://exemplo.com/expert-cri',
-            'lamina': 'https://exemplo.com/lamina-cri',
-            'material': 'https://exemplo.com/material-cri'
-        }
     else:
         resumo = "Fundo com gestão ativa e estratégia diversificada."
         condicoes = f"• Emissor: Casa de gestão independente\n• Prazo: Variável\n• Taxa: 1,0% a 2,0% a.a.\n• Liquidez: D+30\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
         perfil = "Investidores com perfil moderado"
         speech = "Gestão profissional e rebalanceamento tático."
         venda_1min = "Fundo com gestão ativa que busca as melhores oportunidades do mercado através de análise criteriosa e rebalanceamento constante. Diversificação automática com equipe especializada cuidando do seu patrimônio."
-        links = {
-            'expert': 'https://exemplo.com/expert-fundo',
-            'lamina': 'https://exemplo.com/lamina-fundo',
-            'material': 'https://exemplo.com/material-fundo'
-        }
     
     return {
         'resumo': resumo,
         'condicoes': condicoes,
         'perfil': perfil,
         'speech': speech,
-        'venda_1min': venda_1min,
-        'links': links
+        'venda_1min': venda_1min
     }
 
 def buscar_info_fundo(nome_ativo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses):
@@ -635,6 +621,7 @@ def buscar_info_fundo(nome_ativo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa
     return {'dia_util': None, 'cor': '#95a5a6', 'sigla': nome_ativo[:10], 'tese': {}}
 
 def calcular_dia_util(ano, mes, numero_dia_util, feriados):
+    """Calcula a data do N-ésimo dia útil do mês"""
     if not numero_dia_util or numero_dia_util <= 0:
         return None
     
@@ -662,10 +649,9 @@ def calcular_dia_util(ano, mes, numero_dia_util, feriados):
 # CARREGAR DADOS ANTES DA AUTENTICAÇÃO
 # ============================================
 
-# Carregar dados primeiro para poder validar na tela de login
-# Adicionar timestamp para forçar reload quando necessário
 @st.cache_data(ttl=60)  # Cache por apenas 60 segundos
 def carregar_dados(force_reload=False):
+    """Carrega dados do Excel incluindo links da aba Fundos"""
     try:
         NOME_ARQUIVO = 'calendario_Renda_mais.xlsx'
         
@@ -822,13 +808,13 @@ if mapa_links:
         print("⚠️ Nenhum link encontrado - verifique a aba 'Fundos' no Excel")
 
 # ============================================
-# PÁGINA DE FUNDOS (CORRIGIDA)
+# PÁGINA DE FUNDOS
 # ============================================
 
 def pagina_conheca_fundos():
-    """Página pública com informações de todos os fundos - VERSÃO COM NAVEGAÇÃO FUNCIONAL"""
+    """Página pública com informações de todos os fundos"""
     
-    # Cabeçalho da página - ATUALIZADO COM NOVO TÍTULO
+    # Cabeçalho da página - ATUALIZADO
     st.markdown("""
     <div style="background: white; padding: 30px 40px; text-align: center; border-bottom: 3px solid #1e4d2b;">
         <h1 style="font-size: 36px; margin: 10px 0 5px 0; font-family: 'Segoe UI', sans-serif; color: #1e4d2b; font-weight: 700;">
@@ -863,10 +849,6 @@ def pagina_conheca_fundos():
     # Criar lista de fundos para o selectbox (ordenada alfabeticamente)
     fundos_ordenados = sorted(list(mapa_pagamentos.keys()))
     lista_fundos = ["📋 Todos os Fundos"] + fundos_ordenados
-    
-    # Inicializar session_state
-    if 'fundo_selecionado_nav' not in st.session_state:
-        st.session_state.fundo_selecionado_nav = lista_fundos[0]
     
     # Selectbox
     fundo_nav = st.selectbox(
@@ -1209,11 +1191,11 @@ def main():
         
         if fundo_para_tese:
             info = buscar_info_fundo(fundo_para_tese, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
-            tese = info['tese']
+            tese = info.get('tese', {})
             
             st.markdown(f"""
             <div class="tese-texto">
-                <strong style="color: {info['cor']};">{fundo_para_tese}</strong>
+                <strong style="color: {info.get('cor', '#27ae60')};">{fundo_para_tese}</strong>
                 <p>{tese.get('resumo', '')}</p>
                 <h4>📋 Resumo de Condições</h4>
                 <p style="white-space: pre-line;">{tese.get('condicoes', '')}</p>
