@@ -34,10 +34,6 @@ ASSESSORES = {
     '74644': ('Marcelo Fontes de Almeida', 'MFA2025'),
     '39586': ('Marco Antonio de Moraes', 'MAM2025'),
     '46857': ('Gustavo Aquila', 'GA2025'),
-    '29871': ('Jonathan Francesco Barletta', 'JFB2025'),
-    '97495': ('Luana Peres Ribeiro', 'LPR2025'),
-    '90410': ('Marta Maria Acquisti Guarido', 'MMAG2025'),
-    '46604': ('Roberto da Silva Junior', 'RSJ2025'),
     '51594': ('Bruna Rafaela Teixeira Mateos', 'BRTM2025'),
     '91796': ('Jose Dy Carlos Bueno Chiroza', 'JDCBC2025'),
     '47104': ('Kamila Munhoz Adario', 'KMA2025'),
@@ -45,7 +41,6 @@ ASSESSORES = {
     '24931': ('Paula Pellegrini Reimao', 'PPR2025'),
     '91476': ('Rafael Iran Gomes Januario', 'RIGJ2025'),
     '42596': ('Ricardo Salles de Godoy', 'RSG2025'),
-    '94296': ('Vanessa Alves Mattar Calfat', 'VAMC2025'),
     '67756': ('Vinicius Nunes Palacios', 'VNP2025'),
 }
 
