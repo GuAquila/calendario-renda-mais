@@ -76,6 +76,14 @@ def verificar_autenticacao(df_base):
             .stApp {
                 background: white;
             }
+            .login-box {
+                max-width: 450px;
+                margin: 120px auto;
+                padding: 40px;
+                background: white;
+                border-radius: 10px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            }
             .login-titulo {
                 text-align: center;
                 color: #1e4d2b;
@@ -99,8 +107,9 @@ def verificar_autenticacao(df_base):
             try:
                 st.image("logo_tauari.png", width=350)
             except:
-                st.markdown("<div style='text-align: center;'><div style='background: #2d5a3d; color: white; padding: 40px; border-radius: 10px;'>🌳 TAUARI INVESTIMENTOS</div></div>", unsafe_allow_html=True)
+                st.markdown("<div style='text-align: center; padding: 20px;'><div style='background: #2d5a3d; color: white; padding: 40px; border-radius: 10px; font-size: 14px;'>📁 Salve a logo como 'logo_tauari.png'<br>na mesma pasta do código</div></div>", unsafe_allow_html=True)
             
+            # TÍTULO ATUALIZADO
             st.markdown("""
             <div class="login-titulo">
                 <h2 style='margin: 10px 0; font-size: 24px;'>Calendário Renda Mais - Tauari Investimentos</h2>
@@ -108,6 +117,7 @@ def verificar_autenticacao(df_base):
             </div>
             """, unsafe_allow_html=True)
             
+            # FORM PARA PERMITIR ENTER
             with st.form("login_form"):
                 codigo_assessor = st.text_input(
                     "👤 Código do Assessor:",
@@ -184,6 +194,35 @@ st.markdown("""
     #MainMenu, footer, header {visibility: hidden;}
     .stDeployButton {display: none;}
     
+    .header-verde {
+        background: #1e4d2b;
+        padding: 20px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .assessor-info {
+        color: white;
+        font-size: 16px;
+        background: rgba(255,255,255,0.1);
+        padding: 10px 18px;
+        border-radius: 5px;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    
+    .barra-selecao {
+        background: #ecf0f1;
+        padding: 8px 40px;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    
+    .stSelectbox [data-baseweb="select"] > div:first-child {
+        background: white !important;
+        border: 2px solid #27ae60 !important;
+        color: #000000 !important;
+    }
+    
     .container-principal {
         padding: 20px 40px;
         background: white;
@@ -204,6 +243,7 @@ st.markdown("""
         font-weight: bold;
         color: #2c3e50;
         font-size: 15px;
+        font-family: 'Segoe UI', sans-serif;
     }
     
     .box-conteudo {
@@ -224,6 +264,7 @@ st.markdown("""
         border-left: 6px solid #27ae60;
         border-radius: 4px;
         padding: 14px;
+        font-family: 'Segoe UI', sans-serif;
         transition: all 0.2s;
         min-height: 140px;
     }
@@ -281,6 +322,7 @@ st.markdown("""
 
     .tese-texto {
         padding: 15px;
+        font-family: 'Segoe UI', sans-serif;
         font-size: 13px;
         line-height: 1.6;
         color: #2c3e50;
@@ -358,6 +400,15 @@ st.markdown("""
     .stButton button:hover {
         background: #1e8449 !important;
     }
+    
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: #27ae60;
+        border-radius: 4px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -375,30 +426,6 @@ MESES_PT = [
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ]
 
-def limpar_valor_monetario(valor_str):
-    """Limpa string com valor monetário e retorna float"""
-    try:
-        # Remove R$, espaços e converte separadores
-        valor_limpo = str(valor_str).replace('R$', '').replace(' ', '').strip()
-        # Remove pontos de milhar
-        valor_limpo = valor_limpo.replace('.', '')
-        # Substitui vírgula decimal por ponto
-        valor_limpo = valor_limpo.replace(',', '.')
-        return float(valor_limpo)
-    except:
-        return 0.0
-
-def limpar_percentual(percentual_str):
-    """Limpa string com percentual e retorna float"""
-    try:
-        # Remove % e espaços
-        percentual_limpo = str(percentual_str).replace('%', '').replace(' ', '').strip()
-        # Substitui vírgula por ponto
-        percentual_limpo = percentual_limpo.replace(',', '.')
-        return float(percentual_limpo)
-    except:
-        return 0.0
-
 def criar_tese(nome_ativo, dia_util_int, df_fundos=None):
     """Cria tese lendo do Excel ou usando padrão"""
     
@@ -407,6 +434,7 @@ def criar_tese(nome_ativo, dia_util_int, df_fundos=None):
     perfil = "Não especificado"
     venda_1min = "Informações não disponíveis"
     
+    # Tentar ler do Excel
     if df_fundos is not None and len(df_fundos) > 0:
         for idx, row in df_fundos.iterrows():
             nome_col = None
@@ -422,39 +450,42 @@ def criar_tese(nome_ativo, dia_util_int, df_fundos=None):
                     for col in df_fundos.columns:
                         col_lower = col.lower()
                         
-                        if 'resumo' in col_lower or 'sobre' in col_lower:
+                        if 'resumo' in col_lower or 'sobre' in col_lower or 'descri' in col_lower:
                             if pd.notna(row[col]) and str(row[col]).strip() != '':
                                 resumo = str(row[col]).strip()
                         
-                        if 'condi' in col_lower:
+                        if 'condi' in col_lower or 'taxa' in col_lower or 'emissor' in col_lower:
                             if pd.notna(row[col]) and str(row[col]).strip() != '':
                                 condicoes = str(row[col]).strip()
+                                if f"Pagamento: {dia_util_int}º dia útil" not in condicoes:
+                                    condicoes += f"\n• Pagamento: {dia_util_int}º dia útil"
                         
                         if 'perfil' in col_lower:
                             if pd.notna(row[col]) and str(row[col]).strip() != '':
                                 perfil = str(row[col]).strip()
                         
-                        if 'venda' in col_lower or 'minuto' in col_lower:
+                        if 'venda' in col_lower or '1 minuto' in col_lower or 'pitch' in col_lower:
                             if pd.notna(row[col]) and str(row[col]).strip() != '':
                                 venda_1min = str(row[col]).strip()
                     break
     
+    # Usar teses padrão se não encontrou no Excel
     if resumo == "Informações não disponíveis":
-        if 'FII' in nome_ativo:
-            resumo = "Fundo de Investimento Imobiliário que investe em imóveis comerciais de alto padrão e CRI de emissores sólidos."
-            condicoes = f"• Taxa: 0,5% a 1,0% a.a.\n• Liquidez: D+30\n• Pagamento: {dia_util_int}º dia útil"
+        if 'FII' in nome_ativo or 'Imobiliário' in nome_ativo:
+            resumo = "Fundo de Investimento Imobiliário que investe em imóveis comerciais de alto padrão, galpões logísticos em regiões estratégicas e Certificados de Recebíveis Imobiliários (CRI) de emissores sólidos."
+            condicoes = f"• Emissor: Gestora especializada em FII\n• Prazo: Indeterminado\n• Taxa: 0,5% a 1,0% a.a.\n• Liquidez: D+30\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
             perfil = "Ideal para investidores que buscam renda mensal passiva, isenta de IR para PF"
-            venda_1min = "FII com renda mensal isenta de IR, ideal para diversificação e rendimentos acima da poupança."
+            venda_1min = "Este FII oferece renda mensal isenta de IR para pessoa física, investindo em imóveis de alta qualidade com inquilinos sólidos. Ideal para quem busca diversificação e rendimentos previsíveis acima da poupança."
         elif 'CRI' in nome_ativo or 'Renda' in nome_ativo:
-            resumo = "Fundo de renda fixa que investe em CRI e crédito privado de primeira linha."
-            condicoes = f"• Taxa: 0,5% a 1,0% a.a.\n• Liquidez: D+30\n• Pagamento: {dia_util_int}º dia útil"
+            resumo = "Fundo de renda fixa que investe em CRI, títulos públicos e crédito privado de primeira linha."
+            condicoes = f"• Emissor: Gestora com expertise em renda fixa\n• Prazo: Indeterminado\n• Taxa: 0,5% a 1,0% a.a.\n• Liquidez: D+30\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
             perfil = "Conservadores que buscam rentabilidade acima do CDI"
-            venda_1min = "Fundo de renda fixa com rentabilidade superior ao CDI. Gestão profissional e liquidez."
+            venda_1min = "Fundo de renda fixa que busca rentabilidade superior ao CDI através de uma carteira diversificada de CRI e crédito privado. Gestão profissional com foco em segurança e liquidez, perfeito para o investidor conservador que quer mais do que a poupança oferece."
         else:
             resumo = "Fundo com gestão ativa e estratégia diversificada."
-            condicoes = f"• Taxa: 1,0% a 2,0% a.a.\n• Liquidez: D+30\n• Pagamento: {dia_util_int}º dia útil"
+            condicoes = f"• Emissor: Casa de gestão independente\n• Prazo: Variável\n• Taxa: 1,0% a 2,0% a.a.\n• Liquidez: D+30\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
             perfil = "Investidores com perfil moderado"
-            venda_1min = "Fundo com gestão ativa que busca as melhores oportunidades do mercado."
+            venda_1min = "Fundo com gestão ativa que busca as melhores oportunidades do mercado através de análise criteriosa e rebalanceamento constante. Diversificação automática com equipe especializada cuidando do seu patrimônio."
     
     return {
         'resumo': resumo,
@@ -515,15 +546,40 @@ def carregar_dados(force_reload=False):
         df_base = pd.read_excel(NOME_ARQUIVO, sheet_name='Base')
         df_base.columns = df_base.columns.str.strip()
         
+        print(f"\n{'='*60}")
+        print(f"✅ Aba 'Base' carregada com sucesso!")
+        print(f"   Total de linhas: {len(df_base)}")
+        print(f"   Colunas encontradas: {list(df_base.columns)}")
+        print(f"{'='*60}\n")
+        
         df_suporte = pd.read_excel(NOME_ARQUIVO, sheet_name='Suporte')
         
+        # Carregar aba Fundos
         df_fundos = None
         try:
             df_fundos = pd.read_excel(NOME_ARQUIVO, sheet_name='Fundos')
             df_fundos.columns = df_fundos.columns.str.strip()
-            print(f"✅ Aba Fundos: {len(df_fundos)} linhas")
-        except:
-            print("⚠️ Aba Fundos não encontrada")
+            print(f"\n{'='*60}")
+            print(f"✅ Aba 'Fundos' carregada com sucesso!")
+            print(f"   Total de linhas: {len(df_fundos)}")
+            print(f"   Colunas encontradas: {list(df_fundos.columns)}")
+            print(f"{'='*60}\n")
+            
+            # Mostrar primeiras linhas para debug
+            print("📋 Primeiras 3 linhas da aba Fundos:")
+            for idx, row in df_fundos.head(3).iterrows():
+                print(f"  Linha {idx + 1}:")
+                for col in df_fundos.columns:
+                    valor = row[col]
+                    if pd.notna(valor):
+                        print(f"    {col}: {str(valor)[:50]}")
+            print()
+            
+        except Exception as e:
+            print(f"\n{'='*60}")
+            print(f"⚠️ Erro ao carregar aba 'Fundos': {e}")
+            print(f"   Certifique-se que existe uma aba chamada 'Fundos' no Excel")
+            print(f"{'='*60}\n")
         
         try:
             df_feriados = pd.read_excel(NOME_ARQUIVO, sheet_name='Feriados')
@@ -568,9 +624,11 @@ def carregar_dados(force_reload=False):
                         sigla = ''.join([p[0].upper() for p in palavras[:3]])
                     mapa_siglas[nome_ativo] = sigla.upper()
                     
+                    # Criar tese passando df_fundos
                     tese = criar_tese(nome_ativo, dia_util_int, df_fundos)
                     mapa_teses[nome_ativo] = tese
                     
+                    # Buscar links
                     link_expert = ''
                     link_material = ''
                     
@@ -579,45 +637,120 @@ def carregar_dados(force_reload=False):
                         col_expert = None
                         col_material = None
                         
+                        # Identificar colunas com busca mais flexível
                         for col in df_fundos.columns:
                             col_lower = col.lower().strip()
-                            if 'fundo' in col_lower or 'nome' in col_lower:
+                            col_clean = col_lower.replace(' ', '').replace('_', '')
+                            
+                            if any(x in col_clean for x in ['fundo', 'nome', 'ativo']):
                                 col_fundo = col
-                            elif 'expert' in col_lower:
+                                print(f"  Coluna do fundo identificada: '{col}'")
+                            elif 'expert' in col_clean:
                                 col_expert = col
-                            elif 'material' in col_lower:
+                                print(f"  Coluna Expert identificada: '{col}'")
+                            elif any(x in col_clean for x in ['material', 'publicitario', 'publicitário']):
                                 col_material = col
+                                print(f"  Coluna Material identificada: '{col}'")
                         
                         if col_fundo:
+                            print(f"\n🔍 Buscando links para: {nome_ativo}")
                             for idx_f, row_f in df_fundos.iterrows():
-                                nome_excel = str(row_f[col_fundo]).strip() if pd.notna(row_f[col_fundo]) else ''
+                                nome_fundo_excel = str(row_f[col_fundo]).strip() if pd.notna(row_f[col_fundo]) else ''
                                 
-                                if nome_excel and (nome_excel.lower() in nome_ativo.lower() or nome_ativo.lower() in nome_excel.lower()):
+                                # Comparação mais flexível - remover espaços extras e comparar
+                                nome_ativo_clean = ' '.join(nome_ativo.lower().split())
+                                nome_excel_clean = ' '.join(nome_fundo_excel.lower().split())
+                                
+                                # Várias formas de comparação
+                                match = False
+                                if nome_excel_clean and nome_ativo_clean:
+                                    # Exata
+                                    if nome_excel_clean == nome_ativo_clean:
+                                        match = True
+                                        print(f"  ✅ Match exato: '{nome_fundo_excel}'")
+                                    # Contém
+                                    elif nome_excel_clean in nome_ativo_clean or nome_ativo_clean in nome_excel_clean:
+                                        match = True
+                                        print(f"  ✅ Match parcial: '{nome_fundo_excel}'")
+                                    # Primeiras palavras
+                                    elif nome_excel_clean.split()[0] in nome_ativo_clean or nome_ativo_clean.split()[0] in nome_excel_clean:
+                                        match = True
+                                        print(f"  ✅ Match por palavra: '{nome_fundo_excel}'")
+                                
+                                if match:
                                     if col_expert and pd.notna(row_f[col_expert]):
                                         link_expert = str(row_f[col_expert]).strip()
-                                        if not link_expert.startswith('http'):
+                                        # Validar URL
+                                        if link_expert and link_expert.lower() != 'nan' and ('http://' in link_expert.lower() or 'https://' in link_expert.lower()):
+                                            print(f"  📎 Expert encontrado: {link_expert[:50]}...")
+                                        else:
+                                            print(f"  ⚠️ Expert inválido: '{link_expert}'")
                                             link_expert = ''
                                     
                                     if col_material and pd.notna(row_f[col_material]):
                                         link_material = str(row_f[col_material]).strip()
-                                        if not link_material.startswith('http'):
+                                        # Validar URL
+                                        if link_material and link_material.lower() != 'nan' and ('http://' in link_material.lower() or 'https://' in link_material.lower()):
+                                            print(f"  📎 Material encontrado: {link_material[:50]}...")
+                                        else:
+                                            print(f"  ⚠️ Material inválido: '{link_material}'")
                                             link_material = ''
+                                    
+                                    if link_expert or link_material:
+                                        print(f"  ✅ Total de links válidos: {1 if link_expert else 0} Expert + {1 if link_material else 0} Material")
+                                    else:
+                                        print(f"  ⚠️ Nenhum link válido encontrado para este fundo")
                                     break
+                            
+                            if not link_expert and not link_material:
+                                print(f"  ❌ Nenhum match encontrado na aba Fundos para: {nome_ativo}")
                         
-                        mapa_links[nome_ativo] = {'expert': link_expert, 'material': link_material}
+                        mapa_links[nome_ativo] = {
+                            'expert': link_expert,
+                            'material': link_material
+                        }
                     else:
                         mapa_links[nome_ativo] = {'expert': '', 'material': ''}
                     
                     cor_index += 1
-                except:
+                except Exception as e:
+                    print(f"❌ Erro ao processar {nome_ativo}: {e}")
                     continue
         
-        print(f"📊 {len(mapa_pagamentos)} fundos carregados")
+        print(f"\n{'='*60}")
+        print(f"📊 RESUMO DO CARREGAMENTO:")
+        print(f"   Total de fundos carregados: {len(mapa_pagamentos)}")
+        print(f"   Total de links processados: {len(mapa_links)}")
+        
+        # Contar fundos com e sem links
+        fundos_com_expert = sum(1 for links in mapa_links.values() if links.get('expert'))
+        fundos_com_material = sum(1 for links in mapa_links.values() if links.get('material'))
+        fundos_com_ambos = sum(1 for links in mapa_links.values() if links.get('expert') and links.get('material'))
+        fundos_sem_links = sum(1 for links in mapa_links.values() if not links.get('expert') and not links.get('material'))
+        
+        print(f"\n📎 ESTATÍSTICAS DE LINKS:")
+        print(f"   ✅ Fundos com link Expert: {fundos_com_expert}")
+        print(f"   ✅ Fundos com link Material: {fundos_com_material}")
+        print(f"   ✅ Fundos com ambos os links: {fundos_com_ambos}")
+        print(f"   ⚠️  Fundos SEM links: {fundos_sem_links}")
+        
+        if fundos_sem_links > 0:
+            print(f"\n⚠️ FUNDOS SEM LINKS CADASTRADOS:")
+            for nome, links in mapa_links.items():
+                if not links.get('expert') and not links.get('material'):
+                    print(f"   - {nome}")
+            print(f"\n💡 DICA: Adicione esses fundos na aba 'Fundos' do Excel")
+            print(f"   Estrutura esperada:")
+            print(f"   | Fundo | Link Expert | Link Material |")
+        
+        print(f"{'='*60}\n")
         
         return df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses, mapa_links
         
     except Exception as e:
         st.error(f"❌ Erro: {e}")
+        import traceback
+        traceback.print_exc()
         return None, None, None, None, None, None, None
 
 if 'reload_count' not in st.session_state:
@@ -628,6 +761,31 @@ df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses, mapa_li
 if mapa_links is None:
     mapa_links = {}
 
+# Debug mais completo
+print(f"\n{'='*60}")
+print(f"🔍 VERIFICAÇÃO FINAL DOS LINKS:")
+if mapa_links:
+    fundos_com_links = sum(1 for links in mapa_links.values() if links.get('expert') or links.get('material'))
+    print(f"   Total de fundos no sistema: {len(mapa_links)}")
+    print(f"   Fundos com pelo menos 1 link: {fundos_com_links}")
+    
+    if fundos_com_links > 0:
+        print(f"\n   ✅ Links encontrados para:")
+        for nome, links in mapa_links.items():
+            if links.get('expert') or links.get('material'):
+                expert_status = "✓" if links.get('expert') else "✗"
+                material_status = "✓" if links.get('material') else "✗"
+                print(f"      {nome[:40]:40} [Expert:{expert_status}] [Material:{material_status}]")
+    else:
+        print(f"\n   ⚠️ NENHUM LINK FOI ENCONTRADO!")
+        print(f"   Verifique:")
+        print(f"   1. A aba 'Fundos' existe no Excel")
+        print(f"   2. Os nomes dos fundos na aba 'Fundos' correspondem aos da aba 'Base'")
+        print(f"   3. As URLs começam com http:// ou https://")
+else:
+    print(f"   ❌ mapa_links está vazio!")
+print(f"{'='*60}\n")
+
 # ============================================
 # PÁGINA DE FUNDOS
 # ============================================
@@ -637,10 +795,10 @@ def pagina_conheca_fundos():
     
     st.markdown("""
     <div style="background: white; padding: 30px 40px; text-align: center; border-bottom: 3px solid #1e4d2b;">
-        <h1 style="font-size: 36px; margin: 10px 0 5px 0; color: #1e4d2b; font-weight: 700;">
+        <h1 style="font-size: 36px; margin: 10px 0 5px 0; font-family: 'Segoe UI', sans-serif; color: #1e4d2b; font-weight: 700;">
             Conheça nossos Fundos Renda Mais
         </h1>
-        <h2 style="font-size: 28px; margin: 5px 0 20px 0; color: #27ae60; font-weight: 600;">
+        <h2 style="font-size: 28px; margin: 5px 0 20px 0; font-family: 'Segoe UI', sans-serif; color: #27ae60; font-weight: 600;">
             Tauari Investimentos
         </h2>
     </div>
@@ -648,7 +806,7 @@ def pagina_conheca_fundos():
     
     col_space, col_btn = st.columns([6, 1])
     with col_btn:
-        if st.button("🔙 Voltar ao Login", key="btn_voltar"):
+        if st.button("🔙 Voltar ao Login", key="btn_voltar_login_fundos"):
             st.session_state.pagina_atual = 'login'
             st.rerun()
     
@@ -658,68 +816,131 @@ def pagina_conheca_fundos():
         st.warning("⚠️ Nenhum fundo disponível")
         st.stop()
     
-    fundos_ordenados = sorted(list(mapa_pagamentos.keys()))
+    st.markdown("""
+    <div style="background: #f8f9fa; padding: 20px 40px; border-radius: 8px; margin-bottom: 20px; border: 2px solid #27ae60;">
+        <p style="color: #000000; font-weight: bold; font-size: 18px; margin: 0 0 15px 0;">🔍 Ir para o Fundo:</p>
+    """, unsafe_allow_html=True)
     
-    for nome_fundo in fundos_ordenados:
+    fundos_ordenados = sorted(list(mapa_pagamentos.keys()))
+    lista_fundos = ["📋 Todos os Fundos"] + fundos_ordenados
+    
+    fundo_nav = st.selectbox(
+        "Selecione:",
+        lista_fundos,
+        key="filtro_fundos_conheca",
+        label_visibility="collapsed"
+    )
+    
+    st.markdown("</div>", unsafe_allow_html=True)
+    
+    if fundo_nav != "📋 Todos os Fundos":
+        st.success(f"🎯 Mostrando: **{fundo_nav}**")
+        fundos_para_exibir = [fundo_nav] + [f for f in fundos_ordenados if f != fundo_nav]
+    else:
+        fundos_para_exibir = fundos_ordenados
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    for nome_fundo in fundos_para_exibir:
         dia_util = mapa_pagamentos[nome_fundo]
         cor = mapa_cores.get(nome_fundo, '#27ae60')
         tese = mapa_teses.get(nome_fundo, {})
         
-        resumo = tese.get("resumo", "")
-        condicoes = tese.get('condicoes', "")
-        venda = tese.get("venda_1min", "")
-        perfil = tese.get("perfil", "")
+        destaque = ""
+        if fundo_nav != "📋 Todos os Fundos" and nome_fundo == fundo_nav:
+            destaque = "border: 3px solid #f39c12; box-shadow: 0 0 20px rgba(243, 156, 18, 0.4);"
+        
+        resumo = tese.get("resumo", "Informações não disponíveis")
+        condicoes = tese.get('condicoes', 'Informações não disponíveis')
+        venda = tese.get("venda_1min", "Informações não disponíveis")
+        perfil = tese.get("perfil", "Não especificado")
         
         with st.container():
             st.markdown(f"""
-            <div style="background: white; border-left: 6px solid {cor}; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <h3 style="color: #1e4d2b; font-size: 20px; margin: 0 0 20px 0;">📊 {nome_fundo}</h3>
+            <div style="background: white; border: 1px solid #ddd; border-left: 6px solid {cor}; 
+                 border-radius: 8px; padding: 20px; margin-bottom: 10px; 
+                 box-shadow: 0 2px 4px rgba(0,0,0,0.1); {destaque}">
+                <h3 style="color: #1e4d2b; font-size: 20px; margin: 0 0 20px 0; font-weight: bold;">
+                    📊 {nome_fundo}
+                </h3>
             </div>
             """, unsafe_allow_html=True)
             
-            st.markdown(f'<p style="color: #000; font-weight: bold; font-size: 16px;">📝 Sobre o Fundo</p>', unsafe_allow_html=True)
-            st.markdown(f'<p style="color: #000; font-size: 14px; line-height: 1.7;">{resumo}</p>', unsafe_allow_html=True)
+            st.markdown('<p style="color: #000000; font-weight: bold; font-size: 16px; margin-bottom: 8px;">📝 Sobre o Fundo</p>', unsafe_allow_html=True)
+            st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.7;">{resumo}</p>', unsafe_allow_html=True)
             st.markdown("<br>", unsafe_allow_html=True)
             
             col1, col2 = st.columns(2)
             
             with col1:
-                st.markdown('<p style="color: #000; font-weight: bold; font-size: 16px;">📋 Resumo de Condições</p>', unsafe_allow_html=True)
-                st.markdown(f'<p style="color: #000; font-size: 14px; white-space: pre-line;">{condicoes}</p>', unsafe_allow_html=True)
+                st.markdown('<p style="color: #000000; font-weight: bold; font-size: 16px; margin-bottom: 8px;">📋 Resumo de Condições</p>', unsafe_allow_html=True)
+                st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.7; white-space: pre-line;">{condicoes}</p>', unsafe_allow_html=True)
             
             with col2:
-                st.markdown('<p style="color: #000; font-weight: bold; font-size: 16px;">⚡ Venda em 1 Minuto</p>', unsafe_allow_html=True)
-                st.markdown(f'<p style="color: #000; font-size: 14px;">{venda}</p>', unsafe_allow_html=True)
+                st.markdown('<p style="color: #000000; font-weight: bold; font-size: 16px; margin-bottom: 8px;">⚡ Venda em 1 Minuto</p>', unsafe_allow_html=True)
+                st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.7;">{venda}</p>', unsafe_allow_html=True)
             
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown('<p style="color: #000; font-weight: bold; font-size: 16px;">🎯 Perfil do Cliente</p>', unsafe_allow_html=True)
-            st.markdown(f'<p style="color: #000; font-size: 14px;">{perfil}</p>', unsafe_allow_html=True)
+            
+            st.markdown('<p style="color: #000000; font-weight: bold; font-size: 16px; margin-bottom: 8px;">🎯 Perfil do Cliente</p>', unsafe_allow_html=True)
+            st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.7;">{perfil}</p>', unsafe_allow_html=True)
             st.markdown("<br>", unsafe_allow_html=True)
             
-            st.markdown('<p style="color: #000; font-weight: bold; font-size: 16px;">📎 Materiais e Conteúdos</p>', unsafe_allow_html=True)
+            st.markdown('<p style="color: #000000; font-weight: bold; font-size: 16px; margin-bottom: 15px;">📎 Materiais e Conteúdos</p>', unsafe_allow_html=True)
             
-            links_fundo = mapa_links.get(nome_fundo, {})
-            expert_url = links_fundo.get('expert', '')
-            material_url = links_fundo.get('material', '')
+            links_fundo = {}
+            if mapa_links and isinstance(mapa_links, dict) and nome_fundo in mapa_links:
+                links_fundo = mapa_links.get(nome_fundo, {})
             
-            botoes = []
-            if expert_url and expert_url.startswith('http'):
-                botoes.append(('expert', expert_url))
-            if material_url and material_url.startswith('http'):
-                botoes.append(('material', material_url))
+            expert_url = links_fundo.get('expert', '') if isinstance(links_fundo, dict) else ''
+            material_url = links_fundo.get('material', '') if isinstance(links_fundo, dict) else ''
             
-            if not botoes:
-                st.info("⚠️ Links não cadastrados para este fundo")
+            if not expert_url or not expert_url.startswith('http'):
+                expert_url = ''
+            if not material_url or not material_url.startswith('http'):
+                material_url = ''
+            
+            botoes_ativos = []
+            if expert_url:
+                botoes_ativos.append(('expert', expert_url))
+            if material_url:
+                botoes_ativos.append(('material', material_url))
+            
+            if not botoes_ativos:
+                st.markdown('''
+                <div style="background: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107;">
+                    <p style="color: #856404; margin: 0; font-size: 13px;">
+                        ⚠️ <strong>Links não cadastrados</strong><br>
+                        Configure a aba "Fundos" no Excel: Fundo, Link Expert, Link Material
+                    </p>
+                </div>
+                ''', unsafe_allow_html=True)
             else:
-                cols = st.columns(len(botoes) + 1)
-                for idx, (tipo, url) in enumerate(botoes):
-                    with cols[idx]:
+                if len(botoes_ativos) == 2:
+                    col_links = st.columns([1, 1, 2])
+                else:
+                    col_links = st.columns([1, 3])
+                
+                for idx, (tipo, url) in enumerate(botoes_ativos):
+                    with col_links[idx]:
                         if tipo == 'expert':
-                            st.markdown(f'<a href="{url}" target="_blank" style="display: block; background: #e74c3c; color: white; padding: 18px 30px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; text-align: center;">🎯 Expert</a>', unsafe_allow_html=True)
-                        else:
-                            st.markdown(f'<a href="{url}" target="_blank" style="display: block; background: #3498db; color: white; padding: 18px 30px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; text-align: center;">📢 Material Publicitário</a>', unsafe_allow_html=True)
+                            st.markdown(f'''
+                            <a href="{url}" target="_blank" style="
+                                display: block; background: #e74c3c; color: white;
+                                padding: 18px 30px; border-radius: 8px; text-decoration: none;
+                                font-weight: 700; font-size: 16px; text-align: center;
+                                box-shadow: 0 3px 8px rgba(0,0,0,0.2);">🎯 Expert</a>
+                            ''', unsafe_allow_html=True)
+                        elif tipo == 'material':
+                            st.markdown(f'''
+                            <a href="{url}" target="_blank" style="
+                                display: block; background: #3498db; color: white;
+                                padding: 18px 30px; border-radius: 8px; text-decoration: none;
+                                font-weight: 700; font-size: 16px; text-align: center;
+                                box-shadow: 0 3px 8px rgba(0,0,0,0.2);">📢 Material Publicitário</a>
+                            ''', unsafe_allow_html=True)
             
-            st.markdown("<hr style='margin: 40px 0; border-top: 2px solid #e0e0e0;'>", unsafe_allow_html=True)
+            st.markdown("<hr style='margin: 40px 0; border: none; border-top: 2px solid #e0e0e0;'>", unsafe_allow_html=True)
     
     st.stop()
 
@@ -738,8 +959,13 @@ def main():
     if df_base is None:
         st.stop()
     
-    if not st.session_state.get('autenticado', False):
-        st.error("❌ Sessão expirada")
+    if mapa_links is None:
+        mapa_links = {}
+    
+    if not st.session_state.get('autenticado', False) or not st.session_state.get('assessor_logado'):
+        st.error("❌ Sessão expirada. Faça login novamente.")
+        st.session_state.autenticado = False
+        st.session_state.assessor_logado = None
         st.rerun()
     
     assessor_logado = st.session_state.assessor_logado
@@ -754,33 +980,47 @@ def main():
             <div style="display: flex; align-items: center; gap: 20px;">
                 <div style="font-size: 60px;">🌳</div>
                 <div>
-                    <h1 style="color: white; font-size: 22px; margin: 0 0 5px 0;">📅 CALENDÁRIO DE PAGAMENTOS - RENDA MAIS</h1>
-                    <h2 style="color: #7dcea0; font-size: 18px; margin: 0;">TAUARI INVESTIMENTOS</h2>
+                    <h1 style="color: white; font-size: 22px; font-weight: bold; margin: 0 0 5px 0;">
+                        📅 CALENDÁRIO DE PAGAMENTOS - RENDA MAIS
+                    </h1>
+                    <h2 style="color: #7dcea0; font-size: 18px; font-weight: 600; margin: 0;">
+                        TAUARI INVESTIMENTOS
+                    </h2>
                 </div>
             </div>
-            <div style="color: white; background: rgba(255,255,255,0.1); padding: 10px 18px; border-radius: 5px;">
-                👤 {assessor_nome} ({assessor_logado})
+            <div class="assessor-info">
+                👤 Assessor: <strong>{assessor_nome}</strong> ({assessor_logado})
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    col_saudacao, col_sair = st.columns([5, 1])
+    st.markdown('<div style="background: white; padding: 5px 0;">', unsafe_allow_html=True)
+    col_saudacao, col_btns = st.columns([5, 1])
+    
     with col_saudacao:
-        st.markdown(f'<p style="font-size: 26px; color: #1e4d2b; margin: 15px 0 15px 40px; font-weight: 700;">👋 Olá, {assessor_nome}!</p>', unsafe_allow_html=True)
-    with col_sair:
+        nome_assessor = st.session_state.get('nome_assessor', 'Assessor')
+        st.markdown(f'<p style="font-size: 26px; color: #1e4d2b; margin: 15px 0 15px 40px; font-weight: 700;">👋 Olá, {nome_assessor}!</p>', unsafe_allow_html=True)
+    
+    with col_btns:
         st.markdown('<div style="margin-top: 10px; margin-right: 40px;">', unsafe_allow_html=True)
-        if st.button("🚪 Sair"):
+        if st.button("🚪 Sair", key="btn_sair"):
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
     
-    num_clientes = df_base_filtrado['Cliente'].nunique()
-    st.markdown(f'<div style="background: #ecf0f1; padding: 8px 40px;"><label style="font-weight: bold; color: #000; font-size: 16px;">👤 SELECIONE O CLIENTE ({num_clientes} clientes):</label></div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown('<div class="barra-selecao">', unsafe_allow_html=True)
+    
+    num_clientes_unicos = df_base_filtrado['Cliente'].nunique()
+    st.markdown(f'<label style="font-weight: bold; color: #000000; font-size: 16px; display: block; margin-bottom: 6px;">👤 SELECIONE O CLIENTE ({num_clientes_unicos} clientes):</label>', unsafe_allow_html=True)
     
     clientes = sorted(df_base_filtrado['Cliente'].unique())
-    cliente_selecionado = st.selectbox("", [""] + list(clientes), label_visibility="collapsed")
+    cliente_selecionado = st.selectbox("Selecione o Cliente", [""] + list(clientes), label_visibility="collapsed", key="cliente_select")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
     
     if not cliente_selecionado:
         st.stop()
@@ -790,6 +1030,8 @@ def main():
     if 'fundo_selecionado' not in st.session_state or st.session_state.fundo_selecionado not in fundos_cliente['Ativo'].values:
         if not fundos_cliente.empty:
             st.session_state.fundo_selecionado = fundos_cliente['Ativo'].iloc[0]
+        else:
+            st.session_state.fundo_selecionado = None
     
     st.markdown('<div class="container-principal">', unsafe_allow_html=True)
     
@@ -801,71 +1043,24 @@ def main():
         for _, fundo in fundos_cliente.iterrows():
             ativo = fundo['Ativo']
             
-            # Buscar valor aplicado
-            valor_aplicado = 0.0
-            for col_nome in ['Aplicação', 'Financeiro', 'Valor']:
-                if col_nome in fundo.index:
-                    valor_aplicado = limpar_valor_monetario(fundo[col_nome])
-                    break
-            
-            # Buscar percentual
-            percentual_liquido = 0.0
-            for col_nome in ['Rendimento', 'Rendimento %', '% Líquido']:
-                if col_nome in fundo.index:
-                    percentual_liquido = limpar_percentual(fundo[col_nome])
-                    break
-            
-            valor_liquido_cupom = valor_aplicado * (percentual_liquido / 100)
-            
-            info = buscar_info_fundo(ativo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
-            
-            data_pagamento = None
-            dia_util = info.get('dia_util')
-            
-            if 'mes_atual' not in st.session_state:
-                st.session_state.mes_atual = datetime.now().month
-                st.session_state.ano_atual = datetime.now().year
-            
-            if dia_util and dia_util > 0:
-                try:
-                    data_pagamento = calcular_dia_util(st.session_state.ano_atual, st.session_state.mes_atual, dia_util, feriados)
-                except:
-                    pass
-            
-            data_texto = data_pagamento.strftime("%d/%m/%Y") if data_pagamento else "Não definida"
-            classe_selecao = 'fundo-card-selecionado' if ativo == st.session_state.fundo_selecionado else ''
-            
-            st.markdown(f"""
-            <div class="fundo-card-container">
-                <div class="fundo-card {classe_selecao}" style="border-left-color: {info.get('cor', '#27ae60')}">
-                    <div class="nome">{ativo}</div>
-                    <div class="info" style="margin-top: 8px;">
-                        <div style="margin-bottom: 4px;">💰 <strong>Valor Aplicado:</strong> <span class="valor">R$ {valor_aplicado:,.2f}</span></div>
-                        <div style="margin-bottom: 4px;">📅 <strong>Data Pagamento:</strong> {data_texto}</div>
-                        <div style="margin-bottom: 4px;">📈 <strong>% Líquido:</strong> <span class="valor">{percentual_liquido:.2f}%</span></div>
-                        <div>💵 <strong>Valor Líquido:</strong> <span class="valor">R$ {valor_liquido_cupom:,.2f}</span></div>
-                    </div>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            if st.button(" ", key=f"sel_{ativo}"):
-                st.session_state.fundo_selecionado = ativo
-                st.rerun()
-            
-            st.markdown("</div>", unsafe_allow_html=True)
-
-        st.markdown('</div></div>', unsafe_allow_html=True)
+            # CORRIGIDO: Buscar da coluna "Aplicação" (não "Financeiro")
+            try:
+                # Tentar primeiro "Aplicação", depois "Financeiro", depois "Valor"
+                if 'Aplicação' in fundo.index:
+                    valor_aplicado = float(str(fundo['Aplicação']).replace('R
     
     with col2:
         st.markdown('<div class="box"><div class="box-titulo">📝 TESE DO FUNDO</div>', unsafe_allow_html=True)
         
-        if st.session_state.fundo_selecionado:
-            info = buscar_info_fundo(st.session_state.fundo_selecionado, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
+        fundo_para_tese = st.session_state.fundo_selecionado
+        
+        if fundo_para_tese:
+            info = buscar_info_fundo(fundo_para_tese, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
             tese = info.get('tese', {})
             
             st.markdown(f"""
             <div class="tese-texto">
-                <strong style="color: {info.get('cor', '#27ae60')};">{st.session_state.fundo_selecionado}</strong>
+                <strong style="color: {info.get('cor', '#27ae60')};">{fundo_para_tese}</strong>
                 <p>{tese.get('resumo', '')}</p>
                 <h4>📋 Resumo de Condições</h4>
                 <p style="white-space: pre-line;">{tese.get('condicoes', '')}</p>
@@ -890,7 +1085,7 @@ def main():
         col_p1, col_p2, col_p3 = st.columns([1, 3, 1])
         
         with col_p1:
-            if st.button("◀ Anterior"):
+            if st.button("◀ Mês Anterior", key="prev_mes"):
                 st.session_state.mes_atual -= 1
                 if st.session_state.mes_atual < 1:
                     st.session_state.mes_atual = 12
@@ -901,7 +1096,7 @@ def main():
             st.markdown(f'<div style="text-align: center; padding: 8px; font-size: 18px; font-weight: bold; color: #1e4d2b;">{MESES_PT[st.session_state.mes_atual-1]} {st.session_state.ano_atual}</div>', unsafe_allow_html=True)
         
         with col_p3:
-            if st.button("Próximo ▶"):
+            if st.button("Próximo Mês ▶", key="next_mes"):
                 st.session_state.mes_atual += 1
                 if st.session_state.mes_atual > 12:
                     st.session_state.mes_atual = 1
@@ -919,6 +1114,7 @@ def main():
         eventos_mes = {}
         for _, fundo in fundos_cliente.iterrows():
             info = buscar_info_fundo(fundo['Ativo'], mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
+            
             dia_util = info.get('dia_util')
             if dia_util and dia_util > 0:
                 try:
@@ -927,7 +1123,10 @@ def main():
                         dia = data_pagamento.day
                         if dia not in eventos_mes:
                             eventos_mes[dia] = []
-                        eventos_mes[dia].append({'sigla': info.get('sigla', ''), 'cor': info.get('cor', '#27ae60')})
+                        eventos_mes[dia].append({
+                            'sigla': info.get('sigla', fundo['Ativo'][:10]), 
+                            'cor': info.get('cor', '#27ae60')
+                        })
                 except:
                     pass
         
@@ -948,6 +1147,183 @@ def main():
         
         html_cal += '</div>'
         st.markdown(html_cal, unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+
+if __name__ == "__main__":
+    main()
+, '').replace('.', '').replace(',', '.').strip())
+                elif 'Financeiro' in fundo.index:
+                    valor_aplicado = float(fundo['Financeiro'])
+                elif 'Valor' in fundo.index:
+                    valor_aplicado = float(fundo['Valor'])
+                else:
+                    valor_aplicado = 0.0
+            except Exception as e:
+                print(f"Erro ao ler valor aplicado: {e}")
+                valor_aplicado = 0.0
+            
+            # CORRIGIDO: Buscar da coluna "Rendimento" (não "Rendimento %")
+            try:
+                # Tentar primeiro "Rendimento", depois "Rendimento %", depois "% Líquido"
+                if 'Rendimento' in fundo.index:
+                    percentual_str = str(fundo['Rendimento']).replace('%', '').replace(',', '.').strip()
+                    percentual_liquido = float(percentual_str)
+                elif 'Rendimento %' in fundo.index:
+                    percentual_liquido = float(fundo['Rendimento %'])
+                elif '% Líquido' in fundo.index:
+                    percentual_liquido = float(fundo['% Líquido'])
+                else:
+                    percentual_liquido = 0.0
+            except Exception as e:
+                print(f"Erro ao ler percentual: {e}")
+                percentual_liquido = 0.0
+            
+            # Valor Líquido do Cupom
+            valor_liquido_cupom = valor_aplicado * (percentual_liquido / 100)
+            
+            info = buscar_info_fundo(ativo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
+            
+            data_pagamento = None
+            dia_util = info.get('dia_util')
+            
+            if dia_util and dia_util > 0:
+                try:
+                    data_pagamento = calcular_dia_util(
+                        st.session_state.ano_atual, 
+                        st.session_state.mes_atual, 
+                        dia_util, 
+                        feriados
+                    )
+                except:
+                    pass
+            
+            data_texto = data_pagamento.strftime("%d/%m/%Y") if data_pagamento else "Não definida"
+            
+            classe_selecao = 'fundo-card-selecionado' if ativo == st.session_state.fundo_selecionado else ''
+            
+            st.markdown(f"""
+            <div class="fundo-card-container">
+                <div class="fundo-card {classe_selecao}" style="border-left-color: {info.get('cor', '#27ae60')}">
+                    <div class="nome">{ativo}</div>
+                    <div class="info" style="margin-top: 8px;">
+                        <div style="margin-bottom: 4px;">💰 <strong>Valor Aplicado:</strong> <span class="valor">R$ {valor_aplicado:,.2f}</span></div>
+                        <div style="margin-bottom: 4px;">📅 <strong>Data Pagamento:</strong> {data_texto}</div>
+                        <div style="margin-bottom: 4px;">📈 <strong>% Líquido:</strong> <span class="valor">{percentual_liquido:.2f}%</span></div>
+                        <div>💵 <strong>Valor Líquido:</strong> <span class="valor">R$ {valor_liquido_cupom:,.2f}</span></div>
+                    </div>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            if st.button(" ", key=f"select_{ativo}", help=f"Ver tese: {ativo}"):
+                st.session_state.fundo_selecionado = ativo
+                st.rerun()
+            
+            st.markdown("</div>", unsafe_allow_html=True)
+
+        st.markdown('</div></div>', unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown('<div class="box"><div class="box-titulo">📝 TESE DO FUNDO</div>', unsafe_allow_html=True)
+        
+        fundo_para_tese = st.session_state.fundo_selecionado
+        
+        if fundo_para_tese:
+            info = buscar_info_fundo(fundo_para_tese, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
+            tese = info.get('tese', {})
+            
+            st.markdown(f"""
+            <div class="tese-texto">
+                <strong style="color: {info.get('cor', '#27ae60')};">{fundo_para_tese}</strong>
+                <p>{tese.get('resumo', '')}</p>
+                <h4>📋 Resumo de Condições</h4>
+                <p style="white-space: pre-line;">{tese.get('condicoes', '')}</p>
+                <h4>⚡ Venda em 1 Minuto</h4>
+                <p>{tese.get('venda_1min', '')}</p>
+                <h4>🎯 Perfil do Cliente</h4>
+                <p>{tese.get('perfil', '')}</p>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown('<div class="tese-texto"><p>Selecione um fundo.</p></div>', unsafe_allow_html=True)
+
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown('<div class="box"><div class="box-titulo">📅 CALENDÁRIO</div>', unsafe_allow_html=True)
+        
+        if 'mes_atual' not in st.session_state:
+            st.session_state.mes_atual = datetime.now().month
+            st.session_state.ano_atual = datetime.now().year
+        
+        col_p1, col_p2, col_p3 = st.columns([1, 3, 1])
+        
+        with col_p1:
+            if st.button("◀ Mês Anterior", key="prev_mes"):
+                st.session_state.mes_atual -= 1
+                if st.session_state.mes_atual < 1:
+                    st.session_state.mes_atual = 12
+                    st.session_state.ano_atual -= 1
+                st.rerun()
+        
+        with col_p2:
+            st.markdown(f'<div style="text-align: center; padding: 8px; font-size: 18px; font-weight: bold; color: #1e4d2b;">{MESES_PT[st.session_state.mes_atual-1]} {st.session_state.ano_atual}</div>', unsafe_allow_html=True)
+        
+        with col_p3:
+            if st.button("Próximo Mês ▶", key="next_mes"):
+                st.session_state.mes_atual += 1
+                if st.session_state.mes_atual > 12:
+                    st.session_state.mes_atual = 1
+                    st.session_state.ano_atual += 1
+                st.rerun()
+        
+        cal = calendar.monthcalendar(st.session_state.ano_atual, st.session_state.mes_atual)
+        
+        dias_semana = ['seg.', 'ter.', 'qua.', 'qui.', 'sex.', 'sáb.', 'dom.']
+        html_cal = '<div class="calendario-grid">'
+        
+        for dia in dias_semana:
+            html_cal += f'<div class="cal-header">{dia}</div>'
+        
+        eventos_mes = {}
+        for _, fundo in fundos_cliente.iterrows():
+            info = buscar_info_fundo(fundo['Ativo'], mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
+            
+            dia_util = info.get('dia_util')
+            if dia_util and dia_util > 0:
+                try:
+                    data_pagamento = calcular_dia_util(st.session_state.ano_atual, st.session_state.mes_atual, dia_util, feriados)
+                    if data_pagamento:
+                        dia = data_pagamento.day
+                        if dia not in eventos_mes:
+                            eventos_mes[dia] = []
+                        eventos_mes[dia].append({
+                            'sigla': info.get('sigla', fundo['Ativo'][:10]), 
+                            'cor': info.get('cor', '#27ae60')
+                        })
+                except:
+                    pass
+        
+        for semana in cal:
+            for dia in semana:
+                if dia == 0:
+                    html_cal += '<div class="cal-dia" style="background: #f8f9fa;"></div>'
+                else:
+                    data = date(st.session_state.ano_atual, st.session_state.mes_atual, dia)
+                    classe = "cal-dia fim-semana" if data.weekday() >= 5 else "cal-dia" 
+                    
+                    eventos_html = ""
+                    if dia in eventos_mes:
+                        for evento in eventos_mes[dia]:
+                            eventos_html += f'<div class="cal-evento" style="background: {evento["cor"]}">{evento["sigla"]}</div>'
+                    
+                    html_cal += f'<div class="{classe}"><div class="numero">{dia}</div>{eventos_html}</div>'
+        
+        html_cal += '</div>'
+        st.markdown(html_cal, unsafe_allow_html=True)
+        
         st.markdown('</div>', unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
