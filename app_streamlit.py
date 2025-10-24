@@ -2,7 +2,7 @@
 CALENDÁRIO RENDA MAIS - COM AUTENTICAÇÃO POR ASSESSOR
 ======================================================
 Sistema multi-assessor com senhas individuais
-VERSÃO FINAL COMPLETA E CORRIGIDA
+VERSÃO FINAL COMPLETA - ATUALIZADA 24/10/2025
 """
 
 import streamlit as st
@@ -22,7 +22,6 @@ st.set_page_config(
 # AUTENTICAÇÃO POR ASSESSOR
 # ============================================
 
-# Dicionário com os dados dos assessores: código -> (nome, senha)
 ASSESSORES = {
     '21743': ('Andre Miyada', 'AM2025'),
     '22359': ('Giuliano Hissnauer Vieira', 'GHV2025'),
@@ -50,11 +49,7 @@ ASSESSORES = {
 }
 
 def validar_senha_assessor(codigo_assessor, senha):
-    """
-    Valida a senha do assessor usando o dicionário ASSESSORES
-    A senha é formada pelas iniciais dos nomes + 2025
-    Exemplo: Andre Miyada → AM2025
-    """
+    """Valida a senha do assessor"""
     if codigo_assessor not in ASSESSORES:
         return False, None
     
@@ -64,9 +59,8 @@ def validar_senha_assessor(codigo_assessor, senha):
     return False, None
 
 def verificar_autenticacao(df_base):
-    """Tela de login por assessor"""
+    """Tela de login por assessor - ATUALIZADA COM ENTER"""
     
-    # Inicializar session_state se não existir
     if 'autenticado' not in st.session_state:
         st.session_state.autenticado = False
     if 'assessor_logado' not in st.session_state:
@@ -104,95 +98,79 @@ def verificar_autenticacao(df_base):
                 font-size: 12px;
                 color: #2c3e50;
             }
-            .btn-conhecer-fundos {
-                background: #3498db !important;
-                color: white !important;
-                border: none !important;
-                padding: 10px 20px !important;
-                border-radius: 5px !important;
-                font-weight: 600 !important;
-                font-size: 13px !important;
-                cursor: pointer !important;
-                width: 100% !important;
-                margin-top: 15px !important;
-                text-align: center !important;
-            }
-            .btn-conhecer-fundos:hover {
-                background: #2980b9 !important;
-            }
         </style>
         """, unsafe_allow_html=True)
         
         col1, col2, col3 = st.columns([1, 2, 1])
         
         with col2:
-            # Logo Tauari (salve a imagem como 'logo_tauari.png' na mesma pasta do código)
             try:
                 st.image("logo_tauari.png", width=350)
             except:
                 st.markdown("<div style='text-align: center; padding: 20px;'><div style='background: #2d5a3d; color: white; padding: 40px; border-radius: 10px; font-size: 14px;'>📁 Salve a logo como 'logo_tauari.png'<br>na mesma pasta do código</div></div>", unsafe_allow_html=True)
             
+            # TÍTULO ATUALIZADO
             st.markdown("""
             <div class="login-titulo">
-                <h2 style='margin: 10px 0;'>Calendário Renda Mais</h2>
-                <h3 style='color: #7dcea0; margin: 0;'>TAUARI INVESTIMENTOS</h3>
-                <p style='color: #7f8c8d; font-size: 14px; margin-top: 15px;'>Acesso Restrito por Assessor (uso interno)</p>
+                <h2 style='margin: 10px 0; font-size: 24px;'>Calendário Renda Mais - Tauari Investimentos</h2>
+                <p style='color: #7f8c8d; font-size: 14px; margin-top: 15px;'>Acesso restrito por Assessor (uso interno) - Última atualização 24/10</p>
             </div>
             """, unsafe_allow_html=True)
             
-            # Campos de login
-            codigo_assessor = st.text_input(
-                "👤 Código do Assessor:",
-                placeholder="Coloque seu código, exemplo: 46857",
-                max_chars=10
-            )
-            
-            senha_assessor = st.text_input(
-                "🔐 Senha do Assessor:",
-                type="password",
-                placeholder="Digite sua senha",
-                max_chars=20
-            )
-            
-            if st.button("🔓 Entrar", use_container_width=True):
-                if not codigo_assessor or not senha_assessor:
-                    st.error("❌ Preencha todos os campos!")
-                else:
-                    valido, nome_assessor = validar_senha_assessor(codigo_assessor, senha_assessor)
-                    if valido:
-                        # Verificar se o assessor tem clientes na base ANTES de autenticar
-                        if df_base is not None:
-                            df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip()
-                            clientes_assessor = df_base[df_base['Assessor'] == str(codigo_assessor)]
-                            
-                            if clientes_assessor.empty:
-                                st.error(f"❌ Nenhum cliente encontrado para o Assessor {codigo_assessor}")
-                            else:
-                                # Só autentica se tiver clientes
-                                st.session_state.autenticado = True
-                                st.session_state.assessor_logado = codigo_assessor
-                                st.session_state.nome_assessor = nome_assessor
-                                st.session_state.pagina_atual = 'sistema'
-                                st.success(f"✅ Bem-vindo, {nome_assessor}!")
-                                st.rerun()
-                        else:
-                            st.error("❌ Erro ao carregar a base de dados!")
+            # FORM PARA PERMITIR ENTER
+            with st.form("login_form"):
+                codigo_assessor = st.text_input(
+                    "👤 Código do Assessor:",
+                    placeholder="Coloque seu código, exemplo: 46857",
+                    max_chars=10,
+                    key="codigo_input"
+                )
+                
+                senha_assessor = st.text_input(
+                    "🔐 Senha do Assessor:",
+                    type="password",
+                    placeholder="Digite sua senha",
+                    max_chars=20,
+                    key="senha_input"
+                )
+                
+                submitted = st.form_submit_button("🔓 Entrar", use_container_width=True)
+                
+                if submitted:
+                    if not codigo_assessor or not senha_assessor:
+                        st.error("❌ Preencha todos os campos!")
                     else:
-                        st.error("❌ Código ou senha incorretos!")
+                        valido, nome_assessor = validar_senha_assessor(codigo_assessor, senha_assessor)
+                        if valido:
+                            if df_base is not None:
+                                df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip()
+                                clientes_assessor = df_base[df_base['Assessor'] == str(codigo_assessor)]
+                                
+                                if clientes_assessor.empty:
+                                    st.error(f"❌ Nenhum cliente encontrado para o Assessor {codigo_assessor}")
+                                else:
+                                    st.session_state.autenticado = True
+                                    st.session_state.assessor_logado = codigo_assessor
+                                    st.session_state.nome_assessor = nome_assessor
+                                    st.session_state.pagina_atual = 'sistema'
+                                    st.success(f"✅ Bem-vindo, {nome_assessor}!")
+                                    st.rerun()
+                            else:
+                                st.error("❌ Erro ao carregar a base de dados!")
+                        else:
+                            st.error("❌ Código ou senha incorretos!")
             
-            # Botão para conhecer os fundos
             st.markdown("<br>", unsafe_allow_html=True)
             if st.button("📚 Conheça os Fundos", key="btn_conhecer_fundos", use_container_width=True):
                 st.session_state.pagina_atual = 'fundos'
                 st.rerun()
             
-            # Informações de ajuda
             st.markdown("""
             <div class="login-info">
                 <strong>ℹ️ Como acessar:</strong><br>
                 • Digite seu código de assessor (apenas números)<br>
                 • Digite sua senha pessoal<br>
-                • Em caso de dúvidas, entre em contato com o suporte: <strong>gustavo.aquila@tauariinvestimentos.com.br</strong>
+                • Em caso de dúvidas: <strong>gustavo.aquila@tauariinvestimentos.com.br</strong>
             </div>
             """, unsafe_allow_html=True)
         
@@ -216,39 +194,12 @@ st.markdown("""
     #MainMenu, footer, header {visibility: hidden;}
     .stDeployButton {display: none;}
     
-    /* CABEÇALHO */
     .header-verde {
         background: #1e4d2b;
         padding: 20px 40px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-    }
-    
-    .header-content {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-    }
-    
-    .header-verde .logo {
-        font-size: 60px;
-    }
-    
-    .header-verde .texto h1 {
-        color: white;
-        font-size: 22px;
-        font-weight: bold;
-        margin: 0 0 5px 0;
-        font-family: 'Segoe UI', sans-serif;
-    }
-    
-    .header-verde .texto h2 {
-        color: #7dcea0;
-        font-size: 18px;
-        font-weight: 600;
-        margin: 0;
-        font-family: 'Segoe UI', sans-serif;
     }
     
     .assessor-info {
@@ -260,83 +211,23 @@ st.markdown("""
         font-family: 'Segoe UI', sans-serif;
     }
     
-    /* BARRA DE SELEÇÃO */
     .barra-selecao {
         background: #ecf0f1;
         padding: 8px 40px;
         font-family: 'Segoe UI', sans-serif;
     }
     
-    .barra-selecao label {
-        font-weight: bold;
-        color: #000000;
-        font-size: 12px;
-        display: block;
-        margin-bottom: 4px;
-    }
-
-    /* SELECTBOX */
-    .stSelectbox {
-        margin: 0 !important;
-    }
-    
-    .stSelectbox [data-baseweb="select"] {
-        min-height: 32px !important;
-        height: 32px !important;
-    }
-    
     .stSelectbox [data-baseweb="select"] > div:first-child {
         background: white !important;
         border: 2px solid #27ae60 !important;
         color: #000000 !important;
-        box-shadow: none !important;
-        min-height: 32px !important;
-        height: 32px !important;
-        padding: 4px 10px !important;
-        display: flex !important;
-        align-items: center !important;
     }
     
-    .stSelectbox [data-baseweb="select"] div {
-        color: #000000 !important;
-        font-weight: 700 !important;
-        font-size: 16px !important;
-        line-height: 24px !important;
-        overflow: visible !important;
-        text-overflow: clip !important;
-        white-space: nowrap !important;
-    }
-    
-    .stSelectbox svg {
-        fill: #27ae60 !important;
-        width: 18px !important;
-        height: 18px !important;
-    }
-    
-    [data-baseweb="popover"] {
-        background: white !important;
-        border: 1px solid #27ae60 !important;
-    }
-    
-    [data-baseweb="popover"] ul li {
-        color: #000000 !important;
-        background: white !important;
-        padding: 8px 12px !important;
-        font-size: 15px !important;
-    }
-    
-    [data-baseweb="popover"] ul li:hover {
-        background: #e8f5e9 !important;
-        color: #1e4d2b !important;
-    }
-    
-    /* CONTAINER PRINCIPAL */
     .container-principal {
         padding: 20px 40px;
         background: white;
     }
     
-    /* BOXES */
     .box {
         background: white;
         border: 1px solid #ddd;
@@ -362,7 +253,6 @@ st.markdown("""
         background: #fafafa;
     }
     
-    /* CARDS DE FUNDOS */
     .fundo-card-container {
         position: relative; 
         margin-bottom: 12px;
@@ -428,15 +318,8 @@ st.markdown("""
         color: transparent !important;
         cursor: pointer;
         z-index: 10;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-    
-    .fundo-card-container .stButton button:hover {
-        background: rgba(0, 0, 0, 0.02) !important;
     }
 
-    /* TESE */
     .tese-texto {
         padding: 15px;
         font-family: 'Segoe UI', sans-serif;
@@ -444,13 +327,6 @@ st.markdown("""
         line-height: 1.6;
         color: #2c3e50;
         background: white;
-    }
-    
-    .tese-texto strong {
-        font-size: 14px;
-        font-weight: bold;
-        display: block;
-        margin-bottom: 10px;
     }
     
     .tese-texto h4 {
@@ -463,13 +339,6 @@ st.markdown("""
         border-left: 4px solid #27ae60;
     }
     
-    .tese-texto p {
-        margin: 0 0 12px 0;
-        color: #34495e;
-        line-height: 1.7;
-    }
-    
-    /* CALENDÁRIO */
     .calendario-grid {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
@@ -485,7 +354,6 @@ st.markdown("""
         font-weight: bold;
         font-size: 12px;
         border: 1px solid #1e8449;
-        font-family: 'Segoe UI', sans-serif;
     }
     
     .cal-dia {
@@ -493,7 +361,6 @@ st.markdown("""
         padding: 8px;
         min-height: 90px;
         background: white;
-        font-family: 'Segoe UI', sans-serif;
     }
     
     .cal-dia.fim-semana {
@@ -521,7 +388,6 @@ st.markdown("""
         text-overflow: ellipsis;
     }
     
-    /* BOTÕES */
     .stButton button {
         background: #27ae60 !important;
         color: white !important;
@@ -529,39 +395,20 @@ st.markdown("""
         padding: 10px 18px !important;
         border-radius: 4px !important;
         font-weight: 600 !important;
-        font-size: 13px !important;
-        font-family: 'Segoe UI', sans-serif !important;
     }
     
     .stButton button:hover {
         background: #1e8449 !important;
     }
     
-    /* BOTÃO SAIR ESPECÍFICO */
-    div[data-testid="column"]:last-child .stButton button {
-        background: #e74c3c !important;
-        color: white !important;
-        padding: 12px 24px !important;
-        font-size: 15px !important;
-    }
-    
-    div[data-testid="column"]:last-child .stButton button:hover {
-        background: #c0392b !important;
-    }
-    
     ::-webkit-scrollbar {
         width: 8px;
-    }
-    
-    ::-webkit-scrollbar-track {
-        background: #f1f1f1;
     }
     
     ::-webkit-scrollbar-thumb {
         background: #27ae60;
         border-radius: 4px;
     }
-    
 </style>
 """, unsafe_allow_html=True)
 
@@ -579,37 +426,76 @@ MESES_PT = [
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ]
 
-def criar_tese(nome_ativo, dia_util_int):
-    """Cria tese de investimento para cada tipo de fundo"""
-    if 'FII' in nome_ativo or 'Imobiliário' in nome_ativo:
-        resumo = "Fundo de Investimento Imobiliário que investe em imóveis comerciais de alto padrão, galpões logísticos em regiões estratégicas e Certificados de Recebíveis Imobiliários (CRI) de emissores sólidos."
-        condicoes = f"• Emissor: Gestora especializada em FII\n• Prazo: Indeterminado\n• Taxa: 0,5% a 1,0% a.a.\n• Liquidez: D+30\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
-        perfil = "Ideal para investidores que buscam renda mensal passiva, isenta de IR para PF"
-        speech = "Destaque a isenção de IR, diversificação imobiliária e distribuição mensal."
-        venda_1min = "Este FII oferece renda mensal isenta de IR para pessoa física, investindo em imóveis de alta qualidade com inquilinos sólidos. Ideal para quem busca diversificação e rendimentos previsíveis acima da poupança."
-    elif 'CRI' in nome_ativo or 'Renda' in nome_ativo:
-        resumo = "Fundo de renda fixa que investe em CRI, títulos públicos e crédito privado de primeira linha."
-        condicoes = f"• Emissor: Gestora com expertise em renda fixa\n• Prazo: Indeterminado\n• Taxa: 0,5% a 1,0% a.a.\n• Liquidez: D+30\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
-        perfil = "Conservadores que buscam rentabilidade acima do CDI"
-        speech = "Alternativa superior à poupança com rentabilidade consistente."
-        venda_1min = "Fundo de renda fixa que busca rentabilidade superior ao CDI através de uma carteira diversificada de CRI e crédito privado. Gestão profissional com foco em segurança e liquidez, perfeito para o investidor conservador que quer mais do que a poupança oferece."
-    else:
-        resumo = "Fundo com gestão ativa e estratégia diversificada."
-        condicoes = f"• Emissor: Casa de gestão independente\n• Prazo: Variável\n• Taxa: 1,0% a 2,0% a.a.\n• Liquidez: D+30\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
-        perfil = "Investidores com perfil moderado"
-        speech = "Gestão profissional e rebalanceamento tático."
-        venda_1min = "Fundo com gestão ativa que busca as melhores oportunidades do mercado através de análise criteriosa e rebalanceamento constante. Diversificação automática com equipe especializada cuidando do seu patrimônio."
+def criar_tese(nome_ativo, dia_util_int, df_fundos=None):
+    """Cria tese lendo do Excel ou usando padrão"""
+    
+    resumo = "Informações não disponíveis"
+    condicoes = f"• Pagamento: {dia_util_int}º dia útil"
+    perfil = "Não especificado"
+    venda_1min = "Informações não disponíveis"
+    
+    # Tentar ler do Excel
+    if df_fundos is not None and len(df_fundos) > 0:
+        for idx, row in df_fundos.iterrows():
+            nome_col = None
+            for col in df_fundos.columns:
+                if 'fundo' in col.lower() or 'nome' in col.lower() or 'ativo' in col.lower():
+                    nome_col = col
+                    break
+            
+            if nome_col:
+                nome_excel = str(row[nome_col]).strip() if pd.notna(row[nome_col]) else ''
+                
+                if nome_excel and (nome_excel.lower() in nome_ativo.lower() or nome_ativo.lower() in nome_excel.lower()):
+                    for col in df_fundos.columns:
+                        col_lower = col.lower()
+                        
+                        if 'resumo' in col_lower or 'sobre' in col_lower or 'descri' in col_lower:
+                            if pd.notna(row[col]) and str(row[col]).strip() != '':
+                                resumo = str(row[col]).strip()
+                        
+                        if 'condi' in col_lower or 'taxa' in col_lower or 'emissor' in col_lower:
+                            if pd.notna(row[col]) and str(row[col]).strip() != '':
+                                condicoes = str(row[col]).strip()
+                                if f"Pagamento: {dia_util_int}º dia útil" not in condicoes:
+                                    condicoes += f"\n• Pagamento: {dia_util_int}º dia útil"
+                        
+                        if 'perfil' in col_lower:
+                            if pd.notna(row[col]) and str(row[col]).strip() != '':
+                                perfil = str(row[col]).strip()
+                        
+                        if 'venda' in col_lower or '1 minuto' in col_lower or 'pitch' in col_lower:
+                            if pd.notna(row[col]) and str(row[col]).strip() != '':
+                                venda_1min = str(row[col]).strip()
+                    break
+    
+    # Usar teses padrão se não encontrou no Excel
+    if resumo == "Informações não disponíveis":
+        if 'FII' in nome_ativo or 'Imobiliário' in nome_ativo:
+            resumo = "Fundo de Investimento Imobiliário que investe em imóveis comerciais de alto padrão, galpões logísticos em regiões estratégicas e Certificados de Recebíveis Imobiliários (CRI) de emissores sólidos."
+            condicoes = f"• Emissor: Gestora especializada em FII\n• Prazo: Indeterminado\n• Taxa: 0,5% a 1,0% a.a.\n• Liquidez: D+30\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
+            perfil = "Ideal para investidores que buscam renda mensal passiva, isenta de IR para PF"
+            venda_1min = "Este FII oferece renda mensal isenta de IR para pessoa física, investindo em imóveis de alta qualidade com inquilinos sólidos. Ideal para quem busca diversificação e rendimentos previsíveis acima da poupança."
+        elif 'CRI' in nome_ativo or 'Renda' in nome_ativo:
+            resumo = "Fundo de renda fixa que investe em CRI, títulos públicos e crédito privado de primeira linha."
+            condicoes = f"• Emissor: Gestora com expertise em renda fixa\n• Prazo: Indeterminado\n• Taxa: 0,5% a 1,0% a.a.\n• Liquidez: D+30\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
+            perfil = "Conservadores que buscam rentabilidade acima do CDI"
+            venda_1min = "Fundo de renda fixa que busca rentabilidade superior ao CDI através de uma carteira diversificada de CRI e crédito privado. Gestão profissional com foco em segurança e liquidez, perfeito para o investidor conservador que quer mais do que a poupança oferece."
+        else:
+            resumo = "Fundo com gestão ativa e estratégia diversificada."
+            condicoes = f"• Emissor: Casa de gestão independente\n• Prazo: Variável\n• Taxa: 1,0% a 2,0% a.a.\n• Liquidez: D+30\n• Aplicação mínima: R$ 1.000,00\n• Pagamento: {dia_util_int}º dia útil"
+            perfil = "Investidores com perfil moderado"
+            venda_1min = "Fundo com gestão ativa que busca as melhores oportunidades do mercado através de análise criteriosa e rebalanceamento constante. Diversificação automática com equipe especializada cuidando do seu patrimônio."
     
     return {
         'resumo': resumo,
         'condicoes': condicoes,
         'perfil': perfil,
-        'speech': speech,
         'venda_1min': venda_1min
     }
 
 def buscar_info_fundo(nome_ativo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses):
-    """Busca informações de um fundo nos mapas"""
+    """Busca informações de um fundo"""
     for nome_fundo in mapa_pagamentos.keys():
         if nome_fundo.lower() in nome_ativo.lower() or nome_ativo.lower() in nome_fundo.lower():
             return {
@@ -621,7 +507,7 @@ def buscar_info_fundo(nome_ativo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa
     return {'dia_util': None, 'cor': '#95a5a6', 'sigla': nome_ativo[:10], 'tese': {}}
 
 def calcular_dia_util(ano, mes, numero_dia_util, feriados):
-    """Calcula a data do N-ésimo dia útil do mês"""
+    """Calcula a data do N-ésimo dia útil"""
     if not numero_dia_util or numero_dia_util <= 0:
         return None
     
@@ -635,23 +521,21 @@ def calcular_dia_util(ano, mes, numero_dia_util, feriados):
             
             if not eh_fim_de_semana and not eh_feriado:
                 contador_dias_uteis += 1
-                
                 if contador_dias_uteis == numero_dia_util:
                     return dia_atual
             
             dia_atual += timedelta(days=1)
-        
         return None
     except:
         return None
 
 # ============================================
-# CARREGAR DADOS ANTES DA AUTENTICAÇÃO
+# CARREGAR DADOS
 # ============================================
 
-@st.cache_data(ttl=60)  # Cache por apenas 60 segundos
+@st.cache_data(ttl=60)
 def carregar_dados(force_reload=False):
-    """Carrega dados do Excel incluindo links da aba Fundos"""
+    """Carrega dados do Excel incluindo links"""
     try:
         NOME_ARQUIVO = 'calendario_Renda_mais.xlsx'
         
@@ -664,13 +548,13 @@ def carregar_dados(force_reload=False):
         
         df_suporte = pd.read_excel(NOME_ARQUIVO, sheet_name='Suporte')
         
-        # CARREGAR ABA FUNDOS PARA PEGAR OS LINKS
+        # Carregar aba Fundos
         df_fundos = None
         try:
             df_fundos = pd.read_excel(NOME_ARQUIVO, sheet_name='Fundos')
             df_fundos.columns = df_fundos.columns.str.strip()
             print(f"✅ Aba 'Fundos' carregada com {len(df_fundos)} linhas")
-            print(f"Colunas disponíveis: {list(df_fundos.columns)}")
+            print(f"Colunas: {list(df_fundos.columns)}")
         except Exception as e:
             print(f"⚠️ Erro ao carregar aba 'Fundos': {e}")
         
@@ -688,7 +572,7 @@ def carregar_dados(force_reload=False):
         mapa_cores = {}
         mapa_siglas = {}
         mapa_teses = {}
-        mapa_links = {}  # NOVO: mapa para armazenar os links
+        mapa_links = {}
         
         colunas = list(df_suporte.columns)
         col_ativo = colunas[7] if len(colunas) > 7 else None
@@ -717,20 +601,19 @@ def carregar_dados(force_reload=False):
                         sigla = ''.join([p[0].upper() for p in palavras[:3]])
                     mapa_siglas[nome_ativo] = sigla.upper()
                     
-                    tese = criar_tese(nome_ativo, dia_util_int)
+                    # Criar tese passando df_fundos
+                    tese = criar_tese(nome_ativo, dia_util_int, df_fundos)
                     mapa_teses[nome_ativo] = tese
                     
-                    # BUSCAR LINKS NA ABA FUNDOS - VERSÃO MELHORADA
+                    # Buscar links
                     link_expert = ''
                     link_material = ''
                     
                     if df_fundos is not None and len(df_fundos) > 0:
-                        # Tentar diferentes nomes de colunas possíveis
                         col_fundo = None
                         col_expert = None
                         col_material = None
                         
-                        # Identificar as colunas corretas
                         for col in df_fundos.columns:
                             col_lower = col.lower()
                             if 'fundo' in col_lower or 'nome' in col_lower or 'ativo' in col_lower:
@@ -741,13 +624,10 @@ def carregar_dados(force_reload=False):
                                 col_material = col
                         
                         if col_fundo:
-                            # Procurar o fundo na aba Fundos
                             for idx_f, row_f in df_fundos.iterrows():
                                 nome_fundo_excel = str(row_f[col_fundo]).strip() if pd.notna(row_f[col_fundo]) else ''
                                 
-                                # Comparação mais flexível
                                 if nome_fundo_excel and (nome_fundo_excel.lower() in nome_ativo.lower() or nome_ativo.lower() in nome_fundo_excel.lower()):
-                                    # Pegar os links
                                     if col_expert and pd.notna(row_f[col_expert]):
                                         link_expert = str(row_f[col_expert]).strip()
                                         if link_expert.lower() == 'nan' or not link_expert.startswith('http'):
@@ -758,7 +638,10 @@ def carregar_dados(force_reload=False):
                                         if link_material.lower() == 'nan' or not link_material.startswith('http'):
                                             link_material = ''
                                     
-                                    print(f"✅ Links encontrados para {nome_ativo}: Expert={bool(link_expert)}, Material={bool(link_material)}")
+                                    if link_expert or link_material:
+                                        print(f"✅ Links para '{nome_ativo}':")
+                                        print(f"   Expert: {link_expert if link_expert else 'Não cadastrado'}")
+                                        print(f"   Material: {link_material if link_material else 'Não cadastrado'}")
                                     break
                         
                         mapa_links[nome_ativo] = {
@@ -766,55 +649,48 @@ def carregar_dados(force_reload=False):
                             'material': link_material
                         }
                     else:
-                        # Se não houver aba Fundos, criar entrada vazia
-                        mapa_links[nome_ativo] = {
-                            'expert': '',
-                            'material': ''
-                        }
+                        mapa_links[nome_ativo] = {'expert': '', 'material': ''}
                     
                     cor_index += 1
                 except Exception as e:
-                    print(f"❌ Erro ao processar fundo {nome_ativo}: {e}")
+                    print(f"❌ Erro ao processar {nome_ativo}: {e}")
                     continue
         
-        print(f"📊 Total de fundos carregados: {len(mapa_pagamentos)}")
-        print(f"🔗 Total de links carregados: {len(mapa_links)}")
+        print(f"📊 Total de fundos: {len(mapa_pagamentos)}")
+        print(f"🔗 Total de links: {len(mapa_links)}")
+        
+        if not any(links.get('expert') or links.get('material') for links in mapa_links.values()):
+            print("\n⚠️ ATENÇÃO: Nenhum link encontrado!")
+            print("Verifique se a aba 'Fundos' tem as colunas: Fundo, Link Expert, Link Material")
         
         return df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses, mapa_links
         
     except Exception as e:
-        st.error(f"❌ Erro ao carregar dados: {e}")
+        st.error(f"❌ Erro: {e}")
         import traceback
         traceback.print_exc()
         return None, None, None, None, None, None, None
 
-# Carregar dados primeiro
-# Criar uma chave de reload para forçar atualização
 if 'reload_count' not in st.session_state:
     st.session_state.reload_count = 0
 
 df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses, mapa_links = carregar_dados(st.session_state.reload_count)
 
-# Garantir que mapa_links não seja None
 if mapa_links is None:
     mapa_links = {}
 
-# Debug: Mostrar quantos links foram carregados (remover depois)
 if mapa_links:
     fundos_com_links = sum(1 for links in mapa_links.values() if links.get('expert') or links.get('material'))
     if fundos_com_links > 0:
-        print(f"✅ {fundos_com_links} fundos com links carregados")
-    else:
-        print("⚠️ Nenhum link encontrado - verifique a aba 'Fundos' no Excel")
+        print(f"✅ {fundos_com_links} fundos com links")
 
 # ============================================
 # PÁGINA DE FUNDOS
 # ============================================
 
 def pagina_conheca_fundos():
-    """Página pública com informações de todos os fundos"""
+    """Página pública com informações dos fundos"""
     
-    # Cabeçalho da página - ATUALIZADO
     st.markdown("""
     <div style="background: white; padding: 30px 40px; text-align: center; border-bottom: 3px solid #1e4d2b;">
         <h1 style="font-size: 36px; margin: 10px 0 5px 0; font-family: 'Segoe UI', sans-serif; color: #1e4d2b; font-weight: 700;">
@@ -826,7 +702,6 @@ def pagina_conheca_fundos():
     </div>
     """, unsafe_allow_html=True)
     
-    # Botão voltar
     col_space, col_btn = st.columns([6, 1])
     with col_btn:
         if st.button("🔙 Voltar ao Login", key="btn_voltar_login_fundos"):
@@ -835,24 +710,20 @@ def pagina_conheca_fundos():
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Verificar se há fundos disponíveis
     if not mapa_pagamentos:
-        st.warning("⚠️ Nenhum fundo disponível no momento")
+        st.warning("⚠️ Nenhum fundo disponível")
         st.stop()
     
-    # FILTRO DE FUNDOS - Selectbox para navegar até o fundo
     st.markdown("""
     <div style="background: #f8f9fa; padding: 20px 40px; border-radius: 8px; margin-bottom: 20px; border: 2px solid #27ae60;">
         <p style="color: #000000; font-weight: bold; font-size: 18px; margin: 0 0 15px 0;">🔍 Ir para o Fundo:</p>
     """, unsafe_allow_html=True)
     
-    # Criar lista de fundos para o selectbox (ordenada alfabeticamente)
     fundos_ordenados = sorted(list(mapa_pagamentos.keys()))
     lista_fundos = ["📋 Todos os Fundos"] + fundos_ordenados
     
-    # Selectbox
     fundo_nav = st.selectbox(
-        "Selecione um fundo para ir direto até ele:",
+        "Selecione:",
         lista_fundos,
         key="filtro_fundos_conheca",
         label_visibility="collapsed"
@@ -860,36 +731,29 @@ def pagina_conheca_fundos():
     
     st.markdown("</div>", unsafe_allow_html=True)
     
-    # REORGANIZAR ORDEM DOS FUNDOS: fundo selecionado aparece primeiro
     if fundo_nav != "📋 Todos os Fundos":
-        st.success(f"🎯 Mostrando: **{fundo_nav}** (primeiro da lista)")
-        # Colocar o fundo selecionado no início
+        st.success(f"🎯 Mostrando: **{fundo_nav}**")
         fundos_para_exibir = [fundo_nav] + [f for f in fundos_ordenados if f != fundo_nav]
     else:
         fundos_para_exibir = fundos_ordenados
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # MOSTRAR TODOS OS FUNDOS (com o selecionado no topo)
-    for idx, nome_fundo in enumerate(fundos_para_exibir):
+    for nome_fundo in fundos_para_exibir:
         dia_util = mapa_pagamentos[nome_fundo]
         cor = mapa_cores.get(nome_fundo, '#27ae60')
         tese = mapa_teses.get(nome_fundo, {})
         
-        # Destacar visualmente o fundo selecionado
         destaque = ""
         if fundo_nav != "📋 Todos os Fundos" and nome_fundo == fundo_nav:
             destaque = "border: 3px solid #f39c12; box-shadow: 0 0 20px rgba(243, 156, 18, 0.4);"
         
-        # Extrair informações
         resumo = tese.get("resumo", "Informações não disponíveis")
         condicoes = tese.get('condicoes', 'Informações não disponíveis')
         venda = tese.get("venda_1min", "Informações não disponíveis")
         perfil = tese.get("perfil", "Não especificado")
         
-        # Container do fundo
         with st.container():
-            # Cabeçalho do fundo (com destaque se selecionado)
             st.markdown(f"""
             <div style="background: white; border: 1px solid #ddd; border-left: 6px solid {cor}; 
                  border-radius: 8px; padding: 20px; margin-bottom: 10px; 
@@ -900,13 +764,10 @@ def pagina_conheca_fundos():
             </div>
             """, unsafe_allow_html=True)
             
-            # Sobre o fundo - TEXTO PRETO
             st.markdown('<p style="color: #000000; font-weight: bold; font-size: 16px; margin-bottom: 8px;">📝 Sobre o Fundo</p>', unsafe_allow_html=True)
             st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.7;">{resumo}</p>', unsafe_allow_html=True)
-            
             st.markdown("<br>", unsafe_allow_html=True)
             
-            # Criar duas colunas para condições e venda
             col1, col2 = st.columns(2)
             
             with col1:
@@ -919,16 +780,12 @@ def pagina_conheca_fundos():
             
             st.markdown("<br>", unsafe_allow_html=True)
             
-            # Perfil do cliente - TEXTO PRETO
             st.markdown('<p style="color: #000000; font-weight: bold; font-size: 16px; margin-bottom: 8px;">🎯 Perfil do Cliente</p>', unsafe_allow_html=True)
             st.markdown(f'<p style="color: #000000; font-size: 14px; line-height: 1.7;">{perfil}</p>', unsafe_allow_html=True)
-            
             st.markdown("<br>", unsafe_allow_html=True)
             
-            # Botões de links - SOMENTE EXPERT E MATERIAL PUBLICITÁRIO
             st.markdown('<p style="color: #000000; font-weight: bold; font-size: 16px; margin-bottom: 15px;">📎 Materiais e Conteúdos</p>', unsafe_allow_html=True)
             
-            # Buscar links do mapa_links (verificar se existe e tem dados)
             links_fundo = {}
             if mapa_links and isinstance(mapa_links, dict) and nome_fundo in mapa_links:
                 links_fundo = mapa_links.get(nome_fundo, {})
@@ -936,84 +793,58 @@ def pagina_conheca_fundos():
             expert_url = links_fundo.get('expert', '') if isinstance(links_fundo, dict) else ''
             material_url = links_fundo.get('material', '') if isinstance(links_fundo, dict) else ''
             
-            # Limpar valores inválidos
-            if not expert_url or expert_url == 'nan' or str(expert_url).lower() == 'nan' or not str(expert_url).startswith('http'):
+            if not expert_url or not expert_url.startswith('http'):
                 expert_url = ''
-            if not material_url or material_url == 'nan' or str(material_url).lower() == 'nan' or not str(material_url).startswith('http'):
+            if not material_url or not material_url.startswith('http'):
                 material_url = ''
             
-            # Contar quantos botões temos
             botoes_ativos = []
             if expert_url:
                 botoes_ativos.append(('expert', expert_url))
             if material_url:
                 botoes_ativos.append(('material', material_url))
             
-            # Se não houver links, mostrar mensagem
             if not botoes_ativos:
                 st.markdown('''
                 <div style="background: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107;">
                     <p style="color: #856404; margin: 0; font-size: 13px;">
                         ⚠️ <strong>Links não cadastrados</strong><br>
-                        Para adicionar links, configure a aba "Fundos" no Excel com as colunas: Fundo, Link Expert, Link Material
+                        Configure a aba "Fundos" no Excel: Fundo, Link Expert, Link Material
                     </p>
                 </div>
                 ''', unsafe_allow_html=True)
             else:
-                # Criar colunas baseado no número de botões ativos
                 if len(botoes_ativos) == 2:
                     col_links = st.columns([1, 1, 2])
-                elif len(botoes_ativos) == 1:
-                    col_links = st.columns([1, 3])
                 else:
-                    col_links = [st.columns(1)[0]]
+                    col_links = st.columns([1, 3])
                 
-                # Renderizar os botões - APENAS EXPERT E MATERIAL
                 for idx, (tipo, url) in enumerate(botoes_ativos):
                     with col_links[idx]:
                         if tipo == 'expert':
                             st.markdown(f'''
                             <a href="{url}" target="_blank" style="
-                                display: block;
-                                background: #e74c3c;
-                                color: white;
-                                padding: 18px 30px;
-                                border-radius: 8px;
-                                text-decoration: none;
-                                font-weight: 700;
-                                font-size: 16px;
-                                text-align: center;
-                                box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-                                transition: all 0.3s;
-                            ">🎯 Expert</a>
+                                display: block; background: #e74c3c; color: white;
+                                padding: 18px 30px; border-radius: 8px; text-decoration: none;
+                                font-weight: 700; font-size: 16px; text-align: center;
+                                box-shadow: 0 3px 8px rgba(0,0,0,0.2);">🎯 Expert</a>
                             ''', unsafe_allow_html=True)
                         elif tipo == 'material':
                             st.markdown(f'''
                             <a href="{url}" target="_blank" style="
-                                display: block;
-                                background: #3498db;
-                                color: white;
-                                padding: 18px 30px;
-                                border-radius: 8px;
-                                text-decoration: none;
-                                font-weight: 700;
-                                font-size: 16px;
-                                text-align: center;
-                                box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-                                transition: all 0.3s;
-                            ">📢 Material Publicitário</a>
+                                display: block; background: #3498db; color: white;
+                                padding: 18px 30px; border-radius: 8px; text-decoration: none;
+                                font-weight: 700; font-size: 16px; text-align: center;
+                                box-shadow: 0 3px 8px rgba(0,0,0,0.2);">📢 Material Publicitário</a>
                             ''', unsafe_allow_html=True)
             
-            # Linha divisória
             st.markdown("<hr style='margin: 40px 0; border: none; border-top: 2px solid #e0e0e0;'>", unsafe_allow_html=True)
     
     st.stop()
 
-# Verificar qual página mostrar
 if st.session_state.get('pagina_atual') == 'fundos':
     pagina_conheca_fundos()
 else:
-    # Verificar autenticação passando df_base
     verificar_autenticacao(df_base)
 
 # ============================================
@@ -1021,32 +852,24 @@ else:
 # ============================================
 
 def main():
-    # Os dados já foram carregados globalmente
     global df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses, mapa_links
     
     if df_base is None:
         st.stop()
     
-    # Inicializar mapa_links se for None
     if mapa_links is None:
         mapa_links = {}
     
-    # Verificar se está autenticado
     if not st.session_state.get('autenticado', False) or not st.session_state.get('assessor_logado'):
         st.error("❌ Sessão expirada. Faça login novamente.")
         st.session_state.autenticado = False
         st.session_state.assessor_logado = None
         st.rerun()
     
-    # FILTRAR CLIENTES DO ASSESSOR LOGADO
     assessor_logado = st.session_state.assessor_logado
-    
-    # Converter coluna Assessor para string para comparação
     df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip()
-    
     df_base_filtrado = df_base[df_base['Assessor'] == str(assessor_logado)]
     
-    # CABEÇALHO COM INFO DO ASSESSOR
     assessor_nome = st.session_state.get('nome_assessor', 'Assessor')
     
     st.markdown(f"""
@@ -1055,22 +878,21 @@ def main():
             <div style="display: flex; align-items: center; gap: 20px;">
                 <div style="font-size: 60px;">🌳</div>
                 <div>
-                    <h1 style="color: white; font-size: 22px; font-weight: bold; margin: 0 0 5px 0; font-family: 'Segoe UI', sans-serif;">
+                    <h1 style="color: white; font-size: 22px; font-weight: bold; margin: 0 0 5px 0;">
                         📅 CALENDÁRIO DE PAGAMENTOS - RENDA MAIS
                     </h1>
-                    <h2 style="color: #7dcea0; font-size: 18px; font-weight: 600; margin: 0; font-family: 'Segoe UI', sans-serif;">
+                    <h2 style="color: #7dcea0; font-size: 18px; font-weight: 600; margin: 0;">
                         TAUARI INVESTIMENTOS
                     </h2>
                 </div>
             </div>
-            <div style="color: white; font-size: 16px; background: rgba(255,255,255,0.1); padding: 10px 18px; border-radius: 5px; font-family: 'Segoe UI', sans-serif;">
+            <div class="assessor-info">
                 👤 Assessor: <strong>{assessor_nome}</strong> ({assessor_logado})
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    # BARRA DE SAUDAÇÃO E BOTÃO SAIR (SEM RELOAD)
     st.markdown('<div style="background: white; padding: 5px 0;">', unsafe_allow_html=True)
     col_saudacao, col_btns = st.columns([5, 1])
     
@@ -1081,7 +903,6 @@ def main():
     with col_btns:
         st.markdown('<div style="margin-top: 10px; margin-right: 40px;">', unsafe_allow_html=True)
         if st.button("🚪 Sair", key="btn_sair"):
-            # Limpar session_state
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
             st.rerun()
@@ -1089,12 +910,9 @@ def main():
     
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # BARRA DE SELEÇÃO
     st.markdown('<div class="barra-selecao">', unsafe_allow_html=True)
     
-    # Contar clientes únicos (sem repetir)
     num_clientes_unicos = df_base_filtrado['Cliente'].nunique()
-    
     st.markdown(f'<label style="font-weight: bold; color: #000000; font-size: 16px; display: block; margin-bottom: 6px;">👤 SELECIONE O CLIENTE ({num_clientes_unicos} clientes):</label>', unsafe_allow_html=True)
     
     clientes = sorted(df_base_filtrado['Cliente'].unique())
@@ -1113,38 +931,32 @@ def main():
         else:
             st.session_state.fundo_selecionado = None
     
-    # CONTAINER PRINCIPAL
     st.markdown('<div class="container-principal">', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1.2, 1.5, 3])
     
-    # COLUNA 1: FUNDOS COM INFORMAÇÕES DETALHADAS
     with col1:
         st.markdown('<div class="box"><div class="box-titulo">📊 FUNDOS DO CLIENTE</div><div class="box-conteudo">', unsafe_allow_html=True)
         
         for _, fundo in fundos_cliente.iterrows():
             ativo = fundo['Ativo']
             
-            # Valor Aplicado
             try:
                 valor_aplicado = float(fundo['Financeiro'])
             except:
                 valor_aplicado = 0.0
             
-            # % Líquido do Cupom
             try:
                 percentual_liquido = float(fundo.get('Rendimento %', 0))
             except:
                 percentual_liquido = 0.0
             
-            # Valor Líquido do Cupom
             valor_liquido_cupom = valor_aplicado * (percentual_liquido / 100)
             
             info = buscar_info_fundo(ativo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
             
-            # Calcular data de pagamento - COM VERIFICAÇÃO SEGURA
             data_pagamento = None
-            dia_util = info.get('dia_util')  # Usar .get() para evitar KeyError
+            dia_util = info.get('dia_util')
             
             if dia_util and dia_util > 0:
                 try:
@@ -1154,9 +966,8 @@ def main():
                         dia_util, 
                         feriados
                     )
-                except Exception as e:
-                    print(f"Erro ao calcular data de pagamento para {ativo}: {e}")
-                    data_pagamento = None
+                except:
+                    pass
             
             data_texto = data_pagamento.strftime("%d/%m/%Y") if data_pagamento else "Não definida"
             
@@ -1183,7 +994,6 @@ def main():
 
         st.markdown('</div></div>', unsafe_allow_html=True)
     
-    # COLUNA 2: TESE
     with col2:
         st.markdown('<div class="box"><div class="box-titulo">📝 TESE DO FUNDO</div>', unsafe_allow_html=True)
         
@@ -1210,7 +1020,6 @@ def main():
 
         st.markdown('</div>', unsafe_allow_html=True)
     
-    # COLUNA 3: CALENDÁRIO
     with col3:
         st.markdown('<div class="box"><div class="box-titulo">📅 CALENDÁRIO</div>', unsafe_allow_html=True)
         
@@ -1251,7 +1060,6 @@ def main():
         for _, fundo in fundos_cliente.iterrows():
             info = buscar_info_fundo(fundo['Ativo'], mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
             
-            # Verificação segura do dia_util
             dia_util = info.get('dia_util')
             if dia_util and dia_util > 0:
                 try:
@@ -1264,8 +1072,7 @@ def main():
                             'sigla': info.get('sigla', fundo['Ativo'][:10]), 
                             'cor': info.get('cor', '#27ae60')
                         })
-                except Exception as e:
-                    print(f"Erro ao processar evento para {fundo['Ativo']}: {e}")
+                except:
                     pass
         
         for semana in cal:
