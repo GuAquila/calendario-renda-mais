@@ -2,7 +2,8 @@
 CALENDÁRIO RENDA MAIS - COM AUTENTICAÇÃO POR ASSESSOR
 ======================================================
 Sistema multi-assessor com senhas individuais
-VERSÃO FINAL CORRIGIDA - 24/10/2025
+VERSÃO FINAL LIMPA - 24/10/2025
+Usa APENAS aba "Base" do Excel
 """
 
 import streamlit as st
@@ -175,7 +176,7 @@ def verificar_autenticacao(df_base):
         st.stop()
 
 # ============================================
-# CSS - CORRIGIDO
+# CSS
 # ============================================
 
 st.markdown("""
@@ -184,7 +185,6 @@ st.markdown("""
         background: white !important;
     }
     
-    /* Header do sistema */
     .header-sistema {
         background: linear-gradient(135deg, #1e4d2b 0%, #27ae60 100%);
         padding: 20px 40px;
@@ -207,43 +207,36 @@ st.markdown("""
         margin-top: 5px;
     }
     
-    /* BARRA DE SELEÇÃO CORRIGIDA - SEM PRETO */
+    /* BARRA DE SELEÇÃO - LIMPA */
     .cliente-selector {
         background: white !important;
-        padding: 15px 20px;
+        padding: 12px 20px;
         border-radius: 8px;
         margin-bottom: 25px;
         border: 2px solid #27ae60;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        max-width: 350px;
+        max-width: 400px;
     }
     
     .cliente-selector h3 {
         color: #1e4d2b !important;
-        font-size: 15px !important;
+        font-size: 14px !important;
         font-weight: bold;
-        margin: 0 0 10px 0 !important;
+        margin: 0 0 8px 0 !important;
         text-align: center;
     }
     
-    /* Forçar estilo do selectbox */
-    div[data-baseweb="select"] {
-        background-color: white !important;
+    /* Selectbox styling */
+    [data-baseweb="select"] {
+        min-height: 40px !important;
     }
     
-    div[data-baseweb="select"] > div {
-        background-color: white !important;
-        border-color: #27ae60 !important;
-    }
-    
-    /* Container principal */
     .container-principal {
         display: flex;
         gap: 20px;
         margin-top: 20px;
     }
     
-    /* Boxes padrão */
     .box {
         background: white;
         border-radius: 10px;
@@ -269,10 +262,8 @@ st.markdown("""
         padding-right: 10px;
     }
     
-    /* Cards dos fundos - SEM TOOLTIP */
     .fundo-card-container {
         margin-bottom: 15px;
-        position: relative;
     }
     
     .fundo-card {
@@ -283,7 +274,6 @@ st.markdown("""
         padding: 15px;
         cursor: pointer;
         transition: all 0.3s ease;
-        position: relative;
     }
     
     .fundo-card:hover {
@@ -303,7 +293,6 @@ st.markdown("""
         color: #1e4d2b;
         font-size: 14px;
         margin-bottom: 8px;
-        cursor: pointer;
     }
     
     .fundo-card .info {
@@ -317,7 +306,6 @@ st.markdown("""
         font-weight: bold;
     }
     
-    /* Tese do fundo */
     .tese-texto {
         padding: 15px;
         background: #f8f9fa;
@@ -341,7 +329,6 @@ st.markdown("""
         margin-bottom: 10px;
     }
     
-    /* Calendário */
     .calendario-grid {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
@@ -368,7 +355,6 @@ st.markdown("""
         padding: 8px;
         min-height: 80px;
         transition: all 0.2s;
-        position: relative;
     }
     
     .cal-dia:hover {
@@ -402,7 +388,6 @@ st.markdown("""
         text-overflow: ellipsis;
     }
     
-    /* Botões */
     .stButton button {
         background: linear-gradient(135deg, #1e4d2b 0%, #27ae60 100%);
         color: white;
@@ -418,7 +403,6 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
     }
     
-    /* Scrollbar personalizada */
     .box-conteudo::-webkit-scrollbar {
         width: 8px;
     }
@@ -448,9 +432,8 @@ MESES_PT = [
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ]
 
-# FERIADOS NACIONAIS
 def gerar_feriados(ano):
-    """Gera lista de feriados nacionais para o ano"""
+    """Gera lista de feriados nacionais"""
     feriados_fixos = {
         (1, 1): "Ano Novo",
         (4, 21): "Tiradentes",
@@ -712,7 +695,7 @@ MAPA_LINKS = {
 }
 
 def buscar_info_fundo(nome_fundo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses):
-    """Busca informações do fundo nos mapas"""
+    """Busca informações do fundo"""
     return {
         'dia_util': mapa_pagamentos.get(nome_fundo, 0),
         'cor': mapa_cores.get(nome_fundo, '#27ae60'),
@@ -727,11 +710,11 @@ def buscar_info_fundo(nome_fundo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa
     }
 
 # ============================================
-# TELA DE FUNDOS - CORRIGIDA
+# TELA DE FUNDOS
 # ============================================
 
 def tela_fundos():
-    """Tela de apresentação dos fundos - CORRIGIDA"""
+    """Tela de apresentação dos fundos"""
     
     st.markdown("""
     <div style="text-align: center; padding: 30px;">
@@ -744,7 +727,6 @@ def tela_fundos():
     </div>
     """, unsafe_allow_html=True)
     
-    # Botões de navegação - CORRIGIDO
     col1, col2, col3 = st.columns([1, 2, 1])
     
     with col1:
@@ -753,7 +735,6 @@ def tela_fundos():
             st.rerun()
     
     with col2:
-        # Dropdown de navegação para fundos
         fundos_lista = sorted(MAPA_TESES.keys())
         fundo_selecionado = st.selectbox(
             "🎯 Ir para o fundo:",
@@ -763,13 +744,6 @@ def tela_fundos():
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Se selecionou um fundo, rolar até ele (usando âncora)
-    fundo_ancora = ""
-    if fundo_selecionado and fundo_selecionado != "Selecione um fundo...":
-        fundo_ancora = fundo_selecionado.replace(" ", "_")
-        st.markdown(f'<script>document.getElementById("{fundo_ancora}").scrollIntoView({{behavior: "smooth"}});</script>', unsafe_allow_html=True)
-    
-    # Lista de fundos com botões - TEXTO EM PRETO
     for fundo_nome in sorted(MAPA_TESES.keys()):
         info = buscar_info_fundo(fundo_nome, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
         tese = info['tese']
@@ -777,7 +751,6 @@ def tela_fundos():
         
         fundo_id = fundo_nome.replace(" ", "_")
         
-        # Card do fundo - TEXTO EM PRETO
         st.markdown(f"""
         <div id="{fundo_id}" style="background: white; border: 2px solid {info['cor']}; border-left: 6px solid {info['cor']}; 
                     border-radius: 10px; padding: 25px; margin-bottom: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
@@ -794,7 +767,6 @@ def tela_fundos():
         </div>
         """, unsafe_allow_html=True)
         
-        # Botões de links
         col1, col2, col3 = st.columns([1, 1, 2])
         
         with col1:
@@ -808,14 +780,6 @@ def tela_fundos():
                     </button>
                 </a>
                 """, unsafe_allow_html=True)
-            else:
-                st.markdown("""
-                <button style="background: #95a5a6; color: white; border: none; padding: 12px 20px; 
-                               border-radius: 8px; font-weight: bold; width: 100%; font-size: 14px; 
-                               cursor: not-allowed;">
-                    📄 Material Indisponível
-                </button>
-                """, unsafe_allow_html=True)
         
         with col2:
             if links['expert']:
@@ -828,149 +792,43 @@ def tela_fundos():
                     </button>
                 </a>
                 """, unsafe_allow_html=True)
-            else:
-                st.markdown("""
-                <button style="background: #95a5a6; color: white; border: none; padding: 12px 20px; 
-                               border-radius: 8px; font-weight: bold; width: 100%; font-size: 14px; 
-                               cursor: not-allowed;">
-                    🎓 Expert Indisponível
-                </button>
-                """, unsafe_allow_html=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
-    
-    # AVISO REMOVIDO conforme solicitação
 
 # ============================================
-# CARREGAR DADOS - CORRIGIDO
+# CARREGAR DADOS - APENAS ABA BASE
 # ============================================
 
 @st.cache_data
 def carregar_dados():
-    """Carrega dados do Excel - VERSÃO ROBUSTA COM MELHOR DIAGNÓSTICO"""
+    """Carrega dados APENAS da aba Base"""
     try:
-        arquivo_excel = 'calendario_Renda_mais.xlsx'
-        
-        # Verificar se arquivo existe
-        if not os.path.exists(arquivo_excel):
-            st.error("❌ Arquivo 'calendario_Renda_mais.xlsx' não encontrado!")
-            st.error(f"💡 Caminho atual: {os.getcwd()}")
-            st.error("💡 Certifique-se de que o arquivo está na mesma pasta que o código.")
-            st.stop()
-        
-        # Listar abas disponíveis
-        excel_file = pd.ExcelFile(arquivo_excel)
-        abas_disponiveis = excel_file.sheet_names
-        
-        # Carregar Base (índice 1 ou nome 'Base')
-        df_base = None
-        if 'Base' in abas_disponiveis:
-            df_base = pd.read_excel(arquivo_excel, sheet_name='Base')
-        elif len(abas_disponiveis) > 1:
-            df_base = pd.read_excel(arquivo_excel, sheet_name=1)
-        else:
-            st.error("❌ Aba 'Base' não encontrada no Excel!")
-            st.error(f"📋 Abas disponíveis: {', '.join(abas_disponiveis)}")
-            st.stop()
-        
-        # Tentar carregar Aplicações de múltiplas formas
-        df_aplicacoes = None
-        
-        # Tentativa 1: Por nome direto
-        if 'Aplicações' in abas_disponiveis:
-            try:
-                df_aplicacoes = pd.read_excel(arquivo_excel, sheet_name='Aplicações')
-            except:
-                pass
-        
-        # Tentativa 2: Por índice
-        if df_aplicacoes is None and len(abas_disponiveis) > 2:
-            try:
-                df_aplicacoes = pd.read_excel(arquivo_excel, sheet_name=2)
-            except:
-                pass
-        
-        # Tentativa 3: Buscar por nome similar
-        if df_aplicacoes is None:
-            for i, sheet_name in enumerate(abas_disponiveis):
-                if 'aplic' in sheet_name.lower():
-                    try:
-                        df_aplicacoes = pd.read_excel(arquivo_excel, sheet_name=i)
-                        break
-                    except:
-                        pass
-        
-        # Se não conseguiu carregar Aplicações, usar Base
-        if df_aplicacoes is None:
-            st.warning("⚠️ Aba 'Aplicações' não encontrada.")
-            st.info(f"📋 Abas disponíveis: {', '.join(abas_disponiveis)}")
-            st.info("💡 Usando valores da aba 'Base' (coluna 'Aplicação').")
-            
-            # Criar dicionário vazio - usará valores da Base
-            valores_dict = {}
-            return df_base, valores_dict
-        
-        # Criar dicionário de valores aplicados por cliente e fundo
-        valores_dict = {}
-        erros_conversao = 0
-        
-        for _, row in df_aplicacoes.iterrows():
-            try:
-                codigo_cliente = str(int(row['Código do Cliente'])).strip()
-                fundo = str(row['Fundo']).strip()
-                valor = float(row['Valor Solicitado'])
-                
-                if codigo_cliente not in valores_dict:
-                    valores_dict[codigo_cliente] = {}
-                valores_dict[codigo_cliente][fundo] = valor
-            except:
-                erros_conversao += 1
-                continue
-        
-        # Mostrar informações de sucesso
-        if len(valores_dict) > 0:
-            st.success(f"✅ Dados carregados: {len(df_base)} registros na Base, {len(valores_dict)} clientes com aplicações")
-        
-        if erros_conversao > 0:
-            st.warning(f"⚠️ {erros_conversao} linhas com erros foram ignoradas")
-        
-        return df_base, valores_dict
-        
+        df_base = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Base')
+        return df_base
     except Exception as e:
-        st.error(f"❌ Erro ao carregar dados: {str(e)}")
-        st.error("💡 Possíveis causas:")
-        st.error("   1. Arquivo Excel aberto em outro programa")
-        st.error("   2. Arquivo corrompido")
-        st.error("   3. Estrutura do Excel diferente do esperado")
-        st.error("\n🔧 Solução: Feche o Excel e tente novamente")
+        st.error(f"❌ Erro ao carregar Excel: {str(e)}")
         st.stop()
 
 # ============================================
-# FUNÇÃO PRINCIPAL - CORRIGIDA
+# FUNÇÃO PRINCIPAL
 # ============================================
 
 def main():
-    """Função principal do sistema"""
+    """Função principal"""
     
-    # Carregar dados
-    df_base, valores_dict = carregar_dados()
+    df_base = carregar_dados()
     
-    # Verificar autenticação
     if 'pagina_atual' not in st.session_state:
         st.session_state.pagina_atual = 'login'
     
-    # TELA DE FUNDOS
     if st.session_state.pagina_atual == 'fundos':
         tela_fundos()
         return
     
-    # TELA DE LOGIN
     verificar_autenticacao(df_base)
     
-    # SISTEMA PRINCIPAL
     feriados = gerar_feriados(datetime.now().year)
     
-    # Header do sistema
     st.markdown(f"""
     <div class="header-sistema">
         <div class="titulo-principal">📅 Calendário Renda Mais - Tauari Investimentos</div>
@@ -981,7 +839,6 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # Botões de ação
     col1, col2, col3, col4 = st.columns([1, 1, 1, 2])
     
     with col1:
@@ -997,19 +854,22 @@ def main():
             st.session_state.pagina_atual = 'fundos'
             st.rerun()
     
-    # Filtrar apenas clientes do assessor logado
     df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip()
     df_base_filtrado = df_base[df_base['Assessor'] == str(st.session_state.assessor_logado)]
     
     if df_base_filtrado.empty:
-        st.error("❌ Nenhum cliente encontrado para este assessor!")
+        st.error("❌ Nenhum cliente encontrado!")
         st.stop()
     
-    # SELETOR DE CLIENTE - CORRIGIDO SEM PRETO
     st.markdown('<div class="cliente-selector"><h3>👥 SELECIONE O CLIENTE</h3>', unsafe_allow_html=True)
     
     clientes = sorted(df_base_filtrado['Cliente'].unique())
-    cliente_selecionado = st.selectbox("Selecione o Cliente", [""] + list(clientes), label_visibility="collapsed", key="cliente_select")
+    cliente_selecionado = st.selectbox(
+        "Cliente", 
+        [""] + list(clientes), 
+        label_visibility="collapsed", 
+        key="cliente_select"
+    )
     
     st.markdown('</div>', unsafe_allow_html=True)
     
@@ -1018,11 +878,8 @@ def main():
     
     fundos_cliente = df_base_filtrado[df_base_filtrado['Cliente'] == cliente_selecionado]
 
-    if 'fundo_selecionado' not in st.session_state or st.session_state.fundo_selecionado not in fundos_cliente['Ativo'].values:
-        if not fundos_cliente.empty:
-            st.session_state.fundo_selecionado = fundos_cliente['Ativo'].iloc[0]
-        else:
-            st.session_state.fundo_selecionado = None
+    if 'fundo_selecionado' not in st.session_state:
+        st.session_state.fundo_selecionado = fundos_cliente['Ativo'].iloc[0] if not fundos_cliente.empty else None
     
     st.markdown('<div class="container-principal">', unsafe_allow_html=True)
     
@@ -1033,31 +890,21 @@ def main():
         
         for _, fundo in fundos_cliente.iterrows():
             ativo = fundo['Ativo']
-            cliente_codigo = str(int(fundo['Cliente']))
             
-            # BUSCAR VALOR CORRETO DA ABA APLICAÇÕES (com fallback para Base)
-            valor_aplicado = 0.0
-            
-            # Tentar pegar da aba Aplicações primeiro
-            if cliente_codigo in valores_dict and ativo in valores_dict[cliente_codigo]:
-                valor_aplicado = valores_dict[cliente_codigo][ativo]
-            else:
-                # Fallback: usar valor da aba Base (coluna Aplicação)
-                try:
-                    if 'Aplicação' in fundo.index:
-                        valor_aplicado = float(fundo['Aplicação'])
-                except:
-                    valor_aplicado = 0.0
+            # USAR COLUNA APLICAÇÃO DA BASE
+            try:
+                valor_aplicado = float(fundo['Aplicação'])
+            except:
+                valor_aplicado = 0.0
             
             try:
-                percentual_liquido = float(fundo.get('Rendimento %', 0))
+                percentual_liquido = float(fundo['Rendimento %'])
             except:
                 percentual_liquido = 0.0
             
             valor_liquido_cupom = valor_aplicado * percentual_liquido
             
             info = buscar_info_fundo(ativo, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
-            tese = info['tese']
             
             data_pagamento = None
             dia_util = info.get('dia_util')
@@ -1077,12 +924,10 @@ def main():
             
             classe_selecao = 'fundo-card-selecionado' if ativo == st.session_state.fundo_selecionado else ''
             
-            # Card do fundo - SEM TOOLTIP
             st.markdown(f"""
             <div class="fundo-card-container">
-                <div class="fundo-card {classe_selecao}" style="border-left-color: {info.get('cor', '#27ae60')}"
-                     onmouseenter="document.getElementById('fundo_selecionado_{ativo.replace(' ', '_')}').click()">
-                    <div class="nome" title="Clique ou passe o mouse para ver a tese">{ativo}</div>
+                <div class="fundo-card {classe_selecao}" style="border-left-color: {info.get('cor', '#27ae60')}">
+                    <div class="nome">{ativo}</div>
                     <div class="info" style="margin-top: 8px;">
                         <div style="margin-bottom: 4px;">💰 <strong>Valor Aplicado:</strong> <span class="valor">R$ {valor_aplicado:,.2f}</span></div>
                         <div style="margin-bottom: 4px;">📅 <strong>Data Pagamento:</strong> {data_texto}</div>
@@ -1092,8 +937,7 @@ def main():
                 </div>
             """, unsafe_allow_html=True)
             
-            # Botão invisível para seleção ao passar o mouse
-            if st.button("", key=f"fundo_selecionado_{ativo.replace(' ', '_')}", help=f"Selecionar {ativo}"):
+            if st.button("📊", key=f"sel_{ativo}", help=f"Selecionar {ativo}"):
                 st.session_state.fundo_selecionado = ativo
                 st.rerun()
             
@@ -1104,15 +948,13 @@ def main():
     with col2:
         st.markdown('<div class="box"><div class="box-titulo">📝 TESE DO FUNDO</div>', unsafe_allow_html=True)
         
-        fundo_para_tese = st.session_state.fundo_selecionado
-        
-        if fundo_para_tese:
-            info = buscar_info_fundo(fundo_para_tese, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
+        if st.session_state.fundo_selecionado:
+            info = buscar_info_fundo(st.session_state.fundo_selecionado, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
             tese = info.get('tese', {})
             
             st.markdown(f"""
             <div class="tese-texto">
-                <strong style="color: {info.get('cor', '#27ae60')};">{fundo_para_tese}</strong>
+                <strong style="color: {info.get('cor', '#27ae60')};">{st.session_state.fundo_selecionado}</strong>
                 <p>{tese.get('resumo', '')}</p>
                 <h4>📋 Resumo de Condições</h4>
                 <p style="white-space: pre-line;">{tese.get('condicoes', '')}</p>
@@ -1137,7 +979,7 @@ def main():
         col_p1, col_p2, col_p3 = st.columns([1, 3, 1])
         
         with col_p1:
-            if st.button("◀ Mês Anterior", key="prev_mes"):
+            if st.button("◀ Anterior", key="prev_mes"):
                 st.session_state.mes_atual -= 1
                 if st.session_state.mes_atual < 1:
                     st.session_state.mes_atual = 12
@@ -1148,7 +990,7 @@ def main():
             st.markdown(f'<div style="text-align: center; padding: 8px; font-size: 18px; font-weight: bold; color: #1e4d2b;">{MESES_PT[st.session_state.mes_atual-1]} {st.session_state.ano_atual}</div>', unsafe_allow_html=True)
         
         with col_p3:
-            if st.button("Próximo Mês ▶", key="next_mes"):
+            if st.button("Próximo ▶", key="next_mes"):
                 st.session_state.mes_atual += 1
                 if st.session_state.mes_atual > 12:
                     st.session_state.mes_atual = 1
