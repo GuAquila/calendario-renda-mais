@@ -847,31 +847,102 @@ def tela_fundos():
 
 @st.cache_data
 def carregar_dados():
-    """Carrega dados do Excel - CORRIGIDO PARA LER APLICAÇÕES"""
+    """Carrega dados do Excel - VERSÃO ROBUSTA COM MELHOR DIAGNÓSTICO"""
     try:
-        # Carregar Base para assessores e clientes
-        df_base = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Base')
+        arquivo_excel = 'calendario_Renda_mais.xlsx'
         
-        # Carregar Aplicações para valores corretos
-        df_aplicacoes = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Aplicações')
+        # Verificar se arquivo existe
+        if not os.path.exists(arquivo_excel):
+            st.error("❌ Arquivo 'calendario_Renda_mais.xlsx' não encontrado!")
+            st.error(f"💡 Caminho atual: {os.getcwd()}")
+            st.error("💡 Certifique-se de que o arquivo está na mesma pasta que o código.")
+            st.stop()
+        
+        # Listar abas disponíveis
+        excel_file = pd.ExcelFile(arquivo_excel)
+        abas_disponiveis = excel_file.sheet_names
+        
+        # Carregar Base (índice 1 ou nome 'Base')
+        df_base = None
+        if 'Base' in abas_disponiveis:
+            df_base = pd.read_excel(arquivo_excel, sheet_name='Base')
+        elif len(abas_disponiveis) > 1:
+            df_base = pd.read_excel(arquivo_excel, sheet_name=1)
+        else:
+            st.error("❌ Aba 'Base' não encontrada no Excel!")
+            st.error(f"📋 Abas disponíveis: {', '.join(abas_disponiveis)}")
+            st.stop()
+        
+        # Tentar carregar Aplicações de múltiplas formas
+        df_aplicacoes = None
+        
+        # Tentativa 1: Por nome direto
+        if 'Aplicações' in abas_disponiveis:
+            try:
+                df_aplicacoes = pd.read_excel(arquivo_excel, sheet_name='Aplicações')
+            except:
+                pass
+        
+        # Tentativa 2: Por índice
+        if df_aplicacoes is None and len(abas_disponiveis) > 2:
+            try:
+                df_aplicacoes = pd.read_excel(arquivo_excel, sheet_name=2)
+            except:
+                pass
+        
+        # Tentativa 3: Buscar por nome similar
+        if df_aplicacoes is None:
+            for i, sheet_name in enumerate(abas_disponiveis):
+                if 'aplic' in sheet_name.lower():
+                    try:
+                        df_aplicacoes = pd.read_excel(arquivo_excel, sheet_name=i)
+                        break
+                    except:
+                        pass
+        
+        # Se não conseguiu carregar Aplicações, usar Base
+        if df_aplicacoes is None:
+            st.warning("⚠️ Aba 'Aplicações' não encontrada.")
+            st.info(f"📋 Abas disponíveis: {', '.join(abas_disponiveis)}")
+            st.info("💡 Usando valores da aba 'Base' (coluna 'Aplicação').")
+            
+            # Criar dicionário vazio - usará valores da Base
+            valores_dict = {}
+            return df_base, valores_dict
         
         # Criar dicionário de valores aplicados por cliente e fundo
         valores_dict = {}
+        erros_conversao = 0
+        
         for _, row in df_aplicacoes.iterrows():
-            codigo_cliente = str(row['Código do Cliente']).strip()
-            fundo = str(row['Fundo']).strip()
-            valor = float(row['Valor Solicitado'])
-            
-            if codigo_cliente not in valores_dict:
-                valores_dict[codigo_cliente] = {}
-            valores_dict[codigo_cliente][fundo] = valor
+            try:
+                codigo_cliente = str(int(row['Código do Cliente'])).strip()
+                fundo = str(row['Fundo']).strip()
+                valor = float(row['Valor Solicitado'])
+                
+                if codigo_cliente not in valores_dict:
+                    valores_dict[codigo_cliente] = {}
+                valores_dict[codigo_cliente][fundo] = valor
+            except:
+                erros_conversao += 1
+                continue
+        
+        # Mostrar informações de sucesso
+        if len(valores_dict) > 0:
+            st.success(f"✅ Dados carregados: {len(df_base)} registros na Base, {len(valores_dict)} clientes com aplicações")
+        
+        if erros_conversao > 0:
+            st.warning(f"⚠️ {erros_conversao} linhas com erros foram ignoradas")
         
         return df_base, valores_dict
-    except FileNotFoundError:
-        st.error("❌ Arquivo 'calendario_Renda_mais.xlsx' não encontrado!")
-        st.stop()
+        
     except Exception as e:
         st.error(f"❌ Erro ao carregar dados: {str(e)}")
+        st.error("💡 Possíveis causas:")
+        st.error("   1. Arquivo Excel aberto em outro programa")
+        st.error("   2. Arquivo corrompido")
+        st.error("   3. Estrutura do Excel diferente do esperado")
+        st.error("\n🔧 Solução: Feche o Excel e tente novamente")
         st.stop()
 
 # ============================================
@@ -964,10 +1035,19 @@ def main():
             ativo = fundo['Ativo']
             cliente_codigo = str(int(fundo['Cliente']))
             
-            # BUSCAR VALOR CORRETO DA ABA APLICAÇÕES
+            # BUSCAR VALOR CORRETO DA ABA APLICAÇÕES (com fallback para Base)
             valor_aplicado = 0.0
+            
+            # Tentar pegar da aba Aplicações primeiro
             if cliente_codigo in valores_dict and ativo in valores_dict[cliente_codigo]:
                 valor_aplicado = valores_dict[cliente_codigo][ativo]
+            else:
+                # Fallback: usar valor da aba Base (coluna Aplicação)
+                try:
+                    if 'Aplicação' in fundo.index:
+                        valor_aplicado = float(fundo['Aplicação'])
+                except:
+                    valor_aplicado = 0.0
             
             try:
                 percentual_liquido = float(fundo.get('Rendimento %', 0))
