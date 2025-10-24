@@ -1047,7 +1047,10 @@ def main():
             try:
                 # Tentar primeiro "Aplicação", depois "Financeiro", depois "Valor"
                 if 'Aplicação' in fundo.index:
-                    valor_aplicado = float(str(fundo['Aplicação']).replace('R
+                   valor_str = str(fundo['Aplicação']).replace('R$'. '').replace(' '. '').strip()
+                # Remover pontos de milhar e substituir vírgula por ponto
+                    valor_str = valor_str.replace('.', '').replace(',', '.')
+                    valor_aplicado = float(valor_str)
     
     with col2:
         st.markdown('<div class="box"><div class="box-titulo">📝 TESE DO FUNDO</div>', unsafe_allow_html=True)
