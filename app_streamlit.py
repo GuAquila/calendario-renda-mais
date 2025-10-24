@@ -546,6 +546,12 @@ def carregar_dados(force_reload=False):
         df_base = pd.read_excel(NOME_ARQUIVO, sheet_name='Base')
         df_base.columns = df_base.columns.str.strip()
         
+        print(f"\n{'='*60}")
+        print(f"✅ Aba 'Base' carregada com sucesso!")
+        print(f"   Total de linhas: {len(df_base)}")
+        print(f"   Colunas encontradas: {list(df_base.columns)}")
+        print(f"{'='*60}\n")
+        
         df_suporte = pd.read_excel(NOME_ARQUIVO, sheet_name='Suporte')
         
         # Carregar aba Fundos
@@ -553,10 +559,27 @@ def carregar_dados(force_reload=False):
         try:
             df_fundos = pd.read_excel(NOME_ARQUIVO, sheet_name='Fundos')
             df_fundos.columns = df_fundos.columns.str.strip()
-            print(f"✅ Aba 'Fundos' carregada com {len(df_fundos)} linhas")
-            print(f"Colunas: {list(df_fundos.columns)}")
+            print(f"\n{'='*60}")
+            print(f"✅ Aba 'Fundos' carregada com sucesso!")
+            print(f"   Total de linhas: {len(df_fundos)}")
+            print(f"   Colunas encontradas: {list(df_fundos.columns)}")
+            print(f"{'='*60}\n")
+            
+            # Mostrar primeiras linhas para debug
+            print("📋 Primeiras 3 linhas da aba Fundos:")
+            for idx, row in df_fundos.head(3).iterrows():
+                print(f"  Linha {idx + 1}:")
+                for col in df_fundos.columns:
+                    valor = row[col]
+                    if pd.notna(valor):
+                        print(f"    {col}: {str(valor)[:50]}")
+            print()
+            
         except Exception as e:
+            print(f"\n{'='*60}")
             print(f"⚠️ Erro ao carregar aba 'Fundos': {e}")
+            print(f"   Certifique-se que existe uma aba chamada 'Fundos' no Excel")
+            print(f"{'='*60}\n")
         
         try:
             df_feriados = pd.read_excel(NOME_ARQUIVO, sheet_name='Feriados')
@@ -614,35 +637,73 @@ def carregar_dados(force_reload=False):
                         col_expert = None
                         col_material = None
                         
+                        # Identificar colunas com busca mais flexível
                         for col in df_fundos.columns:
-                            col_lower = col.lower()
-                            if 'fundo' in col_lower or 'nome' in col_lower or 'ativo' in col_lower:
+                            col_lower = col.lower().strip()
+                            col_clean = col_lower.replace(' ', '').replace('_', '')
+                            
+                            if any(x in col_clean for x in ['fundo', 'nome', 'ativo']):
                                 col_fundo = col
-                            elif 'expert' in col_lower:
+                                print(f"  Coluna do fundo identificada: '{col}'")
+                            elif 'expert' in col_clean:
                                 col_expert = col
-                            elif 'material' in col_lower or 'publicitário' in col_lower or 'publicitario' in col_lower:
+                                print(f"  Coluna Expert identificada: '{col}'")
+                            elif any(x in col_clean for x in ['material', 'publicitario', 'publicitário']):
                                 col_material = col
+                                print(f"  Coluna Material identificada: '{col}'")
                         
                         if col_fundo:
+                            print(f"\n🔍 Buscando links para: {nome_ativo}")
                             for idx_f, row_f in df_fundos.iterrows():
                                 nome_fundo_excel = str(row_f[col_fundo]).strip() if pd.notna(row_f[col_fundo]) else ''
                                 
-                                if nome_fundo_excel and (nome_fundo_excel.lower() in nome_ativo.lower() or nome_ativo.lower() in nome_fundo_excel.lower()):
+                                # Comparação mais flexível - remover espaços extras e comparar
+                                nome_ativo_clean = ' '.join(nome_ativo.lower().split())
+                                nome_excel_clean = ' '.join(nome_fundo_excel.lower().split())
+                                
+                                # Várias formas de comparação
+                                match = False
+                                if nome_excel_clean and nome_ativo_clean:
+                                    # Exata
+                                    if nome_excel_clean == nome_ativo_clean:
+                                        match = True
+                                        print(f"  ✅ Match exato: '{nome_fundo_excel}'")
+                                    # Contém
+                                    elif nome_excel_clean in nome_ativo_clean or nome_ativo_clean in nome_excel_clean:
+                                        match = True
+                                        print(f"  ✅ Match parcial: '{nome_fundo_excel}'")
+                                    # Primeiras palavras
+                                    elif nome_excel_clean.split()[0] in nome_ativo_clean or nome_ativo_clean.split()[0] in nome_excel_clean:
+                                        match = True
+                                        print(f"  ✅ Match por palavra: '{nome_fundo_excel}'")
+                                
+                                if match:
                                     if col_expert and pd.notna(row_f[col_expert]):
                                         link_expert = str(row_f[col_expert]).strip()
-                                        if link_expert.lower() == 'nan' or not link_expert.startswith('http'):
+                                        # Validar URL
+                                        if link_expert and link_expert.lower() != 'nan' and ('http://' in link_expert.lower() or 'https://' in link_expert.lower()):
+                                            print(f"  📎 Expert encontrado: {link_expert[:50]}...")
+                                        else:
+                                            print(f"  ⚠️ Expert inválido: '{link_expert}'")
                                             link_expert = ''
                                     
                                     if col_material and pd.notna(row_f[col_material]):
                                         link_material = str(row_f[col_material]).strip()
-                                        if link_material.lower() == 'nan' or not link_material.startswith('http'):
+                                        # Validar URL
+                                        if link_material and link_material.lower() != 'nan' and ('http://' in link_material.lower() or 'https://' in link_material.lower()):
+                                            print(f"  📎 Material encontrado: {link_material[:50]}...")
+                                        else:
+                                            print(f"  ⚠️ Material inválido: '{link_material}'")
                                             link_material = ''
                                     
                                     if link_expert or link_material:
-                                        print(f"✅ Links para '{nome_ativo}':")
-                                        print(f"   Expert: {link_expert if link_expert else 'Não cadastrado'}")
-                                        print(f"   Material: {link_material if link_material else 'Não cadastrado'}")
+                                        print(f"  ✅ Total de links válidos: {1 if link_expert else 0} Expert + {1 if link_material else 0} Material")
+                                    else:
+                                        print(f"  ⚠️ Nenhum link válido encontrado para este fundo")
                                     break
+                            
+                            if not link_expert and not link_material:
+                                print(f"  ❌ Nenhum match encontrado na aba Fundos para: {nome_ativo}")
                         
                         mapa_links[nome_ativo] = {
                             'expert': link_expert,
@@ -656,12 +717,33 @@ def carregar_dados(force_reload=False):
                     print(f"❌ Erro ao processar {nome_ativo}: {e}")
                     continue
         
-        print(f"📊 Total de fundos: {len(mapa_pagamentos)}")
-        print(f"🔗 Total de links: {len(mapa_links)}")
+        print(f"\n{'='*60}")
+        print(f"📊 RESUMO DO CARREGAMENTO:")
+        print(f"   Total de fundos carregados: {len(mapa_pagamentos)}")
+        print(f"   Total de links processados: {len(mapa_links)}")
         
-        if not any(links.get('expert') or links.get('material') for links in mapa_links.values()):
-            print("\n⚠️ ATENÇÃO: Nenhum link encontrado!")
-            print("Verifique se a aba 'Fundos' tem as colunas: Fundo, Link Expert, Link Material")
+        # Contar fundos com e sem links
+        fundos_com_expert = sum(1 for links in mapa_links.values() if links.get('expert'))
+        fundos_com_material = sum(1 for links in mapa_links.values() if links.get('material'))
+        fundos_com_ambos = sum(1 for links in mapa_links.values() if links.get('expert') and links.get('material'))
+        fundos_sem_links = sum(1 for links in mapa_links.values() if not links.get('expert') and not links.get('material'))
+        
+        print(f"\n📎 ESTATÍSTICAS DE LINKS:")
+        print(f"   ✅ Fundos com link Expert: {fundos_com_expert}")
+        print(f"   ✅ Fundos com link Material: {fundos_com_material}")
+        print(f"   ✅ Fundos com ambos os links: {fundos_com_ambos}")
+        print(f"   ⚠️  Fundos SEM links: {fundos_sem_links}")
+        
+        if fundos_sem_links > 0:
+            print(f"\n⚠️ FUNDOS SEM LINKS CADASTRADOS:")
+            for nome, links in mapa_links.items():
+                if not links.get('expert') and not links.get('material'):
+                    print(f"   - {nome}")
+            print(f"\n💡 DICA: Adicione esses fundos na aba 'Fundos' do Excel")
+            print(f"   Estrutura esperada:")
+            print(f"   | Fundo | Link Expert | Link Material |")
+        
+        print(f"{'='*60}\n")
         
         return df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses, mapa_links
         
@@ -679,10 +761,30 @@ df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses, mapa_li
 if mapa_links is None:
     mapa_links = {}
 
+# Debug mais completo
+print(f"\n{'='*60}")
+print(f"🔍 VERIFICAÇÃO FINAL DOS LINKS:")
 if mapa_links:
     fundos_com_links = sum(1 for links in mapa_links.values() if links.get('expert') or links.get('material'))
+    print(f"   Total de fundos no sistema: {len(mapa_links)}")
+    print(f"   Fundos com pelo menos 1 link: {fundos_com_links}")
+    
     if fundos_com_links > 0:
-        print(f"✅ {fundos_com_links} fundos com links")
+        print(f"\n   ✅ Links encontrados para:")
+        for nome, links in mapa_links.items():
+            if links.get('expert') or links.get('material'):
+                expert_status = "✓" if links.get('expert') else "✗"
+                material_status = "✓" if links.get('material') else "✗"
+                print(f"      {nome[:40]:40} [Expert:{expert_status}] [Material:{material_status}]")
+    else:
+        print(f"\n   ⚠️ NENHUM LINK FOI ENCONTRADO!")
+        print(f"   Verifique:")
+        print(f"   1. A aba 'Fundos' existe no Excel")
+        print(f"   2. Os nomes dos fundos na aba 'Fundos' correspondem aos da aba 'Base'")
+        print(f"   3. As URLs começam com http:// ou https://")
+else:
+    print(f"   ❌ mapa_links está vazio!")
+print(f"{'='*60}\n")
 
 # ============================================
 # PÁGINA DE FUNDOS
@@ -941,16 +1043,145 @@ def main():
         for _, fundo in fundos_cliente.iterrows():
             ativo = fundo['Ativo']
             
+            # CORRIGIDO: Buscar da coluna "Aplicação" (não "Financeiro")
             try:
-                valor_aplicado = float(fundo['Financeiro'])
-            except:
+                # Tentar primeiro "Aplicação", depois "Financeiro", depois "Valor"
+                if 'Aplicação' in fundo.index:
+                    valor_aplicado = float(str(fundo['Aplicação']).replace('R
+    
+    with col2:
+        st.markdown('<div class="box"><div class="box-titulo">📝 TESE DO FUNDO</div>', unsafe_allow_html=True)
+        
+        fundo_para_tese = st.session_state.fundo_selecionado
+        
+        if fundo_para_tese:
+            info = buscar_info_fundo(fundo_para_tese, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
+            tese = info.get('tese', {})
+            
+            st.markdown(f"""
+            <div class="tese-texto">
+                <strong style="color: {info.get('cor', '#27ae60')};">{fundo_para_tese}</strong>
+                <p>{tese.get('resumo', '')}</p>
+                <h4>📋 Resumo de Condições</h4>
+                <p style="white-space: pre-line;">{tese.get('condicoes', '')}</p>
+                <h4>⚡ Venda em 1 Minuto</h4>
+                <p>{tese.get('venda_1min', '')}</p>
+                <h4>🎯 Perfil do Cliente</h4>
+                <p>{tese.get('perfil', '')}</p>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown('<div class="tese-texto"><p>Selecione um fundo.</p></div>', unsafe_allow_html=True)
+
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown('<div class="box"><div class="box-titulo">📅 CALENDÁRIO</div>', unsafe_allow_html=True)
+        
+        if 'mes_atual' not in st.session_state:
+            st.session_state.mes_atual = datetime.now().month
+            st.session_state.ano_atual = datetime.now().year
+        
+        col_p1, col_p2, col_p3 = st.columns([1, 3, 1])
+        
+        with col_p1:
+            if st.button("◀ Mês Anterior", key="prev_mes"):
+                st.session_state.mes_atual -= 1
+                if st.session_state.mes_atual < 1:
+                    st.session_state.mes_atual = 12
+                    st.session_state.ano_atual -= 1
+                st.rerun()
+        
+        with col_p2:
+            st.markdown(f'<div style="text-align: center; padding: 8px; font-size: 18px; font-weight: bold; color: #1e4d2b;">{MESES_PT[st.session_state.mes_atual-1]} {st.session_state.ano_atual}</div>', unsafe_allow_html=True)
+        
+        with col_p3:
+            if st.button("Próximo Mês ▶", key="next_mes"):
+                st.session_state.mes_atual += 1
+                if st.session_state.mes_atual > 12:
+                    st.session_state.mes_atual = 1
+                    st.session_state.ano_atual += 1
+                st.rerun()
+        
+        cal = calendar.monthcalendar(st.session_state.ano_atual, st.session_state.mes_atual)
+        
+        dias_semana = ['seg.', 'ter.', 'qua.', 'qui.', 'sex.', 'sáb.', 'dom.']
+        html_cal = '<div class="calendario-grid">'
+        
+        for dia in dias_semana:
+            html_cal += f'<div class="cal-header">{dia}</div>'
+        
+        eventos_mes = {}
+        for _, fundo in fundos_cliente.iterrows():
+            info = buscar_info_fundo(fundo['Ativo'], mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
+            
+            dia_util = info.get('dia_util')
+            if dia_util and dia_util > 0:
+                try:
+                    data_pagamento = calcular_dia_util(st.session_state.ano_atual, st.session_state.mes_atual, dia_util, feriados)
+                    if data_pagamento:
+                        dia = data_pagamento.day
+                        if dia not in eventos_mes:
+                            eventos_mes[dia] = []
+                        eventos_mes[dia].append({
+                            'sigla': info.get('sigla', fundo['Ativo'][:10]), 
+                            'cor': info.get('cor', '#27ae60')
+                        })
+                except:
+                    pass
+        
+        for semana in cal:
+            for dia in semana:
+                if dia == 0:
+                    html_cal += '<div class="cal-dia" style="background: #f8f9fa;"></div>'
+                else:
+                    data = date(st.session_state.ano_atual, st.session_state.mes_atual, dia)
+                    classe = "cal-dia fim-semana" if data.weekday() >= 5 else "cal-dia" 
+                    
+                    eventos_html = ""
+                    if dia in eventos_mes:
+                        for evento in eventos_mes[dia]:
+                            eventos_html += f'<div class="cal-evento" style="background: {evento["cor"]}">{evento["sigla"]}</div>'
+                    
+                    html_cal += f'<div class="{classe}"><div class="numero">{dia}</div>{eventos_html}</div>'
+        
+        html_cal += '</div>'
+        st.markdown(html_cal, unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+
+if __name__ == "__main__":
+    main()
+, '').replace('.', '').replace(',', '.').strip())
+                elif 'Financeiro' in fundo.index:
+                    valor_aplicado = float(fundo['Financeiro'])
+                elif 'Valor' in fundo.index:
+                    valor_aplicado = float(fundo['Valor'])
+                else:
+                    valor_aplicado = 0.0
+            except Exception as e:
+                print(f"Erro ao ler valor aplicado: {e}")
                 valor_aplicado = 0.0
             
+            # CORRIGIDO: Buscar da coluna "Rendimento" (não "Rendimento %")
             try:
-                percentual_liquido = float(fundo.get('Rendimento %', 0))
-            except:
+                # Tentar primeiro "Rendimento", depois "Rendimento %", depois "% Líquido"
+                if 'Rendimento' in fundo.index:
+                    percentual_str = str(fundo['Rendimento']).replace('%', '').replace(',', '.').strip()
+                    percentual_liquido = float(percentual_str)
+                elif 'Rendimento %' in fundo.index:
+                    percentual_liquido = float(fundo['Rendimento %'])
+                elif '% Líquido' in fundo.index:
+                    percentual_liquido = float(fundo['% Líquido'])
+                else:
+                    percentual_liquido = 0.0
+            except Exception as e:
+                print(f"Erro ao ler percentual: {e}")
                 percentual_liquido = 0.0
             
+            # Valor Líquido do Cupom
             valor_liquido_cupom = valor_aplicado * (percentual_liquido / 100)
             
             info = buscar_info_fundo(ativo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
