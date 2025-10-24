@@ -364,7 +364,7 @@ st.markdown("""
     /* CARDS DE FUNDOS */
     .fundo-card-container {
         position: relative; 
-        margin-bottom: 8px;
+        margin-bottom: 12px;
     }
     
     .fundo-card {
@@ -372,9 +372,10 @@ st.markdown("""
         border: 1px solid #ddd;
         border-left: 6px solid #27ae60;
         border-radius: 4px;
-        padding: 12px;
+        padding: 14px;
         font-family: 'Segoe UI', sans-serif;
         transition: all 0.2s;
+        min-height: 140px;
     }
     
     .fundo-card:hover {
@@ -391,20 +392,28 @@ st.markdown("""
     
     .fundo-card .nome {
         font-weight: bold;
-        font-size: 13px;
+        font-size: 14px;
         color: #2c3e50;
-        margin-bottom: 8px;
+        margin-bottom: 10px;
         line-height: 1.3;
+        border-bottom: 1px solid #e0e0e0;
+        padding-bottom: 8px;
     }
     
     .fundo-card .info {
         font-size: 12px;
-        color: #7f8c8d;
+        color: #34495e;
+        line-height: 1.6;
+    }
+    
+    .fundo-card .info strong {
+        color: #2c3e50;
+        font-weight: 600;
     }
     
     .fundo-card .info .valor {
         color: #27ae60;
-        font-weight: 600;
+        font-weight: 700;
     }
 
     .fundo-card-container .stButton button {
@@ -614,6 +623,7 @@ def criar_tese(nome_ativo, dia_util_int):
     }
 
 def buscar_info_fundo(nome_ativo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses):
+    """Busca informações de um fundo nos mapas"""
     for nome_fundo in mapa_pagamentos.keys():
         if nome_fundo.lower() in nome_ativo.lower() or nome_ativo.lower() in nome_fundo.lower():
             return {
@@ -661,12 +671,19 @@ def carregar_dados(force_reload=False):
         
         if not os.path.exists(NOME_ARQUIVO):
             st.error(f"❌ Erro: O arquivo '{NOME_ARQUIVO}' não foi encontrado.")
-            return None, None, None, None, None, None
+            return None, None, None, None, None, None, None
 
         df_base = pd.read_excel(NOME_ARQUIVO, sheet_name='Base')
         df_base.columns = df_base.columns.str.strip()
         
         df_suporte = pd.read_excel(NOME_ARQUIVO, sheet_name='Suporte')
+        
+        # CARREGAR ABA FUNDOS PARA PEGAR OS LINKS
+        try:
+            df_fundos = pd.read_excel(NOME_ARQUIVO, sheet_name='Fundos')
+            df_fundos.columns = df_fundos.columns.str.strip()
+        except:
+            df_fundos = None
         
         try:
             df_feriados = pd.read_excel(NOME_ARQUIVO, sheet_name='Feriados')
@@ -682,6 +699,7 @@ def carregar_dados(force_reload=False):
         mapa_cores = {}
         mapa_siglas = {}
         mapa_teses = {}
+        mapa_links = {}  # NOVO: mapa para armazenar os links
         
         colunas = list(df_suporte.columns)
         col_ativo = colunas[7] if len(colunas) > 7 else None
@@ -713,22 +731,51 @@ def carregar_dados(force_reload=False):
                     tese = criar_tese(nome_ativo, dia_util_int)
                     mapa_teses[nome_ativo] = tese
                     
+                    # BUSCAR LINKS NA ABA FUNDOS
+                    if df_fundos is not None:
+                        link_expert = ''
+                        link_material = ''
+                        
+                        # Procurar o fundo na aba Fundos
+                        for idx_f, row_f in df_fundos.iterrows():
+                            nome_fundo_excel = str(row_f.get('Fundo', '')).strip() if 'Fundo' in df_fundos.columns else ''
+                            
+                            if nome_fundo_excel.lower() in nome_ativo.lower() or nome_ativo.lower() in nome_fundo_excel.lower():
+                                # Pegar os links (ajustar nomes das colunas conforme seu Excel)
+                                link_expert = str(row_f.get('Link Expert', '')).strip() if 'Link Expert' in df_fundos.columns else ''
+                                link_material = str(row_f.get('Link Material', '')).strip() if 'Link Material' in df_fundos.columns else ''
+                                
+                                if link_expert == 'nan' or pd.isna(link_expert):
+                                    link_expert = ''
+                                if link_material == 'nan' or pd.isna(link_material):
+                                    link_material = ''
+                                break
+                        
+                        mapa_links[nome_ativo] = {
+                            'expert': link_expert,
+                            'material': link_material
+                        }
+                    
                     cor_index += 1
                 except:
                     pass
         
-        return df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses
+        return df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses, mapa_links
         
     except Exception as e:
         st.error(f"❌ Erro ao carregar dados: {e}")
-        return None, None, None, None, None, None
+        return None, None, None, None, None, None, None
 
 # Carregar dados primeiro
 # Criar uma chave de reload para forçar atualização
 if 'reload_count' not in st.session_state:
     st.session_state.reload_count = 0
 
-df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses = carregar_dados(st.session_state.reload_count)
+df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses, mapa_links = carregar_dados(st.session_state.reload_count)
+
+# Garantir que mapa_links não seja None
+if mapa_links is None:
+    mapa_links = {}
 
 # ============================================
 # PÁGINA DE FUNDOS (CORRIGIDA)
@@ -737,11 +784,15 @@ df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses = carreg
 def pagina_conheca_fundos():
     """Página pública com informações de todos os fundos - VERSÃO COM NAVEGAÇÃO FUNCIONAL"""
     
-    # Cabeçalho da página
+    # Cabeçalho da página - ATUALIZADO COM NOVO TÍTULO
     st.markdown("""
     <div style="background: white; padding: 30px 40px; text-align: center; border-bottom: 3px solid #1e4d2b;">
-        <h1 style="font-size: 32px; margin: 20px 0 10px 0; font-family: 'Segoe UI', sans-serif; color: #000000;">Conheça Nossos Fundos</h1>
-        <p style="font-size: 16px; margin: 0 0 20px 0; color: #000000;">Todos os fundos disponíveis na Tauari Investimentos</p>
+        <h1 style="font-size: 36px; margin: 10px 0 5px 0; font-family: 'Segoe UI', sans-serif; color: #1e4d2b; font-weight: 700;">
+            Conheça nossos Fundos Renda Mais
+        </h1>
+        <h2 style="font-size: 28px; margin: 5px 0 20px 0; font-family: 'Segoe UI', sans-serif; color: #27ae60; font-weight: 600;">
+            Tauari Investimentos
+        </h2>
     </div>
     """, unsafe_allow_html=True)
     
@@ -810,12 +861,6 @@ def pagina_conheca_fundos():
         venda = tese.get("venda_1min", "Informações não disponíveis")
         perfil = tese.get("perfil", "Não especificado")
         
-        # Links
-        links = tese.get('links', {})
-        expert_url = links.get('expert', '') if isinstance(links, dict) else ''
-        lamina_url = links.get('lamina', '') if isinstance(links, dict) else ''
-        material_url = links.get('material', '') if isinstance(links, dict) else ''
-        
         # Container do fundo
         with st.container():
             # Cabeçalho do fundo (com destaque se selecionado)
@@ -854,29 +899,33 @@ def pagina_conheca_fundos():
             
             st.markdown("<br>", unsafe_allow_html=True)
             
-            # Botões de links - MAIORES E MELHOR DISTRIBUÍDOS
+            # Botões de links - SOMENTE EXPERT E MATERIAL PUBLICITÁRIO
             st.markdown('<p style="color: #000000; font-weight: bold; font-size: 16px; margin-bottom: 15px;">📎 Materiais e Conteúdos</p>', unsafe_allow_html=True)
+            
+            # Buscar links do mapa_links (verificar se existe)
+            links_fundo = {}
+            if mapa_links and nome_fundo in mapa_links:
+                links_fundo = mapa_links.get(nome_fundo, {})
+            
+            expert_url = links_fundo.get('expert', '') if links_fundo else ''
+            material_url = links_fundo.get('material', '') if links_fundo else ''
             
             # Contar quantos botões temos
             botoes_ativos = []
-            if expert_url and expert_url != '#' and expert_url != '':
+            if expert_url and expert_url != '' and expert_url != 'nan' and str(expert_url).lower() != 'nan':
                 botoes_ativos.append(('expert', expert_url))
-            if lamina_url and lamina_url != '#' and lamina_url != '':
-                botoes_ativos.append(('lamina', lamina_url))
-            if material_url and material_url != '#' and material_url != '':
+            if material_url and material_url != '' and material_url != 'nan' and str(material_url).lower() != 'nan':
                 botoes_ativos.append(('material', material_url))
             
             # Criar colunas baseado no número de botões ativos
-            if len(botoes_ativos) == 3:
-                col_links = st.columns([1, 1, 1])
-            elif len(botoes_ativos) == 2:
+            if len(botoes_ativos) == 2:
                 col_links = st.columns([1, 1, 2])
             elif len(botoes_ativos) == 1:
                 col_links = st.columns([1, 3])
             else:
                 col_links = [st.columns(1)[0]]
             
-            # Renderizar os botões
+            # Renderizar os botões - APENAS EXPERT E MATERIAL
             for idx, (tipo, url) in enumerate(botoes_ativos):
                 with col_links[idx]:
                     if tipo == 'expert':
@@ -894,22 +943,6 @@ def pagina_conheca_fundos():
                             box-shadow: 0 3px 8px rgba(0,0,0,0.2);
                             transition: all 0.3s;
                         ">🎯 Expert</a>
-                        ''', unsafe_allow_html=True)
-                    elif tipo == 'lamina':
-                        st.markdown(f'''
-                        <a href="{url}" target="_blank" style="
-                            display: block;
-                            background: #27ae60;
-                            color: white;
-                            padding: 18px 30px;
-                            border-radius: 8px;
-                            text-decoration: none;
-                            font-weight: 700;
-                            font-size: 16px;
-                            text-align: center;
-                            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-                            transition: all 0.3s;
-                        ">📄 Lâmina</a>
                         ''', unsafe_allow_html=True)
                     elif tipo == 'material':
                         st.markdown(f'''
@@ -946,10 +979,14 @@ else:
 
 def main():
     # Os dados já foram carregados globalmente
-    global df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses
+    global df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses, mapa_links
     
     if df_base is None:
         st.stop()
+    
+    # Inicializar mapa_links se for None
+    if mapa_links is None:
+        mapa_links = {}
     
     # Verificar se está autenticado
     if not st.session_state.get('autenticado', False) or not st.session_state.get('assessor_logado'):
@@ -990,9 +1027,9 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # BARRA DE SAUDAÇÃO E BOTÃO SAIR
+    # BARRA DE SAUDAÇÃO E BOTÃO SAIR (SEM RELOAD)
     st.markdown('<div style="background: white; padding: 5px 0;">', unsafe_allow_html=True)
-    col_saudacao, col_btns = st.columns([4, 1])
+    col_saudacao, col_btns = st.columns([5, 1])
     
     with col_saudacao:
         nome_assessor = st.session_state.get('nome_assessor', 'Assessor')
@@ -1000,30 +1037,14 @@ def main():
     
     with col_btns:
         st.markdown('<div style="margin-top: 10px; margin-right: 40px;">', unsafe_allow_html=True)
-        col_reload, col_sair = st.columns(2)
-        with col_reload:
-            if st.button("🔄", key="btn_reload", help="Recarregar dados do Excel"):
-                # Incrementar contador para forçar reload
-                st.session_state.reload_count += 1
-                st.session_state.just_reloaded = True
-                # Limpar TODOS os caches
-                st.cache_data.clear()
-                st.cache_resource.clear()
-                st.rerun()
-        with col_sair:
-            if st.button("🚪 Sair", key="btn_sair"):
-                # Limpar session_state
-                for key in list(st.session_state.keys()):
-                    del st.session_state[key]
-                st.rerun()
+        if st.button("🚪 Sair", key="btn_sair"):
+            # Limpar session_state
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Mostrar notificação se acabou de recarregar
-    if 'just_reloaded' in st.session_state and st.session_state.just_reloaded:
-        st.success("✅ Dados do Excel atualizados com sucesso!")
-        st.session_state.just_reloaded = False
     
     # BARRA DE SELEÇÃO
     st.markdown('<div class="barra-selecao">', unsafe_allow_html=True)
@@ -1054,20 +1075,36 @@ def main():
     
     col1, col2, col3 = st.columns([1.2, 1.5, 3])
     
-    # COLUNA 1: FUNDOS
+    # COLUNA 1: FUNDOS COM INFORMAÇÕES DETALHADAS
     with col1:
         st.markdown('<div class="box"><div class="box-titulo">📊 FUNDOS DO CLIENTE</div><div class="box-conteudo">', unsafe_allow_html=True)
         
         for _, fundo in fundos_cliente.iterrows():
             ativo = fundo['Ativo']
+            
+            # Valor Aplicado
             try:
-                posicao = float(fundo['Financeiro'])
+                valor_aplicado = float(fundo['Financeiro'])
             except:
-                posicao = 0.0
-                
+                valor_aplicado = 0.0
+            
+            # % Líquido do Cupom
+            try:
+                percentual_liquido = float(fundo.get('Rendimento %', 0))
+            except:
+                percentual_liquido = 0.0
+            
+            # Valor Líquido do Cupom
+            valor_liquido_cupom = valor_aplicado * (percentual_liquido / 100)
+            
             info = buscar_info_fundo(ativo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
             
-            dia_texto = f"{info['dia_util']}º dia útil" if info['dia_util'] else "Não definido"
+            # Calcular data de pagamento
+            data_pagamento = None
+            if info['dia_util']:
+                data_pagamento = calcular_dia_util(st.session_state.ano_atual, st.session_state.mes_atual, info['dia_util'], feriados)
+            
+            data_texto = data_pagamento.strftime("%d/%m/%Y") if data_pagamento else "Não definida"
             
             classe_selecao = 'fundo-card-selecionado' if ativo == st.session_state.fundo_selecionado else ''
             
@@ -1075,8 +1112,11 @@ def main():
             <div class="fundo-card-container">
                 <div class="fundo-card {classe_selecao}" style="border-left-color: {info['cor']}">
                     <div class="nome">{ativo}</div>
-                    <div class="info">
-                        💰 Posição: <span class="valor">R$ {posicao:,.2f}</span> | 📅 {dia_texto}
+                    <div class="info" style="margin-top: 8px;">
+                        <div style="margin-bottom: 4px;">💰 <strong>Valor Aplicado:</strong> <span class="valor">R$ {valor_aplicado:,.2f}</span></div>
+                        <div style="margin-bottom: 4px;">📅 <strong>Data Pagamento:</strong> {data_texto}</div>
+                        <div style="margin-bottom: 4px;">📈 <strong>% Líquido:</strong> <span class="valor">{percentual_liquido:.2f}%</span></div>
+                        <div>💵 <strong>Valor Líquido:</strong> <span class="valor">R$ {valor_liquido_cupom:,.2f}</span></div>
                     </div>
                 </div>
             """, unsafe_allow_html=True)
