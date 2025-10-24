@@ -679,11 +679,14 @@ def carregar_dados(force_reload=False):
         df_suporte = pd.read_excel(NOME_ARQUIVO, sheet_name='Suporte')
         
         # CARREGAR ABA FUNDOS PARA PEGAR OS LINKS
+        df_fundos = None
         try:
             df_fundos = pd.read_excel(NOME_ARQUIVO, sheet_name='Fundos')
             df_fundos.columns = df_fundos.columns.str.strip()
-        except:
-            df_fundos = None
+            print(f"✅ Aba 'Fundos' carregada com {len(df_fundos)} linhas")
+            print(f"Colunas disponíveis: {list(df_fundos.columns)}")
+        except Exception as e:
+            print(f"⚠️ Erro ao carregar aba 'Fundos': {e}")
         
         try:
             df_feriados = pd.read_excel(NOME_ARQUIVO, sheet_name='Feriados')
@@ -731,39 +734,72 @@ def carregar_dados(force_reload=False):
                     tese = criar_tese(nome_ativo, dia_util_int)
                     mapa_teses[nome_ativo] = tese
                     
-                    # BUSCAR LINKS NA ABA FUNDOS
-                    if df_fundos is not None:
-                        link_expert = ''
-                        link_material = ''
+                    # BUSCAR LINKS NA ABA FUNDOS - VERSÃO MELHORADA
+                    link_expert = ''
+                    link_material = ''
+                    
+                    if df_fundos is not None and len(df_fundos) > 0:
+                        # Tentar diferentes nomes de colunas possíveis
+                        col_fundo = None
+                        col_expert = None
+                        col_material = None
                         
-                        # Procurar o fundo na aba Fundos
-                        for idx_f, row_f in df_fundos.iterrows():
-                            nome_fundo_excel = str(row_f.get('Fundo', '')).strip() if 'Fundo' in df_fundos.columns else ''
-                            
-                            if nome_fundo_excel.lower() in nome_ativo.lower() or nome_ativo.lower() in nome_fundo_excel.lower():
-                                # Pegar os links (ajustar nomes das colunas conforme seu Excel)
-                                link_expert = str(row_f.get('Link Expert', '')).strip() if 'Link Expert' in df_fundos.columns else ''
-                                link_material = str(row_f.get('Link Material', '')).strip() if 'Link Material' in df_fundos.columns else ''
+                        # Identificar as colunas corretas
+                        for col in df_fundos.columns:
+                            col_lower = col.lower()
+                            if 'fundo' in col_lower or 'nome' in col_lower or 'ativo' in col_lower:
+                                col_fundo = col
+                            elif 'expert' in col_lower:
+                                col_expert = col
+                            elif 'material' in col_lower or 'publicitário' in col_lower or 'publicitario' in col_lower:
+                                col_material = col
+                        
+                        if col_fundo:
+                            # Procurar o fundo na aba Fundos
+                            for idx_f, row_f in df_fundos.iterrows():
+                                nome_fundo_excel = str(row_f[col_fundo]).strip() if pd.notna(row_f[col_fundo]) else ''
                                 
-                                if link_expert == 'nan' or pd.isna(link_expert):
-                                    link_expert = ''
-                                if link_material == 'nan' or pd.isna(link_material):
-                                    link_material = ''
-                                break
+                                # Comparação mais flexível
+                                if nome_fundo_excel and (nome_fundo_excel.lower() in nome_ativo.lower() or nome_ativo.lower() in nome_fundo_excel.lower()):
+                                    # Pegar os links
+                                    if col_expert and pd.notna(row_f[col_expert]):
+                                        link_expert = str(row_f[col_expert]).strip()
+                                        if link_expert.lower() == 'nan' or not link_expert.startswith('http'):
+                                            link_expert = ''
+                                    
+                                    if col_material and pd.notna(row_f[col_material]):
+                                        link_material = str(row_f[col_material]).strip()
+                                        if link_material.lower() == 'nan' or not link_material.startswith('http'):
+                                            link_material = ''
+                                    
+                                    print(f"✅ Links encontrados para {nome_ativo}: Expert={bool(link_expert)}, Material={bool(link_material)}")
+                                    break
                         
                         mapa_links[nome_ativo] = {
                             'expert': link_expert,
                             'material': link_material
                         }
+                    else:
+                        # Se não houver aba Fundos, criar entrada vazia
+                        mapa_links[nome_ativo] = {
+                            'expert': '',
+                            'material': ''
+                        }
                     
                     cor_index += 1
-                except:
-                    pass
+                except Exception as e:
+                    print(f"❌ Erro ao processar fundo {nome_ativo}: {e}")
+                    continue
+        
+        print(f"📊 Total de fundos carregados: {len(mapa_pagamentos)}")
+        print(f"🔗 Total de links carregados: {len(mapa_links)}")
         
         return df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses, mapa_links
         
     except Exception as e:
         st.error(f"❌ Erro ao carregar dados: {e}")
+        import traceback
+        traceback.print_exc()
         return None, None, None, None, None, None, None
 
 # Carregar dados primeiro
@@ -776,6 +812,14 @@ df_base, feriados, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses, mapa_li
 # Garantir que mapa_links não seja None
 if mapa_links is None:
     mapa_links = {}
+
+# Debug: Mostrar quantos links foram carregados (remover depois)
+if mapa_links:
+    fundos_com_links = sum(1 for links in mapa_links.values() if links.get('expert') or links.get('material'))
+    if fundos_com_links > 0:
+        print(f"✅ {fundos_com_links} fundos com links carregados")
+    else:
+        print("⚠️ Nenhum link encontrado - verifique a aba 'Fundos' no Excel")
 
 # ============================================
 # PÁGINA DE FUNDOS (CORRIGIDA)
@@ -902,64 +946,81 @@ def pagina_conheca_fundos():
             # Botões de links - SOMENTE EXPERT E MATERIAL PUBLICITÁRIO
             st.markdown('<p style="color: #000000; font-weight: bold; font-size: 16px; margin-bottom: 15px;">📎 Materiais e Conteúdos</p>', unsafe_allow_html=True)
             
-            # Buscar links do mapa_links (verificar se existe)
+            # Buscar links do mapa_links (verificar se existe e tem dados)
             links_fundo = {}
-            if mapa_links and nome_fundo in mapa_links:
+            if mapa_links and isinstance(mapa_links, dict) and nome_fundo in mapa_links:
                 links_fundo = mapa_links.get(nome_fundo, {})
             
-            expert_url = links_fundo.get('expert', '') if links_fundo else ''
-            material_url = links_fundo.get('material', '') if links_fundo else ''
+            expert_url = links_fundo.get('expert', '') if isinstance(links_fundo, dict) else ''
+            material_url = links_fundo.get('material', '') if isinstance(links_fundo, dict) else ''
+            
+            # Limpar valores inválidos
+            if not expert_url or expert_url == 'nan' or str(expert_url).lower() == 'nan' or not str(expert_url).startswith('http'):
+                expert_url = ''
+            if not material_url or material_url == 'nan' or str(material_url).lower() == 'nan' or not str(material_url).startswith('http'):
+                material_url = ''
             
             # Contar quantos botões temos
             botoes_ativos = []
-            if expert_url and expert_url != '' and expert_url != 'nan' and str(expert_url).lower() != 'nan':
+            if expert_url:
                 botoes_ativos.append(('expert', expert_url))
-            if material_url and material_url != '' and material_url != 'nan' and str(material_url).lower() != 'nan':
+            if material_url:
                 botoes_ativos.append(('material', material_url))
             
-            # Criar colunas baseado no número de botões ativos
-            if len(botoes_ativos) == 2:
-                col_links = st.columns([1, 1, 2])
-            elif len(botoes_ativos) == 1:
-                col_links = st.columns([1, 3])
+            # Se não houver links, mostrar mensagem
+            if not botoes_ativos:
+                st.markdown('''
+                <div style="background: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107;">
+                    <p style="color: #856404; margin: 0; font-size: 13px;">
+                        ⚠️ <strong>Links não cadastrados</strong><br>
+                        Para adicionar links, configure a aba "Fundos" no Excel com as colunas: Fundo, Link Expert, Link Material
+                    </p>
+                </div>
+                ''', unsafe_allow_html=True)
             else:
-                col_links = [st.columns(1)[0]]
-            
-            # Renderizar os botões - APENAS EXPERT E MATERIAL
-            for idx, (tipo, url) in enumerate(botoes_ativos):
-                with col_links[idx]:
-                    if tipo == 'expert':
-                        st.markdown(f'''
-                        <a href="{url}" target="_blank" style="
-                            display: block;
-                            background: #e74c3c;
-                            color: white;
-                            padding: 18px 30px;
-                            border-radius: 8px;
-                            text-decoration: none;
-                            font-weight: 700;
-                            font-size: 16px;
-                            text-align: center;
-                            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-                            transition: all 0.3s;
-                        ">🎯 Expert</a>
-                        ''', unsafe_allow_html=True)
-                    elif tipo == 'material':
-                        st.markdown(f'''
-                        <a href="{url}" target="_blank" style="
-                            display: block;
-                            background: #3498db;
-                            color: white;
-                            padding: 18px 30px;
-                            border-radius: 8px;
-                            text-decoration: none;
-                            font-weight: 700;
-                            font-size: 16px;
-                            text-align: center;
-                            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-                            transition: all 0.3s;
-                        ">📢 Material Publicitário</a>
-                        ''', unsafe_allow_html=True)
+                # Criar colunas baseado no número de botões ativos
+                if len(botoes_ativos) == 2:
+                    col_links = st.columns([1, 1, 2])
+                elif len(botoes_ativos) == 1:
+                    col_links = st.columns([1, 3])
+                else:
+                    col_links = [st.columns(1)[0]]
+                
+                # Renderizar os botões - APENAS EXPERT E MATERIAL
+                for idx, (tipo, url) in enumerate(botoes_ativos):
+                    with col_links[idx]:
+                        if tipo == 'expert':
+                            st.markdown(f'''
+                            <a href="{url}" target="_blank" style="
+                                display: block;
+                                background: #e74c3c;
+                                color: white;
+                                padding: 18px 30px;
+                                border-radius: 8px;
+                                text-decoration: none;
+                                font-weight: 700;
+                                font-size: 16px;
+                                text-align: center;
+                                box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+                                transition: all 0.3s;
+                            ">🎯 Expert</a>
+                            ''', unsafe_allow_html=True)
+                        elif tipo == 'material':
+                            st.markdown(f'''
+                            <a href="{url}" target="_blank" style="
+                                display: block;
+                                background: #3498db;
+                                color: white;
+                                padding: 18px 30px;
+                                border-radius: 8px;
+                                text-decoration: none;
+                                font-weight: 700;
+                                font-size: 16px;
+                                text-align: center;
+                                box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+                                transition: all 0.3s;
+                            ">📢 Material Publicitário</a>
+                            ''', unsafe_allow_html=True)
             
             # Linha divisória
             st.markdown("<hr style='margin: 40px 0; border: none; border-top: 2px solid #e0e0e0;'>", unsafe_allow_html=True)
@@ -1099,10 +1160,21 @@ def main():
             
             info = buscar_info_fundo(ativo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
             
-            # Calcular data de pagamento
+            # Calcular data de pagamento - COM VERIFICAÇÃO SEGURA
             data_pagamento = None
-            if info['dia_util']:
-                data_pagamento = calcular_dia_util(st.session_state.ano_atual, st.session_state.mes_atual, info['dia_util'], feriados)
+            dia_util = info.get('dia_util')  # Usar .get() para evitar KeyError
+            
+            if dia_util and dia_util > 0:
+                try:
+                    data_pagamento = calcular_dia_util(
+                        st.session_state.ano_atual, 
+                        st.session_state.mes_atual, 
+                        dia_util, 
+                        feriados
+                    )
+                except Exception as e:
+                    print(f"Erro ao calcular data de pagamento para {ativo}: {e}")
+                    data_pagamento = None
             
             data_texto = data_pagamento.strftime("%d/%m/%Y") if data_pagamento else "Não definida"
             
@@ -1110,7 +1182,7 @@ def main():
             
             st.markdown(f"""
             <div class="fundo-card-container">
-                <div class="fundo-card {classe_selecao}" style="border-left-color: {info['cor']}">
+                <div class="fundo-card {classe_selecao}" style="border-left-color: {info.get('cor', '#27ae60')}">
                     <div class="nome">{ativo}</div>
                     <div class="info" style="margin-top: 8px;">
                         <div style="margin-bottom: 4px;">💰 <strong>Valor Aplicado:</strong> <span class="valor">R$ {valor_aplicado:,.2f}</span></div>
@@ -1196,13 +1268,23 @@ def main():
         eventos_mes = {}
         for _, fundo in fundos_cliente.iterrows():
             info = buscar_info_fundo(fundo['Ativo'], mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses)
-            if info['dia_util']:
-                data_pagamento = calcular_dia_util(st.session_state.ano_atual, st.session_state.mes_atual, info['dia_util'], feriados)
-                if data_pagamento:
-                    dia = data_pagamento.day
-                    if dia not in eventos_mes:
-                        eventos_mes[dia] = []
-                    eventos_mes[dia].append({'sigla': info['sigla'], 'cor': info['cor']})
+            
+            # Verificação segura do dia_util
+            dia_util = info.get('dia_util')
+            if dia_util and dia_util > 0:
+                try:
+                    data_pagamento = calcular_dia_util(st.session_state.ano_atual, st.session_state.mes_atual, dia_util, feriados)
+                    if data_pagamento:
+                        dia = data_pagamento.day
+                        if dia not in eventos_mes:
+                            eventos_mes[dia] = []
+                        eventos_mes[dia].append({
+                            'sigla': info.get('sigla', fundo['Ativo'][:10]), 
+                            'cor': info.get('cor', '#27ae60')
+                        })
+                except Exception as e:
+                    print(f"Erro ao processar evento para {fundo['Ativo']}: {e}")
+                    pass
         
         for semana in cal:
             for dia in semana:
