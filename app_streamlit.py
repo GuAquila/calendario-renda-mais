@@ -2,12 +2,7 @@
 CALENDÁRIO RENDA MAIS - COM AUTENTICAÇÃO POR ASSESSOR
 ======================================================
 Sistema multi-assessor com senhas individuais
-VERSÃO ATUALIZADA - 24/10/2025
-Melhorias:
-- Botões de Material e Expert na tela de Fundos
-- Barra de seleção de cliente ajustada (fundo branco, menor)
-- Valores aplicados atualizados do Excel
-- Hover no nome do fundo para ver a tese (removido botão verde)
+VERSÃO FINAL CORRIGIDA - 24/10/2025
 """
 
 import streamlit as st
@@ -64,7 +59,7 @@ def validar_senha_assessor(codigo_assessor, senha):
     return False, None
 
 def verificar_autenticacao(df_base):
-    """Tela de login por assessor - ATUALIZADA COM ENTER"""
+    """Tela de login por assessor"""
     
     if 'autenticado' not in st.session_state:
         st.session_state.autenticado = False
@@ -114,7 +109,6 @@ def verificar_autenticacao(df_base):
             except:
                 st.markdown("<div style='text-align: center; padding: 20px;'><div style='background: #2d5a3d; color: white; padding: 40px; border-radius: 10px; font-size: 14px;'>📁 Salve a logo como 'logo_tauari.png'<br>na mesma pasta do código</div></div>", unsafe_allow_html=True)
             
-            # TÍTULO ATUALIZADO
             st.markdown("""
             <div class="login-titulo">
                 <h2 style='margin: 10px 0; font-size: 24px;'>Calendário Renda Mais - Tauari Investimentos</h2>
@@ -122,7 +116,6 @@ def verificar_autenticacao(df_base):
             </div>
             """, unsafe_allow_html=True)
             
-            # FORM PARA PERMITIR ENTER
             with st.form("login_form"):
                 codigo_assessor = st.text_input(
                     "👤 Código do Assessor:",
@@ -182,7 +175,7 @@ def verificar_autenticacao(df_base):
         st.stop()
 
 # ============================================
-# CSS
+# CSS - CORRIGIDO
 # ============================================
 
 st.markdown("""
@@ -214,29 +207,33 @@ st.markdown("""
         margin-top: 5px;
     }
     
-    /* AJUSTE DA BARRA DE SELEÇÃO - MUDANÇA 2 */
+    /* BARRA DE SELEÇÃO CORRIGIDA - SEM PRETO */
     .cliente-selector {
-        background: white !important;  /* Fundo branco */
-        padding: 15px;
+        background: white !important;
+        padding: 15px 20px;
         border-radius: 8px;
         margin-bottom: 25px;
         border: 2px solid #27ae60;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        max-width: 400px;  /* Diminuindo o tamanho */
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        max-width: 350px;
     }
     
     .cliente-selector h3 {
-        color: #1e4d2b !important;  /* Texto em preto/verde escuro */
-        font-size: 16px !important;
+        color: #1e4d2b !important;
+        font-size: 15px !important;
         font-weight: bold;
-        margin-bottom: 10px;
+        margin: 0 0 10px 0 !important;
         text-align: center;
     }
     
-    /* Ajustando o selectbox */
-    .stSelectbox > div > div {
-        background: white !important;
-        color: #000000 !important;  /* Texto preto */
+    /* Forçar estilo do selectbox */
+    div[data-baseweb="select"] {
+        background-color: white !important;
+    }
+    
+    div[data-baseweb="select"] > div {
+        background-color: white !important;
+        border-color: #27ae60 !important;
     }
     
     /* Container principal */
@@ -272,7 +269,7 @@ st.markdown("""
         padding-right: 10px;
     }
     
-    /* Cards dos fundos - COM HOVER PARA TESE (MUDANÇA 4) */
+    /* Cards dos fundos - SEM TOOLTIP */
     .fundo-card-container {
         margin-bottom: 15px;
         position: relative;
@@ -295,21 +292,6 @@ st.markdown("""
         border-color: #27ae60;
     }
     
-    /* TOOLTIP PARA TESE - MUDANÇA 4 */
-    .fundo-card:hover::after {
-        content: "🔍 Passe o mouse no nome para ver a tese";
-        position: absolute;
-        bottom: -25px;
-        left: 0;
-        background: #27ae60;
-        color: white;
-        padding: 5px 10px;
-        border-radius: 5px;
-        font-size: 11px;
-        white-space: nowrap;
-        z-index: 1000;
-    }
-    
     .fundo-card-selecionado {
         border: 3px solid #27ae60 !important;
         background: #f0f9f4 !important;
@@ -321,37 +303,7 @@ st.markdown("""
         color: #1e4d2b;
         font-size: 14px;
         margin-bottom: 8px;
-        position: relative;
-        cursor: help;  /* Cursor de ajuda ao passar o mouse */
-    }
-    
-    /* TOOLTIP DA TESE - MUDANÇA 4 */
-    .fundo-card .nome::before {
-        content: attr(data-tese);
-        position: absolute;
-        bottom: 100%;
-        left: 0;
-        background: #2c3e50;
-        color: white;
-        padding: 15px;
-        border-radius: 8px;
-        font-size: 12px;
-        font-weight: normal;
-        width: 350px;
-        max-width: 350px;
-        white-space: pre-wrap;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.3s, visibility 0.3s;
-        z-index: 2000;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        line-height: 1.5;
-        margin-bottom: 10px;
-    }
-    
-    .fundo-card .nome:hover::before {
-        opacity: 1;
-        visibility: visible;
+        cursor: pointer;
     }
     
     .fundo-card .info {
@@ -528,7 +480,7 @@ def gerar_feriados(ano):
     return lista_feriados
 
 def calcular_dia_util(ano, mes, dia_util_desejado, feriados):
-    """Calcula o dia útil real do mês, pulando fins de semana e feriados"""
+    """Calcula o dia útil real do mês"""
     primeiro_dia = date(ano, mes, 1)
     
     if primeiro_dia.month == 12:
@@ -552,7 +504,6 @@ def calcular_dia_util(ano, mes, dia_util_desejado, feriados):
 # MAPEAMENTO DOS FUNDOS
 # ============================================
 
-# DIAS DE PAGAMENTO (dia útil do mês)
 MAPA_PAGAMENTOS = {
     'ARX FII Portfólio Renda CDI+ RL': 15,
     'AZ Quest Renda Mais Infra-Yield VI FIP-IE': 5,
@@ -568,7 +519,6 @@ MAPA_PAGAMENTOS = {
     'Valora CRI CDI Renda+ FII RL': 15,
 }
 
-# CORES DOS FUNDOS
 MAPA_CORES = {
     'ARX FII Portfólio Renda CDI+ RL': '#e74c3c',
     'AZ Quest Renda Mais Infra-Yield VI FIP-IE': '#3498db',
@@ -584,7 +534,6 @@ MAPA_CORES = {
     'Valora CRI CDI Renda+ FII RL': '#8e44ad',
 }
 
-# SIGLAS DOS FUNDOS (para o calendário)
 MAPA_SIGLAS = {
     'ARX FII Portfólio Renda CDI+ RL': 'ARX',
     'AZ Quest Renda Mais Infra-Yield VI FIP-IE': 'AZ Quest',
@@ -600,7 +549,6 @@ MAPA_SIGLAS = {
     'Valora CRI CDI Renda+ FII RL': 'Valora',
 }
 
-# TESES DOS FUNDOS
 MAPA_TESES = {
     'ARX FII Portfólio Renda CDI+ RL': {
         'resumo': 'Fundo de Investimento Imobiliário focado em CRIs com rentabilidade atrelada ao CDI+.',
@@ -712,7 +660,6 @@ MAPA_TESES = {
     }
 }
 
-# LINKS DOS FUNDOS - MUDANÇA 1
 MAPA_LINKS = {
     'ARX FII Portfólio Renda CDI+ RL': {
         'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/dezembro-24-arx-fii-portfolio-renda-cdi-rl/',
@@ -780,11 +727,11 @@ def buscar_info_fundo(nome_fundo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa
     }
 
 # ============================================
-# TELA DE FUNDOS - COM BOTÕES DE LINKS (MUDANÇA 1)
+# TELA DE FUNDOS - CORRIGIDA
 # ============================================
 
 def tela_fundos():
-    """Tela de apresentação dos fundos com links"""
+    """Tela de apresentação dos fundos - CORRIGIDA"""
     
     st.markdown("""
     <div style="text-align: center; padding: 30px;">
@@ -797,39 +744,57 @@ def tela_fundos():
     </div>
     """, unsafe_allow_html=True)
     
-    # Botão para voltar ao login
-    col1, col2, col3 = st.columns([2, 1, 2])
-    with col2:
+    # Botões de navegação - CORRIGIDO
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col1:
         if st.button("🔙 Voltar ao Login", use_container_width=True):
             st.session_state.pagina_atual = 'login'
             st.rerun()
     
+    with col2:
+        # Dropdown de navegação para fundos
+        fundos_lista = sorted(MAPA_TESES.keys())
+        fundo_selecionado = st.selectbox(
+            "🎯 Ir para o fundo:",
+            ["Selecione um fundo..."] + fundos_lista,
+            key="nav_fundo"
+        )
+    
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Lista de fundos com botões de links - MUDANÇA 1
+    # Se selecionou um fundo, rolar até ele (usando âncora)
+    fundo_ancora = ""
+    if fundo_selecionado and fundo_selecionado != "Selecione um fundo...":
+        fundo_ancora = fundo_selecionado.replace(" ", "_")
+        st.markdown(f'<script>document.getElementById("{fundo_ancora}").scrollIntoView({{behavior: "smooth"}});</script>', unsafe_allow_html=True)
+    
+    # Lista de fundos com botões - TEXTO EM PRETO
     for fundo_nome in sorted(MAPA_TESES.keys()):
         info = buscar_info_fundo(fundo_nome, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
         tese = info['tese']
         links = info['links']
         
-        # Card do fundo
+        fundo_id = fundo_nome.replace(" ", "_")
+        
+        # Card do fundo - TEXTO EM PRETO
         st.markdown(f"""
-        <div style="background: white; border: 2px solid {info['cor']}; border-left: 6px solid {info['cor']}; 
+        <div id="{fundo_id}" style="background: white; border: 2px solid {info['cor']}; border-left: 6px solid {info['cor']}; 
                     border-radius: 10px; padding: 25px; margin-bottom: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
             <h3 style="color: {info['cor']}; margin-bottom: 15px; font-size: 20px;">
                 {fundo_nome}
             </h3>
             <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                <p style="margin-bottom: 10px;"><strong>📝 Resumo:</strong> {tese['resumo']}</p>
-                <p style="margin-bottom: 10px;"><strong>📋 Condições:</strong></p>
-                <p style="white-space: pre-line; margin-left: 15px; font-size: 14px;">{tese['condicoes']}</p>
-                <p style="margin-bottom: 10px;"><strong>⚡ Venda em 1 Minuto:</strong> {tese['venda_1min']}</p>
-                <p style="margin-bottom: 0;"><strong>🎯 Perfil do Cliente:</strong> {tese['perfil']}</p>
+                <p style="margin-bottom: 10px; color: #000000;"><strong style="color: #000000;">📝 Resumo:</strong> {tese['resumo']}</p>
+                <p style="margin-bottom: 10px; color: #000000;"><strong style="color: #000000;">📋 Condições:</strong></p>
+                <p style="white-space: pre-line; margin-left: 15px; font-size: 14px; color: #000000;">{tese['condicoes']}</p>
+                <p style="margin-bottom: 10px; color: #000000;"><strong style="color: #000000;">⚡ Venda em 1 Minuto:</strong> {tese['venda_1min']}</p>
+                <p style="margin-bottom: 0; color: #000000;"><strong style="color: #000000;">🎯 Perfil do Cliente:</strong> {tese['perfil']}</p>
             </div>
         </div>
         """, unsafe_allow_html=True)
         
-        # BOTÕES DE LINKS - MUDANÇA 1
+        # Botões de links
         col1, col2, col3 = st.columns([1, 1, 2])
         
         with col1:
@@ -838,8 +803,7 @@ def tela_fundos():
                 <a href="{links['material']}" target="_blank" style="text-decoration: none;">
                     <button style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); 
                                    color: white; border: none; padding: 12px 20px; border-radius: 8px; 
-                                   font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;
-                                   transition: all 0.3s ease;">
+                                   font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
                         📄 Material Publicitário
                     </button>
                 </a>
@@ -859,8 +823,7 @@ def tela_fundos():
                 <a href="{links['expert']}" target="_blank" style="text-decoration: none;">
                     <button style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); 
                                    color: white; border: none; padding: 12px 20px; border-radius: 8px; 
-                                   font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;
-                                   transition: all 0.3s ease;">
+                                   font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
                         🎓 Expert XP
                     </button>
                 </a>
@@ -876,34 +839,34 @@ def tela_fundos():
         
         st.markdown("<br>", unsafe_allow_html=True)
     
-    # Aviso no final
-    st.markdown("""
-    <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; border-left: 5px solid #27ae60; margin-top: 30px;">
-        <p style="color: #1e4d2b; font-weight: bold; margin-bottom: 10px;">⚠️ Links não cadastrados</p>
-        <p style="color: #2c3e50; margin: 0;">
-            Para configurar os links dos fundos, acesse o arquivo Excel na aba "Fundos" e preencha as colunas:
-            <strong>Link Expert</strong> e <strong>Link Material</strong>
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+    # AVISO REMOVIDO conforme solicitação
 
 # ============================================
-# CARREGAR DADOS
+# CARREGAR DADOS - CORRIGIDO
 # ============================================
 
 @st.cache_data
 def carregar_dados():
-    """Carrega a base de dados do Excel - MUDANÇA 3"""
+    """Carrega dados do Excel - CORRIGIDO PARA LER APLICAÇÕES"""
     try:
-        # Carregar a aba Base
-        df = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Base')
+        # Carregar Base para assessores e clientes
+        df_base = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Base')
         
-        # Garantir que a coluna Aplicação seja tratada corretamente
-        if 'Aplicação' in df.columns:
-            # Renomear para Financeiro para compatibilidade com o código
-            df = df.rename(columns={'Aplicação': 'Financeiro'})
+        # Carregar Aplicações para valores corretos
+        df_aplicacoes = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Aplicações')
         
-        return df
+        # Criar dicionário de valores aplicados por cliente e fundo
+        valores_dict = {}
+        for _, row in df_aplicacoes.iterrows():
+            codigo_cliente = str(row['Código do Cliente']).strip()
+            fundo = str(row['Fundo']).strip()
+            valor = float(row['Valor Solicitado'])
+            
+            if codigo_cliente not in valores_dict:
+                valores_dict[codigo_cliente] = {}
+            valores_dict[codigo_cliente][fundo] = valor
+        
+        return df_base, valores_dict
     except FileNotFoundError:
         st.error("❌ Arquivo 'calendario_Renda_mais.xlsx' não encontrado!")
         st.stop()
@@ -912,14 +875,14 @@ def carregar_dados():
         st.stop()
 
 # ============================================
-# FUNÇÃO PRINCIPAL
+# FUNÇÃO PRINCIPAL - CORRIGIDA
 # ============================================
 
 def main():
     """Função principal do sistema"""
     
     # Carregar dados
-    df_base = carregar_dados()
+    df_base, valores_dict = carregar_dados()
     
     # Verificar autenticação
     if 'pagina_atual' not in st.session_state:
@@ -933,7 +896,7 @@ def main():
     # TELA DE LOGIN
     verificar_autenticacao(df_base)
     
-    # SISTEMA PRINCIPAL (após autenticação)
+    # SISTEMA PRINCIPAL
     feriados = gerar_feriados(datetime.now().year)
     
     # Header do sistema
@@ -963,7 +926,7 @@ def main():
             st.session_state.pagina_atual = 'fundos'
             st.rerun()
     
-    # Filtrar apenas clientes do assessor logado - MUDANÇA 3
+    # Filtrar apenas clientes do assessor logado
     df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip()
     df_base_filtrado = df_base[df_base['Assessor'] == str(st.session_state.assessor_logado)]
     
@@ -971,7 +934,7 @@ def main():
         st.error("❌ Nenhum cliente encontrado para este assessor!")
         st.stop()
     
-    # SELETOR DE CLIENTE - MUDANÇA 2 (ajustado CSS acima)
+    # SELETOR DE CLIENTE - CORRIGIDO SEM PRETO
     st.markdown('<div class="cliente-selector"><h3>👥 SELECIONE O CLIENTE</h3>', unsafe_allow_html=True)
     
     clientes = sorted(df_base_filtrado['Cliente'].unique())
@@ -999,19 +962,19 @@ def main():
         
         for _, fundo in fundos_cliente.iterrows():
             ativo = fundo['Ativo']
+            cliente_codigo = str(int(fundo['Cliente']))
             
-            # MUDANÇA 3 - Usar coluna Financeiro (que foi renomeada de Aplicação)
-            try:
-                valor_aplicado = float(fundo['Financeiro'])
-            except:
-                valor_aplicado = 0.0
+            # BUSCAR VALOR CORRETO DA ABA APLICAÇÕES
+            valor_aplicado = 0.0
+            if cliente_codigo in valores_dict and ativo in valores_dict[cliente_codigo]:
+                valor_aplicado = valores_dict[cliente_codigo][ativo]
             
             try:
                 percentual_liquido = float(fundo.get('Rendimento %', 0))
             except:
                 percentual_liquido = 0.0
             
-            valor_liquido_cupom = valor_aplicado * (percentual_liquido / 100)
+            valor_liquido_cupom = valor_aplicado * percentual_liquido
             
             info = buscar_info_fundo(ativo, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
             tese = info['tese']
@@ -1034,13 +997,12 @@ def main():
             
             classe_selecao = 'fundo-card-selecionado' if ativo == st.session_state.fundo_selecionado else ''
             
-            # MUDANÇA 4 - Criar tooltip com a tese para exibir ao passar o mouse
-            tese_tooltip = f"{tese.get('resumo', '')}\\n\\n📋 Condições:\\n{tese.get('condicoes', '')}\\n\\n⚡ Venda em 1 Minuto:\\n{tese.get('venda_1min', '')}\\n\\n🎯 Perfil:\\n{tese.get('perfil', '')}"
-            
+            # Card do fundo - SEM TOOLTIP
             st.markdown(f"""
             <div class="fundo-card-container">
-                <div class="fundo-card {classe_selecao}" style="border-left-color: {info.get('cor', '#27ae60')}">
-                    <div class="nome" data-tese="{tese_tooltip}" title="Passe o mouse para ver a tese">{ativo}</div>
+                <div class="fundo-card {classe_selecao}" style="border-left-color: {info.get('cor', '#27ae60')}"
+                     onmouseenter="document.getElementById('fundo_selecionado_{ativo.replace(' ', '_')}').click()">
+                    <div class="nome" title="Clique ou passe o mouse para ver a tese">{ativo}</div>
                     <div class="info" style="margin-top: 8px;">
                         <div style="margin-bottom: 4px;">💰 <strong>Valor Aplicado:</strong> <span class="valor">R$ {valor_aplicado:,.2f}</span></div>
                         <div style="margin-bottom: 4px;">📅 <strong>Data Pagamento:</strong> {data_texto}</div>
@@ -1050,9 +1012,8 @@ def main():
                 </div>
             """, unsafe_allow_html=True)
             
-            # MUDANÇA 4 - Removido o botão verde que abria a tese
-            # Agora a tese aparece ao passar o mouse sobre o nome do fundo
-            if st.button("📊 Selecionar", key=f"select_{ativo}", help=f"Selecionar: {ativo}"):
+            # Botão invisível para seleção ao passar o mouse
+            if st.button("", key=f"fundo_selecionado_{ativo.replace(' ', '_')}", help=f"Selecionar {ativo}"):
                 st.session_state.fundo_selecionado = ativo
                 st.rerun()
             
