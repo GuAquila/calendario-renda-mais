@@ -891,7 +891,7 @@ def main():
         for _, fundo in fundos_cliente.iterrows():
             ativo = fundo['Ativo']
             
-            # USAR COLUNA APLICAÇÃO DA BASE
+            # USAR COLUNA FINANCEIRO DA BASE
             try:
                 valor_aplicado = float(fundo['Financeiro'])
             except:
