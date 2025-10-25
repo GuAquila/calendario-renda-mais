@@ -806,7 +806,7 @@ def carregar_dados():
         df_base = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Base', engine='openpyxl')
         
         # Verificar se as colunas necessárias existem
-        colunas_necessarias = ['Assessor', 'Cliente', 'Ativo', 'Aplicação', 'Rendimento %']
+        colunas_necessarias = ['Assessor', 'Cliente', 'Ativo', 'Financeiro', 'Rendimento %']
         for coluna in colunas_necessarias:
             if coluna not in df_base.columns:
                 st.error(f"❌ Coluna '{coluna}' não encontrada na planilha!")
@@ -816,7 +816,7 @@ def carregar_dados():
         df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip()
         df_base['Cliente'] = df_base['Cliente'].astype(str).str.strip()
         df_base['Ativo'] = df_base['Ativo'].astype(str).str.strip()
-        df_base['Aplicação'] = pd.to_numeric(df_base['Aplicação'], errors='coerce').fillna(0)
+        df_base['Financeiro'] = pd.to_numeric(df_base['Financeiro'], errors='coerce').fillna(0)
         df_base['Rendimento %'] = pd.to_numeric(df_base['Rendimento %'], errors='coerce').fillna(0)
         
         return df_base
@@ -909,9 +909,9 @@ def main():
         for _, fundo in fundos_cliente.iterrows():
             ativo = fundo['Ativo']
             
-            # USAR COLUNA APLICAÇÃO DA BASE
+            # USAR COLUNA Financeiro DA BASE
             try:
-                valor_aplicado = float(fundo['Aplicação'])
+                valor_aplicado = float(fundo['Financeiro'])
             except:
                 valor_aplicado = 0.0
             
