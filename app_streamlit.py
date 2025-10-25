@@ -803,8 +803,26 @@ def tela_fundos():
 def carregar_dados():
     """Carrega dados APENAS da aba Base"""
     try:
-        df_base = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Base')
+        df_base = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Base', engine='openpyxl')
+        
+        # Verificar se as colunas necessárias existem
+        colunas_necessarias = ['Assessor', 'Cliente', 'Ativo', 'Aplicação', 'Rendimento %']
+        for coluna in colunas_necessarias:
+            if coluna not in df_base.columns:
+                st.error(f"❌ Coluna '{coluna}' não encontrada na planilha!")
+                st.stop()
+        
+        # Limpar e formatar dados
+        df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip()
+        df_base['Cliente'] = df_base['Cliente'].astype(str).str.strip()
+        df_base['Ativo'] = df_base['Ativo'].astype(str).str.strip()
+        df_base['Aplicação'] = pd.to_numeric(df_base['Aplicação'], errors='coerce').fillna(0)
+        df_base['Rendimento %'] = pd.to_numeric(df_base['Rendimento %'], errors='coerce').fillna(0)
+        
         return df_base
+    except FileNotFoundError:
+        st.error("❌ Arquivo 'calendario_Renda_mais.xlsx' não encontrado! Verifique se o arquivo está na mesma pasta do código.")
+        st.stop()
     except Exception as e:
         st.error(f"❌ Erro ao carregar Excel: {str(e)}")
         st.stop()
