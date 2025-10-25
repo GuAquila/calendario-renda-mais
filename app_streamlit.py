@@ -893,14 +893,10 @@ def main():
             
             # USAR COLUNA APLICAÇÃO DA BASE
             try:
-                valor_aplicado = float(fundo['Aplicação'])
-            except:
-                valor_aplicado = 0.0
+                valor_aplicado = float(fundo['Financeiro'])
             
             try:
-                percentual_liquido = float(fundo['Rendimento %'])
-            except:
-                percentual_liquido = 0.0
+                percentual_liquido = float(fundo['Rendimento'])
             
             valor_liquido_cupom = valor_aplicado * percentual_liquido
             
