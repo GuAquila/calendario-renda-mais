@@ -1,15 +1,16 @@
 """
-CALENDÁRIO RENDA MAIS - VERSÃO CORRIGIDA
-==========================================
-✅ Valor Aplicado vem do Excel (coluna "Aplicação")
-✅ Texto "Escolha seu fundo" em PRETO
-✅ Fundo selecionado aparece PRIMEIRO na lista com BORDA em destaque
+CALENDÁRIO RENDA MAIS - COM AUTENTICAÇÃO POR ASSESSOR
+======================================================
+Sistema multi-assessor com senhas individuais
+VERSÃO FINAL LIMPA - 24/10/2025
+Usa APENAS aba "Base" do Excel
 """
 
 import streamlit as st
 import pandas as pd
 from datetime import datetime, date, timedelta
 import calendar
+import os
 
 st.set_page_config(
     page_title="Calendário Renda Mais - TAUARI",
@@ -19,7 +20,7 @@ st.set_page_config(
 )
 
 # ============================================
-# DADOS DOS ASSESSORES
+# AUTENTICAÇÃO POR ASSESSOR
 # ============================================
 
 ASSESSORES = {
@@ -33,6 +34,10 @@ ASSESSORES = {
     '74644': ('Marcelo Fontes de Almeida', 'MFA2025'),
     '39586': ('Marco Antonio de Moraes', 'MAM2025'),
     '46857': ('Gustavo Aquila', 'GA2025'),
+    '29871': ('Jonathan Francesco Barletta', 'JFB2025'),
+    '97495': ('Luana Peres Ribeiro', 'LPR2025'),
+    '90410': ('Marta Maria Acquisti Guarido', 'MMAG2025'),
+    '46604': ('Roberto da Silva Junior', 'RSJ2025'),
     '51594': ('Bruna Rafaela Teixeira Mateos', 'BRTM2025'),
     '91796': ('Jose Dy Carlos Bueno Chiroza', 'JDCBC2025'),
     '47104': ('Kamila Munhoz Adario', 'KMA2025'),
@@ -40,18 +45,23 @@ ASSESSORES = {
     '24931': ('Paula Pellegrini Reimao', 'PPR2025'),
     '91476': ('Rafael Iran Gomes Januario', 'RIGJ2025'),
     '42596': ('Ricardo Salles de Godoy', 'RSG2025'),
+    '94296': ('Vanessa Alves Mattar Calfat', 'VAMC2025'),
     '67756': ('Vinicius Nunes Palacios', 'VNP2025'),
 }
 
 def validar_senha_assessor(codigo_assessor, senha):
+    """Valida a senha do assessor"""
     if codigo_assessor not in ASSESSORES:
         return False, None
+    
     nome_assessor, senha_esperada = ASSESSORES[codigo_assessor]
     if senha == senha_esperada:
         return True, nome_assessor
     return False, None
 
 def verificar_autenticacao(df_base):
+    """Tela de login por assessor"""
+    
     if 'autenticado' not in st.session_state:
         st.session_state.autenticado = False
     if 'assessor_logado' not in st.session_state:
@@ -64,7 +74,9 @@ def verificar_autenticacao(df_base):
     if not st.session_state.autenticado:
         st.markdown("""
         <style>
-            .stApp { background: white; }
+            .stApp {
+                background: white;
+            }
             .login-box {
                 max-width: 450px;
                 margin: 120px auto;
@@ -96,19 +108,19 @@ def verificar_autenticacao(df_base):
             try:
                 st.image("logo_tauari.png", width=350)
             except:
-                st.markdown("<div style='text-align: center; padding: 20px;'><div style='background: #2d5a3d; color: white; padding: 40px; border-radius: 10px; font-size: 14px;'>📁 Logo não encontrada</div></div>", unsafe_allow_html=True)
+                st.markdown("<div style='text-align: center; padding: 20px;'><div style='background: #2d5a3d; color: white; padding: 40px; border-radius: 10px; font-size: 14px;'>📁 Salve a logo como 'logo_tauari.png'<br>na mesma pasta do código</div></div>", unsafe_allow_html=True)
             
             st.markdown("""
             <div class="login-titulo">
                 <h2 style='margin: 10px 0; font-size: 24px;'>Calendário Renda Mais - Tauari Investimentos</h2>
-                <p style='color: #7f8c8d; font-size: 14px; margin-top: 15px;'>Acesso restrito por Assessor</p>
+                <p style='color: #7f8c8d; font-size: 14px; margin-top: 15px;'>Acesso restrito por Assessor (uso interno) - Última atualização 24/10</p>
             </div>
             """, unsafe_allow_html=True)
             
             with st.form("login_form"):
                 codigo_assessor = st.text_input(
                     "👤 Código do Assessor:",
-                    placeholder="Ex: 46857",
+                    placeholder="Coloque seu código, exemplo: 46857",
                     max_chars=10,
                     key="codigo_input"
                 )
@@ -155,16 +167,16 @@ def verificar_autenticacao(df_base):
             st.markdown("""
             <div class="login-info">
                 <strong>ℹ️ Como acessar:</strong><br>
-                • Digite seu código de assessor<br>
+                • Digite seu código de assessor (apenas números)<br>
                 • Digite sua senha pessoal<br>
-                • Dúvidas: <strong>gustavo.aquila@tauariinvestimentos.com.br</strong>
+                • Em caso de dúvidas: <strong>gustavo.aquila@tauariinvestimentos.com.br</strong>
             </div>
             """, unsafe_allow_html=True)
         
         st.stop()
 
 # ============================================
-# CSS COM CORREÇÕES
+# CSS
 # ============================================
 
 st.markdown("""
@@ -186,6 +198,7 @@ st.markdown("""
         font-size: 28px;
         font-weight: bold;
         margin: 0;
+        text-align: left;
     }
     
     .info-assessor {
@@ -194,25 +207,7 @@ st.markdown("""
         margin-top: 5px;
     }
     
-    /* CORREÇÃO: Texto do selectbox em PRETO */
-    .stSelectbox label {
-        color: #000000 !important;
-        font-weight: bold !important;
-        font-size: 16px !important;
-    }
-    
-    .stSelectbox [data-baseweb="select"] {
-        color: #000000 !important;
-    }
-    
-    .stSelectbox [data-baseweb="select"] > div {
-        color: #000000 !important;
-    }
-    
-    .stSelectbox [data-baseweb="select"] span {
-        color: #000000 !important;
-    }
-    
+    /* BARRA DE SELEÇÃO - LIMPA */
     .cliente-selector {
         background: white !important;
         padding: 12px 20px;
@@ -231,24 +226,7 @@ st.markdown("""
         text-align: center;
     }
     
-    .fundo-selector {
-        background: white !important;
-        padding: 12px 20px;
-        border-radius: 8px;
-        margin-bottom: 25px;
-        border: 2px solid #27ae60;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        max-width: 500px;
-    }
-    
-    .fundo-selector h3 {
-        color: #000000 !important;
-        font-size: 16px !important;
-        font-weight: bold;
-        margin: 0 0 8px 0 !important;
-        text-align: center;
-    }
-    
+    /* Selectbox styling */
     [data-baseweb="select"] {
         min-height: 40px !important;
     }
@@ -304,12 +282,10 @@ st.markdown("""
         border-color: #27ae60;
     }
     
-    /* CORREÇÃO: Fundo selecionado com BORDA FORTE */
     .fundo-card-selecionado {
-        border: 5px solid #27ae60 !important;
-        background: #e8f5e9 !important;
-        box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4) !important;
-        transform: scale(1.03) !important;
+        border: 3px solid #27ae60 !important;
+        background: #f0f9f4 !important;
+        box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
     }
     
     .fundo-card .nome {
@@ -448,49 +424,82 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ============================================
-# FUNÇÕES AUXILIARES
+# DADOS E CONFIGURAÇÕES
 # ============================================
-
-def gerar_feriados(ano):
-    feriados = [
-        date(ano, 1, 1), date(ano, 4, 21), date(ano, 5, 1),
-        date(ano, 9, 7), date(ano, 10, 12), date(ano, 11, 2),
-        date(ano, 11, 15), date(ano, 12, 25),
-    ]
-    return feriados
-
-def calcular_dia_util(ano, mes, dia_util_alvo, feriados):
-    data_atual = date(ano, mes, 1)
-    dias_uteis_contados = 0
-    
-    while dias_uteis_contados < dia_util_alvo:
-        if data_atual.weekday() < 5 and data_atual not in feriados:
-            dias_uteis_contados += 1
-            if dias_uteis_contados == dia_util_alvo:
-                return data_atual
-        data_atual += timedelta(days=1)
-        if data_atual.month != mes:
-            return None
-    return None
 
 MESES_PT = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ]
 
+def gerar_feriados(ano):
+    """Gera lista de feriados nacionais"""
+    feriados_fixos = {
+        (1, 1): "Ano Novo",
+        (4, 21): "Tiradentes",
+        (5, 1): "Dia do Trabalho",
+        (9, 7): "Independência",
+        (10, 12): "Nossa Senhora Aparecida",
+        (11, 2): "Finados",
+        (11, 15): "Proclamação da República",
+        (11, 20): "Dia da Consciência Negra",
+        (12, 25): "Natal"
+    }
+    
+    feriados_moveis = {
+        2025: [(2, 28), (3, 3), (3, 4), (4, 18), (5, 29)],
+        2026: [(2, 13), (2, 16), (2, 17), (4, 3), (5, 14)],
+        2027: [(2, 5), (2, 8), (2, 9), (3, 26), (5, 6)],
+    }
+    
+    lista_feriados = []
+    for (mes, dia), nome in feriados_fixos.items():
+        lista_feriados.append(date(ano, mes, dia))
+    
+    if ano in feriados_moveis:
+        for (mes, dia) in feriados_moveis[ano]:
+            lista_feriados.append(date(ano, mes, dia))
+    
+    return lista_feriados
+
+def calcular_dia_util(ano, mes, dia_util_desejado, feriados):
+    """Calcula o dia útil real do mês"""
+    primeiro_dia = date(ano, mes, 1)
+    
+    if primeiro_dia.month == 12:
+        ultimo_dia = date(ano, mes, 31)
+    else:
+        ultimo_dia = (date(ano, mes + 1, 1) - timedelta(days=1))
+    
+    dia_atual = primeiro_dia
+    contador_dias_uteis = 0
+    
+    while dia_atual <= ultimo_dia:
+        if dia_atual.weekday() < 5 and dia_atual not in feriados:
+            contador_dias_uteis += 1
+            if contador_dias_uteis == dia_util_desejado:
+                return dia_atual
+        dia_atual += timedelta(days=1)
+    
+    return None
+
+# ============================================
+# MAPEAMENTO DOS FUNDOS
+# ============================================
+
 MAPA_PAGAMENTOS = {
-    'ARX FII Portfólio Renda CDI+ RL': 5,
+    'ARX FII Portfólio Renda CDI+ RL': 15,
     'AZ Quest Renda Mais Infra-Yield VI FIP-IE': 5,
     'AZ QUEST PANORAMA RENDA CDI FI RESPONSABILIDADE LIMITADA': 5,
     'AZ Quest Panorama Renda CDI FI RL': 5,
-    'BGR Galpões Logísticos - Cota Sênior': 7,
-    'BGR Galpões Logísticos - Cota Subordinada': 7,
-    'Maua Lajes Corporativas Feeder FII RL - Senior': 7,
-    'SPX CRI Portfolio Renda Mais': 5,
+    'BGR Galpões Logísticos - Cota Sênior': 15,
+    'BGR Galpões Logísticos - Cota Subordinada': 15,
+    'Maua Lajes Corporativas Feeder FII RL - Senior': 15,
+    'SPX CRI Portfolio Renda Mais': 15,
     'Solis Portfolio Crédito CDI+ FIC FIDC RL': 5,
-    'XP Renda Imobiliária Feeder FII RL': 5,
-    'XP Habitat Renda Imobiliária Feeder FII': 5,
-    'Valora CRI CDI Renda+ FII RL': 5,
+    'XP Renda Imobiliária Feeder FII RL': 15,
+    'XP Habitat Renda Imobiliária Feeder FII': 15,
+    'Valora CRI CDI Renda+ FII RL': 15,
 }
 
 MAPA_CORES = {
@@ -499,129 +508,129 @@ MAPA_CORES = {
     'AZ QUEST PANORAMA RENDA CDI FI RESPONSABILIDADE LIMITADA': '#9b59b6',
     'AZ Quest Panorama Renda CDI FI RL': '#9b59b6',
     'BGR Galpões Logísticos - Cota Sênior': '#f39c12',
-    'BGR Galpões Logísticos - Cota Subordinada': '#d35400',
+    'BGR Galpões Logísticos - Cota Subordinada': '#e67e22',
     'Maua Lajes Corporativas Feeder FII RL - Senior': '#1abc9c',
-    'SPX CRI Portfolio Renda Mais': '#34495e',
-    'Solis Portfolio Crédito CDI+ FIC FIDC RL': '#16a085',
-    'XP Renda Imobiliária Feeder FII RL': '#27ae60',
-    'XP Habitat Renda Imobiliária Feeder FII': '#2ecc71',
-    'Valora CRI CDI Renda+ FII RL': '#e67e22',
+    'SPX CRI Portfolio Renda Mais': '#2ecc71',
+    'Solis Portfolio Crédito CDI+ FIC FIDC RL': '#34495e',
+    'XP Renda Imobiliária Feeder FII RL': '#16a085',
+    'XP Habitat Renda Imobiliária Feeder FII': '#27ae60',
+    'Valora CRI CDI Renda+ FII RL': '#8e44ad',
 }
 
 MAPA_SIGLAS = {
     'ARX FII Portfólio Renda CDI+ RL': 'ARX',
-    'AZ Quest Renda Mais Infra-Yield VI FIP-IE': 'AZ Infra',
-    'AZ QUEST PANORAMA RENDA CDI FI RESPONSABILIDADE LIMITADA': 'AZ Pan',
-    'AZ Quest Panorama Renda CDI FI RL': 'AZ Pan',
-    'BGR Galpões Logísticos - Cota Sênior': 'BGR Sr',
+    'AZ Quest Renda Mais Infra-Yield VI FIP-IE': 'AZ Quest',
+    'AZ QUEST PANORAMA RENDA CDI FI RESPONSABILIDADE LIMITADA': 'AZ Panorama',
+    'AZ Quest Panorama Renda CDI FI RL': 'AZ Panorama',
+    'BGR Galpões Logísticos - Cota Sênior': 'BGR Senior',
     'BGR Galpões Logísticos - Cota Subordinada': 'BGR Sub',
-    'Maua Lajes Corporativas Feeder FII RL - Senior': 'Maua',
+    'Maua Lajes Corporativas Feeder FII RL - Senior': 'Maua Senior',
     'SPX CRI Portfolio Renda Mais': 'SPX',
     'Solis Portfolio Crédito CDI+ FIC FIDC RL': 'Solis',
     'XP Renda Imobiliária Feeder FII RL': 'XP Renda',
-    'XP Habitat Renda Imobiliária Feeder FII': 'XP Hab',
+    'XP Habitat Renda Imobiliária Feeder FII': 'XP Habitat',
     'Valora CRI CDI Renda+ FII RL': 'Valora',
 }
 
 MAPA_TESES = {
     'ARX FII Portfólio Renda CDI+ RL': {
-        'resumo': 'Fundo focado em CRIs com rentabilidade atrelada ao CDI, gestão da ARX.',
+        'resumo': 'Fundo de Investimento Imobiliário focado em CRIs com rentabilidade atrelada ao CDI+.',
         'condicoes': '''• Rentabilidade: CDI + spread
 • Prazo: Médio/Longo prazo
-• Liquidez: D+30
+• Liquidez: D+30 a D+60
 • Público-alvo: Investidores qualificados''',
-        'venda_1min': 'Fundo de CRIs que busca rentabilidade acima do CDI com baixa volatilidade.',
-        'perfil': 'Investidores que buscam renda passiva com proteção do CDI.'
+        'venda_1min': 'Fundo imobiliário com foco em CRIs que busca rentabilidade acima do CDI, oferecendo uma boa alternativa para renda passiva.',
+        'perfil': 'Investidores que buscam renda recorrente com retornos superiores ao CDI através do mercado imobiliário.'
     },
     'AZ Quest Renda Mais Infra-Yield VI FIP-IE': {
-        'resumo': 'Fundo de infraestrutura com foco em ativos reais e renda previsível.',
+        'resumo': 'Fundo de investimento em participações focado em infraestrutura com geração de renda.',
         'condicoes': '''• Rentabilidade: IPCA + spread
-• Prazo: Longo prazo (5-7 anos)
+• Prazo: Longo prazo
 • Liquidez: Baixa (prazo determinado)
 • Público-alvo: Investidores qualificados''',
-        'venda_1min': 'Investe em infraestrutura brasileira gerando renda atrelada à inflação.',
-        'perfil': 'Investidores de longo prazo que buscam proteção inflacionária.'
+        'venda_1min': 'Fundo de infraestrutura que investe em ativos geradores de renda, protegidos contra inflação.',
+        'perfil': 'Investidores que buscam proteção inflacionária e renda de longo prazo através de ativos de infraestrutura.'
     },
     'AZ QUEST PANORAMA RENDA CDI FI RESPONSABILIDADE LIMITADA': {
-        'resumo': 'Fundo imobiliário com estratégia diversificada e rentabilidade atrelada ao CDI.',
+        'resumo': 'Fundo de renda fixa com objetivo de superar o CDI através de uma carteira diversificada.',
         'condicoes': '''• Rentabilidade: CDI + spread
 • Prazo: Médio prazo
-• Liquidez: D+30 a D+60
-• Público-alvo: Investidores qualificados''',
-        'venda_1min': 'Fundo de tijolo e papel que busca rentabilidade superior ao CDI.',
-        'perfil': 'Investidores que buscam diversificação imobiliária com renda CDI+.'
+• Liquidez: D+30
+• Público-alvo: Investidor geral''',
+        'venda_1min': 'Fundo que busca retornos superiores ao CDI investindo em uma carteira diversificada de crédito privado.',
+        'perfil': 'Investidores conservadores que buscam retornos superiores ao CDI com gestão ativa.'
     },
     'AZ Quest Panorama Renda CDI FI RL': {
-        'resumo': 'Fundo imobiliário com estratégia diversificada e rentabilidade atrelada ao CDI.',
+        'resumo': 'Fundo de renda fixa com objetivo de superar o CDI através de uma carteira diversificada.',
+        'condicoes': '''• Rentabilidade: CDI + spread
+• Prazo: Médio prazo
+• Liquidez: D+30
+• Público-alvo: Investidor geral''',
+        'venda_1min': 'Fundo que busca retornos superiores ao CDI investindo em uma carteira diversificada de crédito privado.',
+        'perfil': 'Investidores conservadores que buscam retornos superiores ao CDI com gestão ativa.'
+    },
+    'BGR Galpões Logísticos - Cota Sênior': {
+        'resumo': 'Fundo imobiliário focado em galpões logísticos com estrutura de cotas sênior.',
+        'condicoes': '''• Rentabilidade: IPCA + spread
+• Prazo: Médio/Longo prazo
+• Liquidez: D+60
+• Público-alvo: Investidores qualificados''',
+        'venda_1min': 'Investimento em galpões logísticos com cota sênior, oferecendo menor risco e proteção inflacionária.',
+        'perfil': 'Investidores que buscam renda no setor logístico com menor risco através da estrutura sênior.'
+    },
+    'BGR Galpões Logísticos - Cota Subordinada': {
+        'resumo': 'Fundo imobiliário focado em galpões logísticos com estrutura de cotas subordinadas.',
+        'condicoes': '''• Rentabilidade: Maior potencial de retorno
+• Prazo: Médio/Longo prazo
+• Liquidez: D+60
+• Público-alvo: Investidores qualificados''',
+        'venda_1min': 'Investimento em galpões logísticos com cota subordinada, oferecendo maior potencial de retorno.',
+        'perfil': 'Investidores que aceitam maior risco em busca de retornos superiores no setor logístico.'
+    },
+    'Maua Lajes Corporativas Feeder FII RL - Senior': {
+        'resumo': 'Fundo imobiliário focado em lajes corporativas com estrutura sênior.',
         'condicoes': '''• Rentabilidade: CDI + spread
 • Prazo: Médio prazo
 • Liquidez: D+30 a D+60
 • Público-alvo: Investidores qualificados''',
-        'venda_1min': 'Fundo de tijolo e papel que busca rentabilidade superior ao CDI.',
-        'perfil': 'Investidores que buscam diversificação imobiliária com renda CDI+.'
-    },
-    'BGR Galpões Logísticos - Cota Sênior': {
-        'resumo': 'Fundo focado em galpões logísticos com estrutura sênior.',
-        'condicoes': '''• Rentabilidade: IPCA + spread
-• Prazo: Médio/Longo prazo
-• Liquidez: D+60
-• Público-alvo: Investidores qualificados''',
-        'venda_1min': 'Investe em galpões logísticos com preferência no recebimento.',
-        'perfil': 'Investidores conservadores que buscam renda com segurança.'
-    },
-    'BGR Galpões Logísticos - Cota Subordinada': {
-        'resumo': 'Fundo focado em galpões logísticos com estrutura subordinada.',
-        'condicoes': '''• Rentabilidade: IPCA + spread maior
-• Prazo: Médio/Longo prazo
-• Liquidez: D+60
-• Público-alvo: Investidores qualificados''',
-        'venda_1min': 'Investe em galpões logísticos com potencial de retorno superior.',
-        'perfil': 'Investidores que aceitam maior risco para buscar maior retorno.'
-    },
-    'Maua Lajes Corporativas Feeder FII RL - Senior': {
-        'resumo': 'Fundo focado em lajes corporativas com estrutura sênior.',
-        'condicoes': '''• Rentabilidade: IPCA + spread
-• Prazo: Médio/Longo prazo
-• Liquidez: D+60
-• Público-alvo: Investidores qualificados''',
-        'venda_1min': 'Investe em lajes corporativas AAA com prioridade no recebimento.',
-        'perfil': 'Investidores que buscam renda previsível em imóveis corporativos.'
+        'venda_1min': 'Fundo de lajes corporativas com estrutura sênior, proporcionando renda estável do mercado corporativo.',
+        'perfil': 'Investidores que buscam renda do mercado imobiliário corporativo com menor risco.'
     },
     'SPX CRI Portfolio Renda Mais': {
-        'resumo': 'Fundo de CRIs com gestão SPX Capital focado em renda.',
+        'resumo': 'Fundo focado em Certificados de Recebíveis Imobiliários diversificado.',
+        'condicoes': '''• Rentabilidade: IPCA/CDI + spread
+• Prazo: Médio/Longo prazo
+• Liquidez: D+30 a D+60
+• Público-alvo: Investidores qualificados''',
+        'venda_1min': 'Portfolio diversificado de CRIs que busca renda recorrente com proteção inflacionária.',
+        'perfil': 'Investidores que buscam diversificação no mercado imobiliário através de CRIs.'
+    },
+    'Solis Portfolio Crédito CDI+ FIC FIDC RL': {
+        'resumo': 'Fundo de crédito privado que investe em direitos creditórios diversos.',
         'condicoes': '''• Rentabilidade: CDI + spread
 • Prazo: Médio prazo
 • Liquidez: D+30
-• Público-alvo: Investidores qualificados''',
-        'venda_1min': 'Portfolio de CRIs selecionados pela SPX Capital.',
-        'perfil': 'Investidores que buscam renda através de crédito imobiliário.'
-    },
-    'Solis Portfolio Crédito CDI+ FIC FIDC RL': {
-        'resumo': 'Fundo de crédito com rentabilidade atrelada ao CDI.',
-        'condicoes': '''• Rentabilidade: CDI + spread
-• Prazo: Curto/Médio prazo
-• Liquidez: D+30
-• Público-alvo: Investidores qualificados''',
-        'venda_1min': 'Fundo de crédito diversificado que busca rentabilidade acima do CDI.',
-        'perfil': 'Investidores que buscam renda em crédito privado.'
+• Público-alvo: Investidor geral''',
+        'venda_1min': 'Fundo de crédito privado diversificado que busca retornos superiores ao CDI.',
+        'perfil': 'Investidores moderados que buscam retornos atrativos através de crédito privado.'
     },
     'XP Renda Imobiliária Feeder FII RL': {
-        'resumo': 'Fundo feeder que investe em fundos imobiliários de renda.',
-        'condicoes': '''• Rentabilidade: Renda variável
-• Prazo: Médio/Longo prazo
+        'resumo': 'Fundo de fundos imobiliários que investe em FIIs geradores de renda.',
+        'condicoes': '''• Rentabilidade: Distribuição mensal
+• Prazo: Indeterminado
 • Liquidez: D+30
-• Público-alvo: Investidores qualificados''',
-        'venda_1min': 'Acesso a portfolio diversificado de fundos imobiliários.',
-        'perfil': 'Investidores que buscam diversificação em FIIs.'
+• Público-alvo: Investidor geral''',
+        'venda_1min': 'Fundo que investe em uma carteira diversificada de FIIs geradores de renda mensal.',
+        'perfil': 'Investidores que buscam renda recorrente através de uma carteira diversificada de FIIs.'
     },
     'XP Habitat Renda Imobiliária Feeder FII': {
-        'resumo': 'Fundo feeder focado em imóveis residenciais para renda.',
-        'condicoes': '''• Rentabilidade: Renda variável
-• Prazo: Médio/Longo prazo
+        'resumo': 'Fundo de fundos imobiliários focado em ativos residenciais.',
+        'condicoes': '''• Rentabilidade: Distribuição mensal
+• Prazo: Indeterminado
 • Liquidez: D+30
-• Público-alvo: Investidores qualificados''',
-        'venda_1min': 'Investe em fundos imobiliários focados no setor residencial.',
-        'perfil': 'Investidores que buscam exposição ao mercado residencial.'
+• Público-alvo: Investidor geral''',
+        'venda_1min': 'Fundo que investe em FIIs do setor residencial, oferecendo renda mensal.',
+        'perfil': 'Investidores que buscam exposição ao mercado residencial através de FIIs.'
     },
     'Valora CRI CDI Renda+ FII RL': {
         'resumo': 'Fundo imobiliário focado em CRIs com rentabilidade atrelada ao CDI.',
@@ -629,7 +638,7 @@ MAPA_TESES = {
 • Prazo: Médio/Longo prazo
 • Liquidez: D+30 a D+60
 • Público-alvo: Investidores qualificados''',
-        'venda_1min': 'Fundo de CRIs que busca rentabilidade acima do CDI.',
+        'venda_1min': 'Fundo de CRIs que busca rentabilidade acima do CDI com gestão profissional.',
         'perfil': 'Investidores que buscam renda através de CRIs com retornos superiores ao CDI.'
     }
 }
@@ -639,9 +648,54 @@ MAPA_LINKS = {
         'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/dezembro-24-arx-fii-portfolio-renda-cdi-rl/',
         'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2024/11/Material-Publicitario-1a-Emissao-ARX-Portfolio-Renda-CDI_vf.pdf'
     },
+    'AZ Quest Renda Mais Infra-Yield VI FIP-IE': {
+        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/marco-25-az-quest-renda-mais/',
+        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/03/AZQI-RENDA_Material-Publicitario-vf-26_03.pdf'
+    },
+    'AZ QUEST PANORAMA RENDA CDI FI RESPONSABILIDADE LIMITADA': {
+        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/agosto-25-1a-emissao-az-quest-panorama-renda-cdi-fii-portfolio-renda-mais-fii-prazo-determinado/',
+        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2021/01/AZ-Quest-Panorama_MP-VF-1.pdf'
+    },
+    'AZ Quest Panorama Renda CDI FI RL': {
+        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/agosto-25-1a-emissao-az-quest-panorama-renda-cdi-fii-portfolio-renda-mais-fii-prazo-determinado/',
+        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2021/01/AZ-Quest-Panorama_MP-VF-1.pdf'
+    },
+    'BGR Galpões Logísticos - Cota Sênior': {
+        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/outubro-25-1a-emissao-bgr-galpoes-logisticos-cota-senior-fii/',
+        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/10/MP-FII-BGR-GL-FEEDER-17.10.pdf'
+    },
+    'BGR Galpões Logísticos - Cota Subordinada': {
+        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/outubro-25-1a-emissao-bgr-galpoes-logisticos-cota-subordinada-fii/',
+        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/10/MP-FII-BGR-GL-MASTER.pdf'
+    },
+    'Maua Lajes Corporativas Feeder FII RL - Senior': {
+        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/agosto-25-2a-emissao-aaaaa-fundo-de-investimento-imobiliario-responsabilidade-limitada-subclasse-a-e-b-prazo-determinado/',
+        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2021/01/MP_MAUA_LAJES_SENIOR_MCLC-2.pdf'
+    },
+    'SPX CRI Portfolio Renda Mais': {
+        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/janeiro-25-spx-capital-portfolio-renda/',
+        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/01/Apresentacao-SPX-Capital-FII-Portfolio-Renda-I-Final.pdf'
+    },
+    'Solis Portfolio Crédito CDI+ FIC FIDC RL': {
+        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/fevereiro-25-solis-portfolio-credito/',
+        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/01/Material-Publicitario_FIC-FIDC-SOLIS_v.divulgacao.pdf'
+    },
+    'XP Renda Imobiliária Feeder FII RL': {
+        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/julho-25-1a-emissao-fundo-de-investimento-imobiliario-xp-renda-imobiliaria-feeder-fii-portfolio-renda/',
+        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/07/IPO-XP-Renda-Imobiliaria-vf-07.07.pdf'
+    },
+    'XP Habitat Renda Imobiliária Feeder FII': {
+        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/agosto-25-1a-emissao-xp-habitat-renda-imobiliaria-feeder-fii-portfolio-renda/',
+        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2021/01/MP-XP-Habitat-Renda-Imobiliaria-FII_vf-2.pdf'
+    },
+    'Valora CRI CDI Renda+ FII RL': {
+        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/junho-25-1a-emissao-valora-cri-cdi-renda-mais-fundo-de-investimento-imobiliario-fii-portfolio-renda/',
+        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/05/Material-Publicitario-1a-Emissao-Valora-CRI-CDI-Renda-Mais-FII-10_06.pdf'
+    }
 }
 
 def buscar_info_fundo(nome_fundo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses):
+    """Busca informações do fundo"""
     return {
         'dia_util': mapa_pagamentos.get(nome_fundo, 0),
         'cor': mapa_cores.get(nome_fundo, '#27ae60'),
@@ -655,7 +709,13 @@ def buscar_info_fundo(nome_fundo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa
         'links': MAPA_LINKS.get(nome_fundo, {'expert': '', 'material': ''})
     }
 
+# ============================================
+# TELA DE FUNDOS
+# ============================================
+
 def tela_fundos():
+    """Tela de apresentação dos fundos"""
+    
     st.markdown("""
     <div style="text-align: center; padding: 30px;">
         <h1 style="color: #1e4d2b; font-size: 36px; margin-bottom: 10px;">
@@ -667,27 +727,81 @@ def tela_fundos():
     </div>
     """, unsafe_allow_html=True)
     
-    if st.button("🔙 Voltar ao Login", use_container_width=True):
-        st.session_state.pagina_atual = 'login'
-        st.rerun()
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col1:
+        if st.button("🔙 Voltar ao Login", use_container_width=True):
+            st.session_state.pagina_atual = 'login'
+            st.rerun()
+    
+    with col2:
+        fundos_lista = sorted(MAPA_TESES.keys())
+        fundo_selecionado = st.selectbox(
+            "🎯 Ir para o fundo:",
+            ["Selecione um fundo..."] + fundos_lista,
+            key="nav_fundo"
+        )
+    
+    st.markdown("<br>", unsafe_allow_html=True)
     
     for fundo_nome in sorted(MAPA_TESES.keys()):
         info = buscar_info_fundo(fundo_nome, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
         tese = info['tese']
+        links = info['links']
+        
+        fundo_id = fundo_nome.replace(" ", "_")
         
         st.markdown(f"""
-        <div style="background: white; border: 2px solid {info['cor']}; border-left: 6px solid {info['cor']}; 
-                    border-radius: 10px; padding: 25px; margin-bottom: 20px;">
-            <h3 style="color: {info['cor']};">{fundo_nome}</h3>
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
-                <p><strong>📝 Resumo:</strong> {tese['resumo']}</p>
-                <p><strong>⚡ Venda em 1 Minuto:</strong> {tese['venda_1min']}</p>
+        <div id="{fundo_id}" style="background: white; border: 2px solid {info['cor']}; border-left: 6px solid {info['cor']}; 
+                    border-radius: 10px; padding: 25px; margin-bottom: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
+            <h3 style="color: {info['cor']}; margin-bottom: 15px; font-size: 20px;">
+                {fundo_nome}
+            </h3>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <p style="margin-bottom: 10px; color: #000000;"><strong style="color: #000000;">📝 Resumo:</strong> {tese['resumo']}</p>
+                <p style="margin-bottom: 10px; color: #000000;"><strong style="color: #000000;">📋 Condições:</strong></p>
+                <p style="white-space: pre-line; margin-left: 15px; font-size: 14px; color: #000000;">{tese['condicoes']}</p>
+                <p style="margin-bottom: 10px; color: #000000;"><strong style="color: #000000;">⚡ Venda em 1 Minuto:</strong> {tese['venda_1min']}</p>
+                <p style="margin-bottom: 0; color: #000000;"><strong style="color: #000000;">🎯 Perfil do Cliente:</strong> {tese['perfil']}</p>
             </div>
         </div>
         """, unsafe_allow_html=True)
+        
+        col1, col2, col3 = st.columns([1, 1, 2])
+        
+        with col1:
+            if links['material']:
+                st.markdown(f"""
+                <a href="{links['material']}" target="_blank" style="text-decoration: none;">
+                    <button style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); 
+                                   color: white; border: none; padding: 12px 20px; border-radius: 8px; 
+                                   font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
+                        📄 Material Publicitário
+                    </button>
+                </a>
+                """, unsafe_allow_html=True)
+        
+        with col2:
+            if links['expert']:
+                st.markdown(f"""
+                <a href="{links['expert']}" target="_blank" style="text-decoration: none;">
+                    <button style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); 
+                                   color: white; border: none; padding: 12px 20px; border-radius: 8px; 
+                                   font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
+                        🎓 Expert XP
+                    </button>
+                </a>
+                """, unsafe_allow_html=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+
+# ============================================
+# CARREGAR DADOS - APENAS ABA BASE
+# ============================================
 
 @st.cache_data
 def carregar_dados():
+    """Carrega dados APENAS da aba Base"""
     try:
         df_base = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Base')
         return df_base
@@ -695,7 +809,13 @@ def carregar_dados():
         st.error(f"❌ Erro ao carregar Excel: {str(e)}")
         st.stop()
 
+# ============================================
+# FUNÇÃO PRINCIPAL
+# ============================================
+
 def main():
+    """Função principal"""
+    
     df_base = carregar_dados()
     
     if 'pagina_atual' not in st.session_state:
@@ -741,8 +861,8 @@ def main():
         st.error("❌ Nenhum cliente encontrado!")
         st.stop()
     
-    # SELETOR DE CLIENTE
     st.markdown('<div class="cliente-selector"><h3>👥 SELECIONE O CLIENTE</h3>', unsafe_allow_html=True)
+    
     clientes = sorted(df_base_filtrado['Cliente'].unique())
     cliente_selecionado = st.selectbox(
         "Cliente", 
@@ -750,6 +870,7 @@ def main():
         label_visibility="collapsed", 
         key="cliente_select"
     )
+    
     st.markdown('</div>', unsafe_allow_html=True)
     
     if not cliente_selecionado:
@@ -757,62 +878,27 @@ def main():
     
     fundos_cliente = df_base_filtrado[df_base_filtrado['Cliente'] == cliente_selecionado]
 
-    # INICIALIZA FUNDO SELECIONADO
     if 'fundo_selecionado' not in st.session_state:
         st.session_state.fundo_selecionado = fundos_cliente['Ativo'].iloc[0] if not fundos_cliente.empty else None
     
-    # ✅ CORREÇÃO 1: SELECTBOX COM TEXTO EM PRETO
-    st.markdown('<div class="fundo-selector"><h3>Escolha seu fundo</h3>', unsafe_allow_html=True)
-    fundos_disponiveis = sorted(fundos_cliente['Ativo'].unique())
-    fundo_escolhido = st.selectbox(
-        "Escolha seu fundo",
-        fundos_disponiveis,
-        index=fundos_disponiveis.index(st.session_state.fundo_selecionado) if st.session_state.fundo_selecionado in fundos_disponiveis else 0,
-        label_visibility="collapsed",
-        key="fundo_select"
-    )
-    
-    # Atualiza o fundo selecionado
-    if fundo_escolhido:
-        st.session_state.fundo_selecionado = fundo_escolhido
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # LAYOUT PRINCIPAL
     st.markdown('<div class="container-principal">', unsafe_allow_html=True)
+    
     col1, col2, col3 = st.columns([1.2, 1.5, 3])
     
-    # ✅ CORREÇÃO 2: FUNDOS ORDENADOS (SELECIONADO PRIMEIRO)
     with col1:
         st.markdown('<div class="box"><div class="box-titulo">📊 FUNDOS DO CLIENTE</div><div class="box-conteudo">', unsafe_allow_html=True)
         
-        # Cria lista ordenada: fundo selecionado primeiro
-        fundos_lista = []
-        fundo_atual = st.session_state.fundo_selecionado
-        
-        # Adiciona o selecionado primeiro
-        if fundo_atual:
-            fundo_sel = fundos_cliente[fundos_cliente['Ativo'] == fundo_atual]
-            if not fundo_sel.empty:
-                fundos_lista.append(fundo_sel.iloc[0])
-        
-        # Adiciona os demais
         for _, fundo in fundos_cliente.iterrows():
-            if fundo['Ativo'] != fundo_atual:
-                fundos_lista.append(fundo)
-        
-        # Mostra os fundos
-        for fundo_data in fundos_lista:
-            ativo = fundo_data['Ativo']
+            ativo = fundo['Ativo']
             
-            # ✅ CORREÇÃO 3: USA COLUNA "Aplicação" DO EXCEL
+            # USAR COLUNA APLICAÇÃO DA BASE
             try:
-                valor_aplicado = float(fundo_data['Aplicação'])
+                valor_aplicado = float(fundo['Aplicação'])
             except:
                 valor_aplicado = 0.0
             
             try:
-                percentual_liquido = float(fundo_data['Rendimento %'])
+                percentual_liquido = float(fundo['Rendimento %'])
             except:
                 percentual_liquido = 0.0
             
@@ -826,8 +912,8 @@ def main():
             if dia_util and dia_util > 0:
                 try:
                     data_pagamento = calcular_dia_util(
-                        st.session_state.get('ano_atual', datetime.now().year), 
-                        st.session_state.get('mes_atual', datetime.now().month), 
+                        st.session_state.ano_atual, 
+                        st.session_state.mes_atual, 
                         dia_util, 
                         feriados
                     )
@@ -836,7 +922,6 @@ def main():
             
             data_texto = data_pagamento.strftime("%d/%m/%Y") if data_pagamento else "Não definida"
             
-            # ✅ BORDA EM DESTAQUE PARA O SELECIONADO
             classe_selecao = 'fundo-card-selecionado' if ativo == st.session_state.fundo_selecionado else ''
             
             st.markdown(f"""
@@ -846,7 +931,7 @@ def main():
                     <div class="info" style="margin-top: 8px;">
                         <div style="margin-bottom: 4px;">💰 <strong>Valor Aplicado:</strong> <span class="valor">R$ {valor_aplicado:,.2f}</span></div>
                         <div style="margin-bottom: 4px;">📅 <strong>Data Pagamento:</strong> {data_texto}</div>
-                        <div style="margin-bottom: 4px;">📈 <strong>% Líquido:</strong> <span class="valor">{percentual_liquido:.4f}%</span></div>
+                        <div style="margin-bottom: 4px;">📈 <strong>% Líquido:</strong> <span class="valor">{percentual_liquido:.2f}%</span></div>
                         <div>💵 <strong>Valor Líquido:</strong> <span class="valor">R$ {valor_liquido_cupom:,.2f}</span></div>
                     </div>
                 </div>
@@ -913,6 +998,7 @@ def main():
                 st.rerun()
         
         cal = calendar.monthcalendar(st.session_state.ano_atual, st.session_state.mes_atual)
+        
         dias_semana = ['seg.', 'ter.', 'qua.', 'qui.', 'sex.', 'sáb.', 'dom.']
         html_cal = '<div class="calendario-grid">'
         
@@ -922,6 +1008,7 @@ def main():
         eventos_mes = {}
         for _, fundo in fundos_cliente.iterrows():
             info = buscar_info_fundo(fundo['Ativo'], MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
+            
             dia_util = info.get('dia_util')
             if dia_util and dia_util > 0:
                 try:
@@ -954,6 +1041,7 @@ def main():
         
         html_cal += '</div>'
         st.markdown(html_cal, unsafe_allow_html=True)
+        
         st.markdown('</div>', unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
