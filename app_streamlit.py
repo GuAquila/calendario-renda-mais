@@ -422,18 +422,6 @@ def carregar_dados_excel():
     
     # Retorna os dados prontos para usar!
     return df_padronizado
-    
-    # NOTA: Se der qualquer erro que não pegamos, o except abaixo pega
-    
-except Exception as e:
-        st.error(f"""
-        ❌ ERRO inesperado ao processar o arquivo!
-        
-        Detalhes: {str(e)}
-        
-        Por favor, entre em contato com o suporte.
-        """)
-        return None
 
 # ═══════════════════════════════════════════════════════════════════════
 # PARTE 7: CONFIGURAÇÃO DOS FUNDOS
