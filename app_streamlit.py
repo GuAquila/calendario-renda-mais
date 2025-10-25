@@ -805,11 +805,15 @@ def carregar_dados():
     try:
         df_base = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Base', engine='openpyxl')
         
+        # DEBUG: Mostrar os nomes das colunas
+        st.sidebar.info(f"📋 Colunas encontradas no Excel: {list(df_base.columns)}")
+        
         # Verificar se as colunas necessárias existem
         colunas_necessarias = ['Assessor', 'Cliente', 'Ativo', 'Financeiro', 'Rendimento']
         for coluna in colunas_necessarias:
             if coluna not in df_base.columns:
                 st.error(f"❌ Coluna '{coluna}' não encontrada na planilha!")
+                st.error(f"📋 Colunas disponíveis: {list(df_base.columns)}")
                 st.stop()
         
         # Limpar e formatar dados
