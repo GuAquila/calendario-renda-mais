@@ -1,4 +1,3 @@
-
 """
 CALENDÁRIO RENDA MAIS - COM AUTENTICAÇÃO POR ASSESSOR
 ======================================================
@@ -750,32 +749,10 @@ MAPA_LINKS = {
     }
 }
 
-def buscar_info_fundo(nome_fundo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses, df_suporte=None):
+def buscar_info_fundo(nome_fundo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses):
     """Busca informações do fundo"""
-    # Buscar dia útil do fundo
-    dia_util = 0
-    if df_suporte is not None:
-        try:
-            fundo_info = df_suporte[df_suporte['Ativo'] == nome_fundo]
-            if not fundo_info.empty:
-                dia_util_val = fundo_info['Dia útil'].iloc[0]
-                if pd.notna(dia_util_val) and str(dia_util_val) != '-':
-                    try:
-                        dia_util = int(float(dia_util_val))
-                    except:
-                        dia_util = mapa_pagamentos.get(nome_fundo, 0)
-                else:
-                    dia_util = mapa_pagamentos.get(nome_fundo, 0)
-            else:
-                dia_util = mapa_pagamentos.get(nome_fundo, 0)
-        except:
-            dia_util = mapa_pagamentos.get(nome_fundo, 0)
-    else:
-        dia_util = mapa_pagamentos.get(nome_fundo, 0)
-    
-
     return {
-        'dia_util': dia_util,
+        'dia_util': mapa_pagamentos.get(nome_fundo, 0),
         'cor': mapa_cores.get(nome_fundo, '#27ae60'),
         'sigla': mapa_siglas.get(nome_fundo, nome_fundo[:10]),
         'tese': mapa_teses.get(nome_fundo, {
@@ -800,12 +777,6 @@ def tela_fundos():
     aparece EM DESTAQUE no topo da página, em um box grande e colorido.
     Depois, todos os fundos (incluindo o selecionado) aparecem na lista normal abaixo.
     """
-    
-    # Carregar df_suporte para ter dias úteis
-    try:
-        df_suporte = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Suporte')
-    except:
-        df_suporte = None
     
     # ===== CABEÇALHO DA PÁGINA =====
     st.markdown("""
@@ -855,8 +826,7 @@ def tela_fundos():
             MAPA_PAGAMENTOS,        # Mapa com dias de pagamento
             MAPA_CORES,             # Mapa com cores de cada fundo
             MAPA_SIGLAS,            # Mapa com siglas
-            MAPA_TESES,             # Mapa com as teses de investimento
-            df_suporte              # DataFrame com dias úteis
+            MAPA_TESES              # Mapa com as teses de investimento
         )
         
         # Pegamos a tese (informações detalhadas) do fundo
@@ -949,8 +919,7 @@ def tela_fundos():
             MAPA_PAGAMENTOS,
             MAPA_CORES,
             MAPA_SIGLAS,
-            MAPA_TESES,
-            df_suporte
+            MAPA_TESES
         )
         
         tese = info['tese']     # Tese do fundo
@@ -1019,45 +988,14 @@ def tela_fundos():
 # CARREGAR DADOS - APENAS ABA BASE
 # ============================================
 
+@st.cache_data
 def carregar_dados():
-    """
-    Carrega dados das abas Base e Suporte do Excel
-    VERSÃO SEM CACHE - Carrega toda vez
-    
-    Base: contém os clientes e suas aplicações
-    Suporte: contém os dias úteis de pagamento de cada fundo
-    """
+    """Carrega dados APENAS da aba Base"""
     try:
-        # Carregar aba Base (clientes e aplicações) - EXCEL CORRIGIDO!
-        df_base = pd.read_excel('calendario_Renda_mais_CORRIGIDO.xlsx', sheet_name='Base')
-        
-        # Carregar aba Suporte (dias úteis dos fundos)  
-        df_suporte = pd.read_excel('calendario_Renda_mais_CORRIGIDO.xlsx', sheet_name='Suporte')
-        
-        # Renomear colunas da Base para facilitar o uso no código
-        df_base = df_base.rename(columns={
-            'Código do Cliente': 'Cliente',
-            'Fundo': 'Ativo',
-            'Valor Solicitado': 'Aplicação',
-            'Código do Assessor': 'Assessor',
-            'Rendimento Percentual': 'Rendimento %'  # ← JÁ VEM CONVERTIDO!
-        })
-        
-        # Limpar código do assessor (remover o "A" do início)
-        # A22359 -> 22359
-        df_base['Assessor'] = df_base['Assessor'].astype(str).str.replace('A', '', regex=False).str.strip()
-        
-        # NÃO PRECISA MAIS CONVERTER! O Excel já tem a coluna convertida!
-        # A coluna 'Rendimento Percentual' já vem com 1.15 ao invés de 0.0115
-        
-        # Garantir que a coluna Rendimento % existe e está em float
-        if 'Rendimento %' in df_base.columns:
-            df_base['Rendimento %'] = pd.to_numeric(df_base['Rendimento %'], errors='coerce').fillna(0.0)
-        
-        return df_base, df_suporte
+        df_base = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Base')
+        return df_base
     except Exception as e:
         st.error(f"❌ Erro ao carregar Excel: {str(e)}")
-        st.error(f"📍 Detalhes: {e}")
         st.stop()
 
 # ============================================
@@ -1067,7 +1005,7 @@ def carregar_dados():
 def main():
     """Função principal"""
     
-    df_base, df_suporte = carregar_dados()
+    df_base = carregar_dados()
     
     if 'pagina_atual' not in st.session_state:
         st.session_state.pagina_atual = 'login'
@@ -1153,9 +1091,9 @@ def main():
             except:
                 percentual_liquido = 0.0
             
-            valor_liquido_cupom = valor_aplicado * (percentual_liquido / 100)
+            valor_liquido_cupom = valor_aplicado * percentual_liquido
             
-            info = buscar_info_fundo(ativo, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES, df_suporte)
+            info = buscar_info_fundo(ativo, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
             
             data_pagamento = None
             dia_util = info.get('dia_util')
@@ -1200,7 +1138,7 @@ def main():
         st.markdown('<div class="box"><div class="box-titulo">📝 TESE DO FUNDO</div>', unsafe_allow_html=True)
         
         if st.session_state.fundo_selecionado:
-            info = buscar_info_fundo(st.session_state.fundo_selecionado, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES, df_suporte)
+            info = buscar_info_fundo(st.session_state.fundo_selecionado, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
             tese = info.get('tese', {})
             
             st.markdown(f"""
@@ -1258,7 +1196,7 @@ def main():
         
         eventos_mes = {}
         for _, fundo in fundos_cliente.iterrows():
-            info = buscar_info_fundo(fundo['Ativo'], MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES, df_suporte)
+            info = buscar_info_fundo(fundo['Ativo'], MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
             
             dia_util = info.get('dia_util')
             if dia_util and dia_util > 0:
