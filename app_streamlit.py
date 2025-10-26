@@ -34,6 +34,10 @@ ASSESSORES = {
     '74644': ('Marcelo Fontes de Almeida', 'MFA2025'),
     '39586': ('Marco Antonio de Moraes', 'MAM2025'),
     '46857': ('Gustavo Aquila', 'GA2025'),
+    '29871': ('Jonathan Francesco Barletta', 'JFB2025'),
+    '97495': ('Luana Peres Ribeiro', 'LPR2025'),
+    '90410': ('Marta Maria Acquisti Guarido', 'MMAG2025'),
+    '46604': ('Roberto da Silva Junior', 'RSJ2025'),
     '51594': ('Bruna Rafaela Teixeira Mateos', 'BRTM2025'),
     '91796': ('Jose Dy Carlos Bueno Chiroza', 'JDCBC2025'),
     '47104': ('Kamila Munhoz Adario', 'KMA2025'),
@@ -41,6 +45,7 @@ ASSESSORES = {
     '24931': ('Paula Pellegrini Reimao', 'PPR2025'),
     '91476': ('Rafael Iran Gomes Januario', 'RIGJ2025'),
     '42596': ('Ricardo Salles de Godoy', 'RSG2025'),
+    '94296': ('Vanessa Alves Mattar Calfat', 'VAMC2025'),
     '67756': ('Vinicius Nunes Palacios', 'VNP2025'),
 }
 
@@ -732,7 +737,7 @@ def tela_fundos():
     with col2:
         fundos_lista = sorted(MAPA_TESES.keys())
         fundo_selecionado = st.selectbox(
-            "🎯 Ir para o fundo:",
+            "Ir para o fundo:",
             ["Selecione um fundo..."] + fundos_lista,
             key="nav_fundo"
         )
@@ -798,8 +803,30 @@ def tela_fundos():
 def carregar_dados():
     """Carrega dados APENAS da aba Base"""
     try:
-        df_base = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Base')
+        df_base = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Base', engine='openpyxl')
+        
+        # DEBUG: Mostrar os nomes das colunas
+        st.sidebar.info(f"📋 Colunas encontradas no Excel: {list(df_base.columns)}")
+        
+        # Verificar se as colunas necessárias existem
+        colunas_necessarias = ['Assessor', 'Cliente', 'Ativo', 'Financeiro', 'Rendimento']
+        for coluna in colunas_necessarias:
+            if coluna not in df_base.columns:
+                st.error(f"❌ Coluna '{coluna}' não encontrada na planilha!")
+                st.error(f"📋 Colunas disponíveis: {list(df_base.columns)}")
+                st.stop()
+        
+        # Limpar e formatar dados
+        df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip()
+        df_base['Cliente'] = df_base['Cliente'].astype(str).str.strip()
+        df_base['Ativo'] = df_base['Ativo'].astype(str).str.strip()
+        df_base['Financeiro'] = pd.to_numeric(df_base['Financeiro'], errors='coerce').fillna(0)
+        df_base['Rendimento'] = pd.to_numeric(df_base['Rendimento'], errors='coerce').fillna(0)
+        
         return df_base
+    except FileNotFoundError:
+        st.error("❌ Arquivo 'calendario_Renda_mais.xlsx' não encontrado! Verifique se o arquivo está na mesma pasta do código.")
+        st.stop()
     except Exception as e:
         st.error(f"❌ Erro ao carregar Excel: {str(e)}")
         st.stop()
@@ -886,15 +913,17 @@ def main():
         for _, fundo in fundos_cliente.iterrows():
             ativo = fundo['Ativo']
             
-            # USAR COLUNA APLICAÇÃO DA BASE
+            # USAR COLUNA FINANCEIRO DA BASE
             try:
                 valor_aplicado = float(fundo['Financeiro'])
             except:
                 valor_aplicado = 0.0
+            
             try:
                 percentual_liquido = float(fundo['Rendimento'])
             except:
                 percentual_liquido = 0.0
+            
             valor_liquido_cupom = valor_aplicado * percentual_liquido
             
             info = buscar_info_fundo(ativo, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
