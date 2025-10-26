@@ -4,6 +4,8 @@ CALENDÁRIO RENDA MAIS - COM AUTENTICAÇÃO POR ASSESSOR
 Sistema multi-assessor com senhas individuais
 VERSÃO FINAL LIMPA - 25/10/2025
 Usa APENAS aba "Base" do Excel
+
+MODIFICAÇÃO: Página "Conheça os Fundos" agora destaca o fundo selecionado no topo
 """
 
 import streamlit as st
@@ -415,6 +417,64 @@ st.markdown("""
     .box-conteudo::-webkit-scrollbar-thumb:hover {
         background: #1e4d2b;
     }
+    
+    /* ============================================
+       NOVO CSS PARA FUNDO EM DESTAQUE
+       ============================================ */
+    
+    /* Este é o estilo do box grande que aparece no topo quando um fundo é selecionado */
+    .fundo-destaque {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        padding: 35px;
+        border-radius: 15px;
+        margin-bottom: 40px;
+        box-shadow: 0 8px 25px rgba(39, 174, 96, 0.25);
+        border: 3px solid #27ae60;
+        animation: fadeIn 0.5s ease-in;
+    }
+    
+    /* Animação suave quando o fundo aparece em destaque */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Título do fundo em destaque - maior e mais chamativo */
+    .fundo-destaque h2 {
+        color: #1e4d2b;
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 3px solid #27ae60;
+    }
+    
+    /* Badge "SELECIONADO" que aparece no topo */
+    .badge-selecionado {
+        display: inline-block;
+        background: #27ae60;
+        color: white;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+    }
+    
+    /* Conteúdo do fundo em destaque */
+    .fundo-destaque-conteudo {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -628,44 +688,44 @@ MAPA_TESES = {
         'perfil': 'Investidores que buscam exposição ao mercado imobiliário sem marcação a mercado.'
     },
     'Valora CRI CDI Renda+ FII RL': {
-        'resumo': 'Fundo imobiliário que entrega diversificação e um retorno ágil de capital ao cotista, investido em setores de Logística, Residencial, Terreno, Shopping, etc.',
+        'resumo': 'Fundo imobiliário focado em CRIs com rentabilidade atrelada ao CDI.',
         'condicoes': '''• Rentabilidade: CDI + 2,40% (Isento de IR para PF)
-• Prazo: 5 anos
-• Duration: 3 anos
+• Prazo: 6 anos
+• Duration: 3,5 anos
 • Público-alvo: Investidores em Geral''',
-        'venda_1min': 'Fundo de CRIs que busca rentabilidade acima do CDI com gestão profissional com mitigação de risco e robustez de garantias.',
-        'perfil': 'Investidores que buscam renda através de CRIs com retornos superiores ao CDI, com garantias reais e gestora com expertise no setor.'
+        'venda_1min': 'Fundo de CRIs que oferece rentabilidade superior ao CDI com distribuição mensal de rendimentos.',
+        'perfil': 'Investidores que buscam renda passiva através do mercado imobiliário com baixa volatilidade.'
     }
 }
 
 MAPA_LINKS = {
     'ARX FII Portfólio Renda CDI+ RL': {
-        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/dezembro-24-arx-fii-portfolio-renda-cdi-rl/',
-        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2024/11/Material-Publicitario-1a-Emissao-ARX-Portfolio-Renda-CDI_vf.pdf'
+        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/marco-25-1a-emissao-arx-fii-portfolio-renda-cdi-rl/',
+        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/02/Apresentacao-ARX-FII-Portfolio-Renda-CDIRL-2.pdf'
     },
     'AZ Quest Renda Mais Infra-Yield VI FIP-IE': {
-        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/marco-25-az-quest-renda-mais/',
-        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/03/AZQI-RENDA_Material-Publicitario-vf-26_03.pdf'
+        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/fevereiro-25-az-quest-renda-mais-infra-yield-vi-fip-ie/',
+        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/01/AZ-Quest-Renda-Mais-Infra-Yield-VI-FIP-IE_vf.pdf'
     },
     'AZ QUEST PANORAMA RENDA CDI FI RESPONSABILIDADE LIMITADA': {
-        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/agosto-25-1a-emissao-az-quest-panorama-renda-cdi-fii-portfolio-renda-mais-fii-prazo-determinado/',
-        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2021/01/AZ-Quest-Panorama_MP-VF-1.pdf'
+        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/outubro-25-az-quest-panorama-renda-cdi-fi-responsabilidade-limitada-2/',
+        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2024/09/Apresentacao-AZ-Quest-Panorama-Renda-CDI-FI-Responsabilidade-Limitada-v3.pdf'
     },
     'AZ Quest Panorama Renda CDI FI RL': {
-        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/agosto-25-1a-emissao-az-quest-panorama-renda-cdi-fii-portfolio-renda-mais-fii-prazo-determinado/',
-        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2021/01/AZ-Quest-Panorama_MP-VF-1.pdf'
+        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/outubro-25-az-quest-panorama-renda-cdi-fi-responsabilidade-limitada-2/',
+        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2024/09/Apresentacao-AZ-Quest-Panorama-Renda-CDI-FI-Responsabilidade-Limitada-v3.pdf'
     },
     'BGR Galpões Logísticos - Cota Sênior': {
-        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/outubro-25-1a-emissao-bgr-galpoes-logisticos-cota-senior-fii/',
-        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/10/MP-FII-BGR-GL-FEEDER-17.10.pdf'
+        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/julho-25-bgr-galpoes-logisticos-cota-senior/',
+        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/06/BGR-Galpoes-Logisticos-Senior.pdf'
     },
     'BGR Galpões Logísticos - Cota Subordinada': {
-        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/outubro-25-1a-emissao-bgr-galpoes-logisticos-cota-subordinada-fii/',
-        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/10/MP-FII-BGR-GL-MASTER.pdf'
+        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/julho-25-bgr-galpoes-logisticos-cota-subordinada/',
+        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/06/BGR-Galpoes-Logisticos-Subordinada.pdf'
     },
     'Maua Lajes Corporativas Feeder FII RL - Senior': {
-        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/agosto-25-2a-emissao-aaaaa-fundo-de-investimento-imobiliario-responsabilidade-limitada-subclasse-a-e-b-prazo-determinado/',
-        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2021/01/MP_MAUA_LAJES_SENIOR_MCLC-2.pdf'
+        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/maio-25-maua-lajes-corporativas-feeder-fii-rl-senior/',
+        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/04/Maua-Lajes-Corporativas-vf.pdf'
     },
     'SPX CRI Portfolio Renda Mais': {
         'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/janeiro-25-spx-capital-portfolio-renda/',
@@ -705,12 +765,20 @@ def buscar_info_fundo(nome_fundo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa
     }
 
 # ============================================
-# TELA DE FUNDOS
+# TELA DE FUNDOS - COM DESTAQUE
 # ============================================
 
 def tela_fundos():
-    """Tela de apresentação dos fundos"""
+    """
+    Tela de apresentação dos fundos
     
+    NOVA FUNCIONALIDADE:
+    Quando o usuário seleciona um fundo no dropdown, esse fundo
+    aparece EM DESTAQUE no topo da página, em um box grande e colorido.
+    Depois, todos os fundos (incluindo o selecionado) aparecem na lista normal abaixo.
+    """
+    
+    # ===== CABEÇALHO DA PÁGINA =====
     st.markdown("""
     <div style="text-align: center; padding: 30px;">
         <h1 style="color: #1e4d2b; font-size: 36px; margin-bottom: 10px;">
@@ -722,49 +790,208 @@ def tela_fundos():
     </div>
     """, unsafe_allow_html=True)
     
+    # ===== BOTÃO VOLTAR E SELETOR DE FUNDO =====
     col1, col2, col3 = st.columns([1, 2, 1])
     
     with col1:
+        # Botão para voltar à tela de login
         if st.button("🔙 Voltar ao Login", use_container_width=True):
             st.session_state.pagina_atual = 'login'
             st.rerun()
     
     with col2:
+        # Lista de todos os fundos disponíveis (em ordem alfabética)
         fundos_lista = sorted(MAPA_TESES.keys())
+        
+        # Dropdown para o usuário selecionar qual fundo quer ver em destaque
         fundo_selecionado = st.selectbox(
             "🎯 Ir para o fundo:",
-            ["Selecione um fundo..."] + fundos_lista,
+            ["Selecione um fundo..."] + fundos_lista,  # Primeira opção vazia
             key="nav_fundo"
         )
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    for fundo_nome in sorted(MAPA_TESES.keys()):
-        info = buscar_info_fundo(fundo_nome, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
-        tese = info['tese']
-        links = info['links']
+    # ============================================
+    # AQUI COMEÇA A NOVA FUNCIONALIDADE
+    # ============================================
+    
+    # Verifica se o usuário selecionou algum fundo (e não a opção padrão "Selecione...")
+    if fundo_selecionado and fundo_selecionado != "Selecione um fundo...":
         
-        fundo_id = fundo_nome.replace(" ", "_")
+        # ===== BUSCAR INFORMAÇÕES DO FUNDO SELECIONADO =====
+        # Aqui buscamos todas as informações do fundo que o usuário escolheu
+        info_destaque = buscar_info_fundo(
+            fundo_selecionado,      # Nome do fundo
+            MAPA_PAGAMENTOS,        # Mapa com dias de pagamento
+            MAPA_CORES,             # Mapa com cores de cada fundo
+            MAPA_SIGLAS,            # Mapa com siglas
+            MAPA_TESES              # Mapa com as teses de investimento
+        )
         
+        # Pegamos a tese (informações detalhadas) do fundo
+        tese_destaque = info_destaque['tese']
+        
+        # Pegamos os links (expert e material) do fundo
+        links_destaque = info_destaque['links']
+        
+        # ===== CRIAR O BOX DE DESTAQUE =====
+        # Este é o box grande e destacado que aparece NO TOPO da página
         st.markdown(f"""
-        <div id="{fundo_id}" style="background: white; border: 2px solid {info['cor']}; border-left: 6px solid {info['cor']}; 
-                    border-radius: 10px; padding: 25px; margin-bottom: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
-            <h3 style="color: {info['cor']}; margin-bottom: 15px; font-size: 20px;">
-                {fundo_nome}
-            </h3>
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                <p style="margin-bottom: 10px; color: #000000;"><strong style="color: #000000;">📝 Resumo:</strong> {tese['resumo']}</p>
-                <p style="margin-bottom: 10px; color: #000000;"><strong style="color: #000000;">📋 Condições:</strong></p>
-                <p style="white-space: pre-line; margin-left: 15px; font-size: 14px; color: #000000;">{tese['condicoes']}</p>
-                <p style="margin-bottom: 10px; color: #000000;"><strong style="color: #000000;">⚡ Venda em 1 Minuto:</strong> {tese['venda_1min']}</p>
-                <p style="margin-bottom: 0; color: #000000;"><strong style="color: #000000;">🎯 Perfil do Cliente:</strong> {tese['perfil']}</p>
+        <div class="fundo-destaque">
+            <!-- Badge "SELECIONADO" -->
+            <div class="badge-selecionado">
+                ⭐ FUNDO SELECIONADO
+            </div>
+            
+            <!-- Título do fundo com cor personalizada -->
+            <h2 style="color: {info_destaque['cor']};">
+                {fundo_selecionado}
+            </h2>
+            
+            <!-- Conteúdo do fundo -->
+            <div class="fundo-destaque-conteudo">
+                <!-- RESUMO -->
+                <p style="margin-bottom: 15px; color: #000000; font-size: 15px;">
+                    <strong style="color: #000000;">📝 Resumo:</strong> {tese_destaque['resumo']}
+                </p>
+                
+                <!-- CONDIÇÕES -->
+                <p style="margin-bottom: 10px; color: #000000; font-size: 15px;">
+                    <strong style="color: #000000;">📋 Condições:</strong>
+                </p>
+                <p style="white-space: pre-line; margin-left: 15px; font-size: 14px; color: #000000; margin-bottom: 15px;">
+                    {tese_destaque['condicoes']}
+                </p>
+                
+                <!-- VENDA EM 1 MINUTO -->
+                <p style="margin-bottom: 10px; color: #000000; font-size: 15px;">
+                    <strong style="color: #000000;">⚡ Venda em 1 Minuto:</strong> {tese_destaque['venda_1min']}
+                </p>
+                
+                <!-- PERFIL DO CLIENTE -->
+                <p style="margin-bottom: 0; color: #000000; font-size: 15px;">
+                    <strong style="color: #000000;">🎯 Perfil do Cliente:</strong> {tese_destaque['perfil']}
+                </p>
             </div>
         </div>
         """, unsafe_allow_html=True)
         
+        # ===== BOTÕES DE LINKS DO FUNDO EM DESTAQUE =====
+        # Aqui criamos os botões para Material Publicitário e Expert XP
+        col_link1, col_link2, col_link3 = st.columns([1, 1, 2])
+        
+        # Botão para Material Publicitário (se existir)
+        with col_link1:
+            if links_destaque['material']:  # Só mostra se tiver link
+                st.markdown(f"""
+                <a href="{links_destaque['material']}" target="_blank" style="text-decoration: none;">
+                    <button style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); 
+                                   color: white; border: none; padding: 12px 20px; border-radius: 8px; 
+                                   font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
+                        📄 Material Publicitário
+                    </button>
+                </a>
+                """, unsafe_allow_html=True)
+        
+        # Botão para Expert XP (se existir)
+        with col_link2:
+            if links_destaque['expert']:  # Só mostra se tiver link
+                st.markdown(f"""
+                <a href="{links_destaque['expert']}" target="_blank" style="text-decoration: none;">
+                    <button style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); 
+                                   color: white; border: none; padding: 12px 20px; border-radius: 8px; 
+                                   font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
+                        🎓 Expert XP
+                    </button>
+                </a>
+                """, unsafe_allow_html=True)
+        
+        # Espaçamento antes de mostrar todos os fundos
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        
+        # Linha separadora
+        st.markdown("""
+        <div style="border-top: 2px solid #e0e0e0; margin: 30px 0;">
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Título para a seção de todos os fundos
+        st.markdown("""
+        <h3 style="color: #1e4d2b; text-align: center; margin-bottom: 30px;">
+            📊 Todos os Fundos Disponíveis
+        </h3>
+        """, unsafe_allow_html=True)
+    
+    # ============================================
+    # LISTAGEM DE TODOS OS FUNDOS
+    # ============================================
+    # Aqui mostramos TODOS os fundos (incluindo o que está em destaque acima)
+    # em ordem alfabética, cada um no seu próprio box
+    
+    for fundo_nome in sorted(MAPA_TESES.keys()):
+        # Busca as informações de cada fundo
+        info = buscar_info_fundo(
+            fundo_nome,
+            MAPA_PAGAMENTOS,
+            MAPA_CORES,
+            MAPA_SIGLAS,
+            MAPA_TESES
+        )
+        
+        tese = info['tese']     # Tese do fundo
+        links = info['links']   # Links do fundo
+        
+        # Cria um ID único para cada fundo (usado para navegação)
+        fundo_id = fundo_nome.replace(" ", "_")
+        
+        # ===== BOX DE CADA FUNDO =====
+        # Cada fundo tem seu próprio box com borda colorida
+        st.markdown(f"""
+        <div id="{fundo_id}" style="background: white; border: 2px solid {info['cor']}; 
+                    border-left: 6px solid {info['cor']}; border-radius: 10px; 
+                    padding: 25px; margin-bottom: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
+            
+            <!-- Título do fundo -->
+            <h3 style="color: {info['cor']}; margin-bottom: 15px; font-size: 20px;">
+                {fundo_nome}
+            </h3>
+            
+            <!-- Informações do fundo em um box cinza -->
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                
+                <!-- RESUMO -->
+                <p style="margin-bottom: 10px; color: #000000;">
+                    <strong style="color: #000000;">📝 Resumo:</strong> {tese['resumo']}
+                </p>
+                
+                <!-- CONDIÇÕES -->
+                <p style="margin-bottom: 10px; color: #000000;">
+                    <strong style="color: #000000;">📋 Condições:</strong>
+                </p>
+                <p style="white-space: pre-line; margin-left: 15px; font-size: 14px; color: #000000;">
+                    {tese['condicoes']}
+                </p>
+                
+                <!-- VENDA EM 1 MINUTO -->
+                <p style="margin-bottom: 10px; color: #000000;">
+                    <strong style="color: #000000;">⚡ Venda em 1 Minuto:</strong> {tese['venda_1min']}
+                </p>
+                
+                <!-- PERFIL DO CLIENTE -->
+                <p style="margin-bottom: 0; color: #000000;">
+                    <strong style="color: #000000;">🎯 Perfil do Cliente:</strong> {tese['perfil']}
+                </p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # ===== BOTÕES DE LINKS =====
+        # Botões para Material Publicitário e Expert XP de cada fundo
         col1, col2, col3 = st.columns([1, 1, 2])
         
         with col1:
+            # Botão Material Publicitário (vermelho)
             if links['material']:
                 st.markdown(f"""
                 <a href="{links['material']}" target="_blank" style="text-decoration: none;">
@@ -777,6 +1004,7 @@ def tela_fundos():
                 """, unsafe_allow_html=True)
         
         with col2:
+            # Botão Expert XP (azul)
             if links['expert']:
                 st.markdown(f"""
                 <a href="{links['expert']}" target="_blank" style="text-decoration: none;">
@@ -788,6 +1016,7 @@ def tela_fundos():
                 </a>
                 """, unsafe_allow_html=True)
         
+        # Espaçamento entre fundos
         st.markdown("<br>", unsafe_allow_html=True)
 
 # ============================================
