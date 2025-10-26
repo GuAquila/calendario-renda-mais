@@ -105,7 +105,7 @@ def verificar_autenticacao(df_base):
             try:
                 st.image("logo_tauari.png", width=350)
             except:
-                st.markdown("<div style='text-align: center; padding: 20px;'><div style='background: #2d5a3d; color: white; padding: 40px; border-radius: 10px; font-size: 14px;'>📁 Salve a logo como 'logo_tauari.png'<br>na mesma pasta do código</div></div>", unsafe_allow_html=True)
+                st.markdown("<div style='text-align: center; padding: 20px;'><div style='background: #2d5a3d; color: white; padding: 40px; border-radius: 10px; font-size: 14px;'", unsafe_allow_html=True)
             
             st.markdown("""
             <div class="login-titulo">
