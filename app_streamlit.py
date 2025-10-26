@@ -543,18 +543,18 @@ def calcular_dia_util(ano, mes, dia_util_desejado, feriados):
 # ============================================
 
 MAPA_PAGAMENTOS = {
-    'ARX FII Portfólio Renda CDI+ RL': 15,
-    'AZ Quest Renda Mais Infra-Yield VI FIP-IE': 5,
-    'AZ QUEST PANORAMA RENDA CDI FI RESPONSABILIDADE LIMITADA': 5,
-    'AZ Quest Panorama Renda CDI FI RL': 5,
+    'ARX FII Portfólio Renda CDI+ RL': 10,
+    'AZ Quest Renda Mais Infra-Yield VI FIP-IE': 15,
+    'AZ QUEST PANORAMA RENDA CDI FI RESPONSABILIDADE LIMITADA': 1,
+    'AZ Quest Panorama Renda CDI FI RL': 1,
     'BGR Galpões Logísticos - Cota Sênior': 15,
     'BGR Galpões Logísticos - Cota Subordinada': 15,
     'Maua Lajes Corporativas Feeder FII RL - Senior': 15,
-    'SPX CRI Portfolio Renda Mais': 15,
+    'SPX CRI Portfolio Renda Mais': 10,
     'Solis Portfolio Crédito CDI+ FIC FIDC RL': 5,
-    'XP Renda Imobiliária Feeder FII RL': 15,
-    'XP Habitat Renda Imobiliária Feeder FII': 15,
-    'Valora CRI CDI Renda+ FII RL': 15,
+    'XP Renda Imobiliária Feeder FII RL': 10,
+    'XP Habitat Renda Imobiliária Feeder FII': 6,
+    'Valora CRI CDI Renda+ FII RL': 5,
 }
 
 MAPA_CORES = {
