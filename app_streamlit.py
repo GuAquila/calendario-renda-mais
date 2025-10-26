@@ -1045,9 +1045,28 @@ def carregar_dados():
         # A22359 -> 22359
         df_base['Assessor'] = df_base['Assessor'].astype(str).str.replace('A', '', regex=False).str.strip()
         
-        # Renomear coluna "Rendimento" para "Rendimento %"
+        # CONVERTER COLUNA RENDIMENTO:
+        # No Excel, o valor está como 0.0115 (decimal)
+        # Precisamos converter para 1.15 (percentual)
+        # Também precisamos tratar valores "-" que aparecem no Excel
         if 'Rendimento' in df_base.columns:
-            df_base = df_base.rename(columns={'Rendimento': 'Rendimento %'})
+            # Função para converter cada valor
+            def converter_rendimento(valor):
+                # Se for "-" ou vazio, retorna 0
+                if valor == '-' or pd.isna(valor):
+                    return 0.0
+                # Tenta converter para número
+                try:
+                    # Converte para float e multiplica por 100
+                    # 0.0115 vira 1.15
+                    return float(valor) * 100
+                except:
+                    return 0.0
+            
+            # Aplica a conversão em toda a coluna
+            df_base['Rendimento %'] = df_base['Rendimento'].apply(converter_rendimento)
+            # Remove a coluna antiga
+            df_base = df_base.drop(columns=['Rendimento'])
         
         return df_base, df_suporte
     except Exception as e:
