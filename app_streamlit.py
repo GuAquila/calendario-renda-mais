@@ -1,3 +1,4 @@
+
 """
 CALENDÁRIO RENDA MAIS - COM AUTENTICAÇÃO POR ASSESSOR
 ======================================================
@@ -1018,59 +1019,45 @@ def tela_fundos():
 # CARREGAR DADOS - APENAS ABA BASE
 # ============================================
 
-@st.cache_data
 def carregar_dados():
     """
     Carrega dados das abas Base e Suporte do Excel
+    VERSÃO SEM CACHE - Carrega toda vez
     
     Base: contém os clientes e suas aplicações
     Suporte: contém os dias úteis de pagamento de cada fundo
     """
     try:
-        # Carregar aba Base (clientes e aplicações)
-        df_base = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Base')
+        # Carregar aba Base (clientes e aplicações) - EXCEL CORRIGIDO!
+        df_base = pd.read_excel('calendario_Renda_mais_CORRIGIDO.xlsx', sheet_name='Base')
         
-        # Carregar aba Suporte (dias úteis dos fundos)
-        df_suporte = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Suporte')
+        # Carregar aba Suporte (dias úteis dos fundos)  
+        df_suporte = pd.read_excel('calendario_Renda_mais_CORRIGIDO.xlsx', sheet_name='Suporte')
         
         # Renomear colunas da Base para facilitar o uso no código
         df_base = df_base.rename(columns={
             'Código do Cliente': 'Cliente',
             'Fundo': 'Ativo',
             'Valor Solicitado': 'Aplicação',
-            'Código do Assessor': 'Assessor'
+            'Código do Assessor': 'Assessor',
+            'Rendimento Percentual': 'Rendimento %'  # ← JÁ VEM CONVERTIDO!
         })
         
         # Limpar código do assessor (remover o "A" do início)
         # A22359 -> 22359
         df_base['Assessor'] = df_base['Assessor'].astype(str).str.replace('A', '', regex=False).str.strip()
         
-        # CONVERTER COLUNA RENDIMENTO:
-        # No Excel, o valor está como 0.0115 (decimal)
-        # Precisamos converter para 1.15 (percentual)
-        # Também precisamos tratar valores "-" que aparecem no Excel
-        if 'Rendimento' in df_base.columns:
-            # Função para converter cada valor
-            def converter_rendimento(valor):
-                # Se for "-" ou vazio, retorna 0
-                if valor == '-' or pd.isna(valor):
-                    return 0.0
-                # Tenta converter para número
-                try:
-                    # Converte para float e multiplica por 100
-                    # 0.0115 vira 1.15
-                    return float(valor) * 100
-                except:
-                    return 0.0
-            
-            # Aplica a conversão em toda a coluna
-            df_base['Rendimento %'] = df_base['Rendimento'].apply(converter_rendimento)
-            # Remove a coluna antiga
-            df_base = df_base.drop(columns=['Rendimento'])
+        # NÃO PRECISA MAIS CONVERTER! O Excel já tem a coluna convertida!
+        # A coluna 'Rendimento Percentual' já vem com 1.15 ao invés de 0.0115
+        
+        # Garantir que a coluna Rendimento % existe e está em float
+        if 'Rendimento %' in df_base.columns:
+            df_base['Rendimento %'] = pd.to_numeric(df_base['Rendimento %'], errors='coerce').fillna(0.0)
         
         return df_base, df_suporte
     except Exception as e:
         st.error(f"❌ Erro ao carregar Excel: {str(e)}")
+        st.error(f"📍 Detalhes: {e}")
         st.stop()
 
 # ============================================
