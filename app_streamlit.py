@@ -838,44 +838,32 @@ def tela_fundos():
         # ===== CRIAR O BOX DE DESTAQUE =====
         # Este é o box grande e destacado que aparece NO TOPO da página
         st.markdown(f"""
-        <div class="fundo-destaque">
-            <!-- Badge "SELECIONADO" -->
-            <div class="badge-selecionado">
-                ⭐ FUNDO SELECIONADO
-            </div>
-            
-            <!-- Título do fundo com cor personalizada -->
-            <h2 style="color: {info_destaque['cor']};">
-                {fundo_selecionado}
-            </h2>
-            
-            <!-- Conteúdo do fundo -->
-            <div class="fundo-destaque-conteudo">
-                <!-- RESUMO -->
-                <p style="margin-bottom: 15px; color: #000000; font-size: 15px;">
-                    <strong style="color: #000000;">📝 Resumo:</strong> {tese_destaque['resumo']}
-                </p>
-                
-                <!-- CONDIÇÕES -->
-                <p style="margin-bottom: 10px; color: #000000; font-size: 15px;">
-                    <strong style="color: #000000;">📋 Condições:</strong>
-                </p>
-                <p style="white-space: pre-line; margin-left: 15px; font-size: 14px; color: #000000; margin-bottom: 15px;">
-                    {tese_destaque['condicoes']}
-                </p>
-                
-                <!-- VENDA EM 1 MINUTO -->
-                <p style="margin-bottom: 10px; color: #000000; font-size: 15px;">
-                    <strong style="color: #000000;">⚡ Venda em 1 Minuto:</strong> {tese_destaque['venda_1min']}
-                </p>
-                
-                <!-- PERFIL DO CLIENTE -->
-                <p style="margin-bottom: 0; color: #000000; font-size: 15px;">
-                    <strong style="color: #000000;">🎯 Perfil do Cliente:</strong> {tese_destaque['perfil']}
-                </p>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+<div class="fundo-destaque">
+    <div class="badge-selecionado">
+        ⭐ FUNDO SELECIONADO
+    </div>
+    <h2 style="color: {info_destaque['cor']};">
+        {fundo_selecionado}
+    </h2>
+    <div class="fundo-destaque-conteudo">
+        <p style="margin-bottom: 15px; color: #000000; font-size: 15px;">
+            <strong style="color: #000000;">📝 Resumo:</strong> {tese_destaque['resumo']}
+        </p>
+        <p style="margin-bottom: 10px; color: #000000; font-size: 15px;">
+            <strong style="color: #000000;">📋 Condições:</strong>
+        </p>
+        <p style="white-space: pre-line; margin-left: 15px; font-size: 14px; color: #000000; margin-bottom: 15px;">
+            {tese_destaque['condicoes']}
+        </p>
+        <p style="margin-bottom: 10px; color: #000000; font-size: 15px;">
+            <strong style="color: #000000;">⚡ Venda em 1 Minuto:</strong> {tese_destaque['venda_1min']}
+        </p>
+        <p style="margin-bottom: 0; color: #000000; font-size: 15px;">
+            <strong style="color: #000000;">🎯 Perfil do Cliente:</strong> {tese_destaque['perfil']}
+        </p>
+    </div>
+</div>
+""", unsafe_allow_html=True)
         
         # ===== BOTÕES DE LINKS DO FUNDO EM DESTAQUE =====
         # Aqui criamos os botões para Material Publicitário e Expert XP
@@ -885,43 +873,38 @@ def tela_fundos():
         with col_link1:
             if links_destaque['material']:  # Só mostra se tiver link
                 st.markdown(f"""
-                <a href="{links_destaque['material']}" target="_blank" style="text-decoration: none;">
-                    <button style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); 
-                                   color: white; border: none; padding: 12px 20px; border-radius: 8px; 
-                                   font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
-                        📄 Material Publicitário
-                    </button>
-                </a>
-                """, unsafe_allow_html=True)
+<a href="{links_destaque['material']}" target="_blank" style="text-decoration: none;">
+    <button style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
+        📄 Material Publicitário
+    </button>
+</a>
+""", unsafe_allow_html=True)
         
         # Botão para Expert XP (se existir)
         with col_link2:
             if links_destaque['expert']:  # Só mostra se tiver link
                 st.markdown(f"""
-                <a href="{links_destaque['expert']}" target="_blank" style="text-decoration: none;">
-                    <button style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); 
-                                   color: white; border: none; padding: 12px 20px; border-radius: 8px; 
-                                   font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
-                        🎓 Expert XP
-                    </button>
-                </a>
-                """, unsafe_allow_html=True)
+<a href="{links_destaque['expert']}" target="_blank" style="text-decoration: none;">
+    <button style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
+        🎓 Expert XP
+    </button>
+</a>
+""", unsafe_allow_html=True)
         
         # Espaçamento antes de mostrar todos os fundos
         st.markdown("<br><br>", unsafe_allow_html=True)
         
         # Linha separadora
         st.markdown("""
-        <div style="border-top: 2px solid #e0e0e0; margin: 30px 0;">
-        </div>
-        """, unsafe_allow_html=True)
+<div style="border-top: 2px solid #e0e0e0; margin: 30px 0;"></div>
+""", unsafe_allow_html=True)
         
         # Título para a seção de todos os fundos
         st.markdown("""
-        <h3 style="color: #1e4d2b; text-align: center; margin-bottom: 30px;">
-            📊 Todos os Fundos Disponíveis
-        </h3>
-        """, unsafe_allow_html=True)
+<h3 style="color: #1e4d2b; text-align: center; margin-bottom: 30px;">
+    📊 Todos os Fundos Disponíveis
+</h3>
+""", unsafe_allow_html=True)
     
     # ============================================
     # LISTAGEM DE TODOS OS FUNDOS
@@ -948,43 +931,29 @@ def tela_fundos():
         # ===== BOX DE CADA FUNDO =====
         # Cada fundo tem seu próprio box com borda colorida
         st.markdown(f"""
-        <div id="{fundo_id}" style="background: white; border: 2px solid {info['cor']}; 
-                    border-left: 6px solid {info['cor']}; border-radius: 10px; 
-                    padding: 25px; margin-bottom: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
-            
-            <!-- Título do fundo -->
-            <h3 style="color: {info['cor']}; margin-bottom: 15px; font-size: 20px;">
-                {fundo_nome}
-            </h3>
-            
-            <!-- Informações do fundo em um box cinza -->
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                
-                <!-- RESUMO -->
-                <p style="margin-bottom: 10px; color: #000000;">
-                    <strong style="color: #000000;">📝 Resumo:</strong> {tese['resumo']}
-                </p>
-                
-                <!-- CONDIÇÕES -->
-                <p style="margin-bottom: 10px; color: #000000;">
-                    <strong style="color: #000000;">📋 Condições:</strong>
-                </p>
-                <p style="white-space: pre-line; margin-left: 15px; font-size: 14px; color: #000000;">
-                    {tese['condicoes']}
-                </p>
-                
-                <!-- VENDA EM 1 MINUTO -->
-                <p style="margin-bottom: 10px; color: #000000;">
-                    <strong style="color: #000000;">⚡ Venda em 1 Minuto:</strong> {tese['venda_1min']}
-                </p>
-                
-                <!-- PERFIL DO CLIENTE -->
-                <p style="margin-bottom: 0; color: #000000;">
-                    <strong style="color: #000000;">🎯 Perfil do Cliente:</strong> {tese['perfil']}
-                </p>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+<div id="{fundo_id}" style="background: white; border: 2px solid {info['cor']}; border-left: 6px solid {info['cor']}; border-radius: 10px; padding: 25px; margin-bottom: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
+    <h3 style="color: {info['cor']}; margin-bottom: 15px; font-size: 20px;">
+        {fundo_nome}
+    </h3>
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+        <p style="margin-bottom: 10px; color: #000000;">
+            <strong style="color: #000000;">📝 Resumo:</strong> {tese['resumo']}
+        </p>
+        <p style="margin-bottom: 10px; color: #000000;">
+            <strong style="color: #000000;">📋 Condições:</strong>
+        </p>
+        <p style="white-space: pre-line; margin-left: 15px; font-size: 14px; color: #000000;">
+            {tese['condicoes']}
+        </p>
+        <p style="margin-bottom: 10px; color: #000000;">
+            <strong style="color: #000000;">⚡ Venda em 1 Minuto:</strong> {tese['venda_1min']}
+        </p>
+        <p style="margin-bottom: 0; color: #000000;">
+            <strong style="color: #000000;">🎯 Perfil do Cliente:</strong> {tese['perfil']}
+        </p>
+    </div>
+</div>
+""", unsafe_allow_html=True)
         
         # ===== BOTÕES DE LINKS =====
         # Botões para Material Publicitário e Expert XP de cada fundo
@@ -994,27 +963,23 @@ def tela_fundos():
             # Botão Material Publicitário (vermelho)
             if links['material']:
                 st.markdown(f"""
-                <a href="{links['material']}" target="_blank" style="text-decoration: none;">
-                    <button style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); 
-                                   color: white; border: none; padding: 12px 20px; border-radius: 8px; 
-                                   font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
-                        📄 Material Publicitário
-                    </button>
-                </a>
-                """, unsafe_allow_html=True)
+<a href="{links['material']}" target="_blank" style="text-decoration: none;">
+    <button style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
+        📄 Material Publicitário
+    </button>
+</a>
+""", unsafe_allow_html=True)
         
         with col2:
             # Botão Expert XP (azul)
             if links['expert']:
                 st.markdown(f"""
-                <a href="{links['expert']}" target="_blank" style="text-decoration: none;">
-                    <button style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); 
-                                   color: white; border: none; padding: 12px 20px; border-radius: 8px; 
-                                   font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
-                        🎓 Expert XP
-                    </button>
-                </a>
-                """, unsafe_allow_html=True)
+<a href="{links['expert']}" target="_blank" style="text-decoration: none;">
+    <button style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
+        🎓 Expert XP
+    </button>
+</a>
+""", unsafe_allow_html=True)
         
         # Espaçamento entre fundos
         st.markdown("<br>", unsafe_allow_html=True)
