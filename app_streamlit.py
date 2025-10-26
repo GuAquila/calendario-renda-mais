@@ -566,75 +566,75 @@ MAPA_TESES = {
     },
     'BGR Galpões Logísticos - Cota Sênior': {
         'resumo': 'Fundo imobiliário focado em galpões logísticos com estrutura de cotas sênior.',
-        'condicoes': '''• Rentabilidade: IPCA + spread
-• Prazo: Médio/Longo prazo
-• Liquidez: D+60
-• Público-alvo: Investidores qualificados''',
+        'condicoes': '''• Rentabilidade: IPCA + 9,50% (Isento de IR para PF)
+• Prazo: 5 anos
+• Duration: 3 anos
+• Público-alvo: Investidores em Geral''',
         'venda_1min': 'Investimento em galpões logísticos com cota sênior, oferecendo menor risco e proteção inflacionária.',
         'perfil': 'Investidores que buscam renda no setor logístico com menor risco através da estrutura sênior.'
     },
     'BGR Galpões Logísticos - Cota Subordinada': {
         'resumo': 'Fundo imobiliário focado em galpões logísticos com estrutura de cotas subordinadas.',
-        'condicoes': '''• Rentabilidade: Maior potencial de retorno
-• Prazo: Médio/Longo prazo
-• Liquidez: D+60
-• Público-alvo: Investidores qualificados''',
+        'condicoes': '''• Rentabilidade: IPCA + 29,20% (Isento de IR para PF)
+• Prazo: 5 anos
+• Duration: 3 anos
+• Público-alvo: Investidores Profissionais''',
         'venda_1min': 'Investimento em galpões logísticos com cota subordinada, oferecendo maior potencial de retorno.',
         'perfil': 'Investidores que aceitam maior risco em busca de retornos superiores no setor logístico.'
     },
     'Maua Lajes Corporativas Feeder FII RL - Senior': {
         'resumo': 'Fundo imobiliário focado em lajes corporativas com estrutura sênior.',
-        'condicoes': '''• Rentabilidade: CDI + spread
-• Prazo: Médio prazo
-• Liquidez: D+30 a D+60
-• Público-alvo: Investidores qualificados''',
-        'venda_1min': 'Fundo de lajes corporativas com estrutura sênior, proporcionando renda estável do mercado corporativo.',
-        'perfil': 'Investidores que buscam renda do mercado imobiliário corporativo com menor risco.'
+        'condicoes': '''• Rentabilidade: IPCA + 9,20% (Isento de IR para PF)
+• Prazo: 5 anos
+• Duration: 4,1 anos
+• Público-alvo: Investidores em Geral''',
+        'venda_1min': 'Fundo de lajes corporativas com estrutura sênior, proporcionando renda estável do mercado corporativo com rendimentos mensais mais correção do IPCA na conta, sem volatilidade.',
+        'perfil': 'Investidores que buscam renda do mercado imobiliário corporativo com menor volatilidade e remarcação na cota patrimonial.'
     },
     'SPX CRI Portfolio Renda Mais': {
-        'resumo': 'Fundo focado em Certificados de Recebíveis Imobiliários diversificado.',
-        'condicoes': '''• Rentabilidade: IPCA/CDI + spread
-• Prazo: Médio/Longo prazo
-• Liquidez: D+30 a D+60
-• Público-alvo: Investidores qualificados''',
-        'venda_1min': 'Portfolio diversificado de CRIs que busca renda recorrente com proteção inflacionária.',
+        'resumo': 'Fundo imoboliário focado em CRIs, com indexador definido durante todo o período.',
+        'condicoes': '''• Rentabilidade: CDI + 2,40% (Isento de IR para PF)
+• Prazo: 6 anos
+• Duration: 3,5 anos
+• Público-alvo: Investidores em Geral''',
+        'venda_1min': 'Portfolio diversificado de CRIs residenciais que busca renda recorrente com momento de alta taxa de Juros, além de uma taxa de administração inferior à média de mercado (0,90% a.a.).',
         'perfil': 'Investidores que buscam diversificação no mercado imobiliário através de CRIs.'
     },
     'Solis Portfolio Crédito CDI+ FIC FIDC RL': {
-        'resumo': 'Fundo de crédito privado que investe em direitos creditórios diversos.',
-        'condicoes': '''• Rentabilidade: CDI + spread
-• Prazo: Médio prazo
-• Liquidez: D+30
-• Público-alvo: Investidor geral''',
-        'venda_1min': 'Fundo de crédito privado diversificado que busca retornos superiores ao CDI.',
-        'perfil': 'Investidores moderados que buscam retornos atrativos através de crédito privado.'
+        'resumo': 'Fundo que consiste na alocaçãõ diversificada em cotas seniores de FIDCs, com aquisições exclusivas priorizando um perfil conservador de investimento.',
+        'condicoes': '''• Rentabilidade: CDI + 2,00% (Isento de IR para PF)
+• Prazo: 6 anos
+• Duration: 2,5 anos
+• Público-alvo: Investidores em Geral''',
+        'venda_1min': 'Fundo de crédito privado diversificado que busca retornos superiores ao CDI com aquisição exclusiva de cotas seniores de FIDCs, além de uma subordinação robusta (acima de 25,0%).',
+        'perfil': 'Investidores conservadores que buscam retornos atrativos através de cotas seniores de outros FIDCs.'
     },
     'XP Renda Imobiliária Feeder FII RL': {
-        'resumo': 'Fundo de fundos imobiliários que investe em FIIs geradores de renda.',
-        'condicoes': '''• Rentabilidade: Distribuição mensal
-• Prazo: Indeterminado
-• Liquidez: D+30
-• Público-alvo: Investidor geral''',
-        'venda_1min': 'Fundo que investe em uma carteira diversificada de FIIs geradores de renda mensal.',
-        'perfil': 'Investidores que buscam renda recorrente através de uma carteira diversificada de FIIs.'
+        'resumo': 'Fundo com objetivo de aquisição de 11 ativos imobiliários de alto padrão, com todos locados (vacância 0).',
+        'condicoes': '''• Rentabilidade: IPCA + 9,00% (Isento de IR para PF)
+• Prazo: 5 anos
+• Duration: 3,5 anos
+• Público-alvo: Investidores em Geral''',
+        'venda_1min': 'Fundo que investe em uma carteira diversificada em ativos de alto padrão com estabilidade e mitigação de curva J.',
+        'perfil': 'Investidores que buscam renda recorrente com ganhos acima da inflação em ativos diversificados e com alta qualidade de crédito.'
     },
     'XP Habitat Renda Imobiliária Feeder FII': {
-        'resumo': 'Fundo de fundos imobiliários focado em ativos residenciais.',
-        'condicoes': '''• Rentabilidade: Distribuição mensal
-• Prazo: Indeterminado
-• Liquidez: D+30
-• Público-alvo: Investidor geral''',
-        'venda_1min': 'Fundo que investe em FIIs do setor residencial, oferecendo renda mensal.',
-        'perfil': 'Investidores que buscam exposição ao mercado residencial através de FIIs.'
+        'resumo': 'Fundo imobiliário com dinâmica de cotas sênior e subordinada, composta majoritariamente por CRIs.',
+        'condicoes': '''• Rentabilidade: IPCA + 10,00% (Isento de IR para PF)
+• Prazo: 5 anos
+• Duration: 4,5 anos
+• Público-alvo: Investidores em Geral''',
+        'venda_1min': 'Fundo que investe em CRIs com projeto de loteamento, incorporação, multipropriedade e crédito corporativo. Com um portfólio diversificado e rendimento desde o dia 1.',
+        'perfil': 'Investidores que buscam exposição ao mercado imobiliário sem marcação a mercado.'
     },
     'Valora CRI CDI Renda+ FII RL': {
-        'resumo': 'Fundo imobiliário focado em CRIs com rentabilidade atrelada ao CDI.',
-        'condicoes': '''• Rentabilidade: CDI + spread
-• Prazo: Médio/Longo prazo
-• Liquidez: D+30 a D+60
-• Público-alvo: Investidores qualificados''',
-        'venda_1min': 'Fundo de CRIs que busca rentabilidade acima do CDI com gestão profissional.',
-        'perfil': 'Investidores que buscam renda através de CRIs com retornos superiores ao CDI.'
+        'resumo': 'Fundo imobiliário que entrega diversificação e um retorno ágil de capital ao cotista, investido em setores de Logística, Residencial, Terreno, Shopping, etc.',
+        'condicoes': '''• Rentabilidade: CDI + 2,40% (Isento de IR para PF)
+• Prazo: 5 anos
+• Duration: 3 anos
+• Público-alvo: Investidores em Geral''',
+        'venda_1min': 'Fundo de CRIs que busca rentabilidade acima do CDI com gestão profissional com mitigação de risco e robustez de garantias.',
+        'perfil': 'Investidores que buscam renda através de CRIs com retornos superiores ao CDI, com garantias reais e gestora com expertise no setor.'
     }
 }
 
