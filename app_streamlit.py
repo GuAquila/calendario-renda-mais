@@ -1,3 +1,4 @@
+
 """
 CALENDÁRIO RENDA MAIS - COM AUTENTICAÇÃO POR ASSESSOR
 ======================================================
@@ -1166,7 +1167,7 @@ def main():
             except:
                 percentual_liquido = 0.0
             
-            valor_liquido_cupom = valor_aplicado * percentual_liquido
+            valor_liquido_cupom = valor_aplicado * (percentual_liquido / 100)
             
             info = buscar_info_fundo(ativo, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES, df_suporte)
             
