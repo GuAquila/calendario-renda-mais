@@ -2,7 +2,7 @@
 CALENDÁRIO RENDA MAIS - COM AUTENTICAÇÃO POR ASSESSOR
 ======================================================
 Sistema multi-assessor com senhas individuais
-VERSÃO FINAL LIMPA - 24/10/2025
+VERSÃO FINAL LIMPA - 25/10/2025
 Usa APENAS aba "Base" do Excel
 """
 
@@ -34,10 +34,6 @@ ASSESSORES = {
     '74644': ('Marcelo Fontes de Almeida', 'MFA2025'),
     '39586': ('Marco Antonio de Moraes', 'MAM2025'),
     '46857': ('Gustavo Aquila', 'GA2025'),
-    '29871': ('Jonathan Francesco Barletta', 'JFB2025'),
-    '97495': ('Luana Peres Ribeiro', 'LPR2025'),
-    '90410': ('Marta Maria Acquisti Guarido', 'MMAG2025'),
-    '46604': ('Roberto da Silva Junior', 'RSJ2025'),
     '51594': ('Bruna Rafaela Teixeira Mateos', 'BRTM2025'),
     '91796': ('Jose Dy Carlos Bueno Chiroza', 'JDCBC2025'),
     '47104': ('Kamila Munhoz Adario', 'KMA2025'),
@@ -45,7 +41,6 @@ ASSESSORES = {
     '24931': ('Paula Pellegrini Reimao', 'PPR2025'),
     '91476': ('Rafael Iran Gomes Januario', 'RIGJ2025'),
     '42596': ('Ricardo Salles de Godoy', 'RSG2025'),
-    '94296': ('Vanessa Alves Mattar Calfat', 'VAMC2025'),
     '67756': ('Vinicius Nunes Palacios', 'VNP2025'),
 }
 
@@ -534,39 +529,39 @@ MAPA_SIGLAS = {
 
 MAPA_TESES = {
     'ARX FII Portfólio Renda CDI+ RL': {
-        'resumo': 'Fundo de Investimento Imobiliário focado em CRIs com rentabilidade atrelada ao CDI+.',
-        'condicoes': '''• Rentabilidade: CDI + spread
-• Prazo: Médio/Longo prazo
-• Liquidez: D+30 a D+60
-• Público-alvo: Investidores qualificados''',
-        'venda_1min': 'Fundo imobiliário com foco em CRIs que busca rentabilidade acima do CDI, oferecendo uma boa alternativa para renda passiva.',
+        'resumo': 'Fundo de Investimento Imobiliário é composto por CRIs, mecânica de Renda Fixa, distribuição mensal de rendimentos e amortizações periódicas, ambas isentas de IR.',
+        'condicoes': '''• Rentabilidade: CDI + 2,04% (Isento de IR para PF)
+• Prazo: 7 anos
+• Duration: 3,6 anos
+• Público-alvo: Investidores em Geral''',
+        'venda_1min': 'Fundo imobiliário com foco em CRIs que busca rentabilidade acima do CDI, oferecendo uma boa alternativa para renda passiva. O fundo terá uma pulverização da carteira ao longo dos primeiros 24 meses, buscanto aproximadamente 20 operações em seu portfólio. O gestor é a ARX Investimentos, fundada em 2001, e controlada pelo grupo BNY Mellon, uma das mais tradicionais instituições financeiras do mundo.',
         'perfil': 'Investidores que buscam renda recorrente com retornos superiores ao CDI através do mercado imobiliário.'
     },
     'AZ Quest Renda Mais Infra-Yield VI FIP-IE': {
-        'resumo': 'Fundo de investimento em participações focado em infraestrutura com geração de renda.',
-        'condicoes': '''• Rentabilidade: IPCA + spread
-• Prazo: Longo prazo
-• Liquidez: Baixa (prazo determinado)
-• Público-alvo: Investidores qualificados''',
-        'venda_1min': 'Fundo de infraestrutura que investe em ativos geradores de renda, protegidos contra inflação.',
-        'perfil': 'Investidores que buscam proteção inflacionária e renda de longo prazo através de ativos de infraestrutura.'
+        'resumo': 'Fundo imoboliário com investimento em ativos de infraestrutura maduros, com distribuição de rendimentos mensais.',
+        'condicoes': '''• Rentabilidade: CDI + 2,20% (Isento de IR para PF)
+• Prazo: 5 anos (+ 2 prorrogáveis)
+• Duration: 3,5 anos
+• Público-alvo: Investidores Qualificados''',
+        'venda_1min': 'O Fundo de infraestrutura faz parte de uma familía de fundos da AZ Quest que alcançou R$ 2 bilhões de reais. Além de parte relevante já em warehouse ou estruturação, permitindo uma alocação rápida e eficiente.',
+        'perfil': 'Investidores que buscam distribuição mensal de rendimentos isentos e uma cota patrimonial que se mantém estável durante o processo.'
     },
     'AZ QUEST PANORAMA RENDA CDI FI RESPONSABILIDADE LIMITADA': {
-        'resumo': 'Fundo de renda fixa com objetivo de superar o CDI através de uma carteira diversificada.',
-        'condicoes': '''• Rentabilidade: CDI + spread
-• Prazo: Médio prazo
-• Liquidez: D+30
-• Público-alvo: Investidor geral''',
-        'venda_1min': 'Fundo que busca retornos superiores ao CDI investindo em uma carteira diversificada de crédito privado.',
+        'resumo': 'Fundo imobiliário de renda fixa com objetivo de superar o CDI através de uma carteira diversificada com um portfólio de crédito para incorporadoras de médio e alto padrão em São Paulo.',
+        'condicoes': '''• Rentabilidade: CDI + 2,40% (Isento de IR para PF)
+• Prazo: 5 anos (+ 1 prorrogável)
+• Duration: 3,5 anos
+• Público-alvo: Investidor em Geral''',
+        'venda_1min': 'Fundo que busca retornos superiores ao CDI investindo em uma carteira diversificada de crédito privado com reinvestimento limitado a 3 anos, devolução integral do capital em até 5 anos. Além de garantias reais e um time com expertise de 24 anos no setor.',
         'perfil': 'Investidores conservadores que buscam retornos superiores ao CDI com gestão ativa.'
     },
     'AZ Quest Panorama Renda CDI FI RL': {
-        'resumo': 'Fundo de renda fixa com objetivo de superar o CDI através de uma carteira diversificada.',
-        'condicoes': '''• Rentabilidade: CDI + spread
-• Prazo: Médio prazo
-• Liquidez: D+30
-• Público-alvo: Investidor geral''',
-        'venda_1min': 'Fundo que busca retornos superiores ao CDI investindo em uma carteira diversificada de crédito privado.',
+        'resumo': 'Fundo imobiliário de renda fixa com objetivo de superar o CDI através de uma carteira diversificada com um portfólio de crédito para incorporadoras de médio e alto padrão em São Paulo.',
+        'condicoes': '''• Rentabilidade: CDI + 2,40% (Isento de IR para PF)
+• Prazo: 5 anos (+ 1 prorrogável)
+• Duration: 3,5 anos
+• Público-alvo: Investidor em Geral''',
+        'venda_1min': 'Fundo que busca retornos superiores ao CDI investindo em uma carteira diversificada de crédito privado com reinvestimento limitado a 3 anos, devolução integral do capital em até 5 anos. Além de garantias reais e um time com expertise de 24 anos no setor.',
         'perfil': 'Investidores conservadores que buscam retornos superiores ao CDI com gestão ativa.'
     },
     'BGR Galpões Logísticos - Cota Sênior': {
