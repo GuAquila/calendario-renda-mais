@@ -105,7 +105,7 @@ def verificar_autenticacao(df_base):
             try:
                 st.image("logo_tauari.png", width=350)
             except:
-                st.markdown("<div style='text-align: center; padding: 20px;'><div style='background: #2d5a3d; color: white; padding: 40px; border-radius: 10px; font-size: 14px;'>📁 Salve a logo como 'logo_tauari.png'<br>na mesma pasta do código</div></div>", unsafe_allow_html=True)
+                st.markdown("<div style='text-align: center; padding: 20px;'><div style='background: #2d5a3d; color: white; padding: 40px; border-radius: 10px; font-size: 14px;'", unsafe_allow_html=True)
             
             st.markdown("""
             <div class="login-titulo">
@@ -874,7 +874,7 @@ def tela_fundos():
             if links_destaque['material']:  # Só mostra se tiver link
                 st.markdown(f"""
 <a href="{links_destaque['material']}" target="_blank" style="text-decoration: none;">
-    <button style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
+    <button style="background: linear-gradient(135deg, #1e4d2b 0%, #27ae60 100%); ...
         📄 Material Publicitário
     </button>
 </a>
@@ -885,7 +885,7 @@ def tela_fundos():
             if links_destaque['expert']:  # Só mostra se tiver link
                 st.markdown(f"""
 <a href="{links_destaque['expert']}" target="_blank" style="text-decoration: none;">
-    <button style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
+    <button style="background: linear-gradient(135deg, #1e4d2b 0%, #27ae60 100%); ...
         🎓 Expert XP
     </button>
 </a>
