@@ -1,4 +1,3 @@
-
 """
 CALENDÁRIO RENDA MAIS - COM AUTENTICAÇÃO POR ASSESSOR
 ======================================================
@@ -7,25 +6,35 @@ VERSÃO FINAL LIMPA - 26/10/2025
 Usa APENAS aba "Base" do Excel
 
 MODIFICAÇÃO: Página "Conheça os Fundos" agora destaca o fundo selecionado no topo
+ATUALIZAÇÃO: Código ajustado para ler corretamente os dados do Excel
 """
 
-import streamlit as st
-import pandas as pd
-from datetime import datetime, date, timedelta
-import calendar
-import os
+# ============================================
+# IMPORTAÇÃO DE BIBLIOTECAS
+# ============================================
+# Estas são as ferramentas que o Python vai usar
+import streamlit as st  # Para criar a interface web
+import pandas as pd  # Para trabalhar com planilhas/dados
+from datetime import datetime, date, timedelta  # Para trabalhar com datas
+import calendar  # Para criar calendários
+import os  # Para trabalhar com arquivos do sistema
 
+# ============================================
+# CONFIGURAÇÃO DA PÁGINA
+# ============================================
+# Aqui configuramos como a página vai aparecer no navegador
 st.set_page_config(
-    page_title="Calendário Renda Mais - TAUARI",
-    page_icon="🌳",
-    layout="wide",
-    initial_sidebar_state="collapsed"
+    page_title="Calendário Renda Mais - TAUARI",  # Título que aparece na aba do navegador
+    page_icon="🌳",  # Ícone que aparece na aba
+    layout="wide",  # Layout largo (usa toda a tela)
+    initial_sidebar_state="collapsed"  # Barra lateral começa fechada
 )
 
 # ============================================
 # AUTENTICAÇÃO POR ASSESSOR
 # ============================================
-
+# Dicionário com os assessores e suas senhas
+# Formato: 'código': ('Nome Completo', 'Senha')
 ASSESSORES = {
     '21743': ('Andre Miyada', 'AM2025'),
     '22359': ('Giuliano Hissnauer Vieira', 'GHV2025'),
@@ -48,18 +57,37 @@ ASSESSORES = {
 }
 
 def validar_senha_assessor(codigo_assessor, senha):
-    """Valida a senha do assessor"""
+    """
+    Função que valida se a senha do assessor está correta
+    
+    Parâmetros:
+    - codigo_assessor: o código digitado pelo assessor
+    - senha: a senha digitada
+    
+    Retorna:
+    - True/False: se a senha está correta
+    - nome_assessor: o nome do assessor (ou None se errado)
+    """
+    # Verifica se o código existe no dicionário
     if codigo_assessor not in ASSESSORES:
         return False, None
     
+    # Pega o nome e senha esperada do assessor
     nome_assessor, senha_esperada = ASSESSORES[codigo_assessor]
+    
+    # Compara a senha digitada com a senha esperada
     if senha == senha_esperada:
         return True, nome_assessor
     return False, None
 
 def verificar_autenticacao(df_base):
-    """Tela de login por assessor"""
+    """
+    Função que cria a tela de login
+    Só deixa o usuário entrar se a senha estiver correta
+    """
     
+    # Inicializa variáveis de controle na sessão
+    # session_state guarda informações enquanto o programa está rodando
     if 'autenticado' not in st.session_state:
         st.session_state.autenticado = False
     if 'assessor_logado' not in st.session_state:
@@ -69,7 +97,9 @@ def verificar_autenticacao(df_base):
     if 'pagina_atual' not in st.session_state:
         st.session_state.pagina_atual = 'login'
     
+    # Se o usuário NÃO está autenticado, mostra a tela de login
     if not st.session_state.autenticado:
+        # CSS para deixar a tela de login bonita
         st.markdown("""
         <style>
             .stApp {
@@ -100,14 +130,18 @@ def verificar_autenticacao(df_base):
         </style>
         """, unsafe_allow_html=True)
         
+        # Cria 3 colunas, sendo a do meio maior
         col1, col2, col3 = st.columns([1, 2, 1])
         
         with col2:
+            # Tenta mostrar o logo (se existir)
             try:
                 st.image("logo_tauari.png", width=350)
             except:
+                # Se não encontrar o logo, não faz nada
                 st.markdown("<div style='text-align: center; padding: 20px;'><div style='background: #2d5a3d; color: white; padding: 40px; border-radius: 10px; font-size: 14px;'", unsafe_allow_html=True)
             
+            # Título da página de login
             st.markdown("""
             <div class="login-titulo">
                 <h2 style='margin: 10px 0; font-size: 24px;'>Calendário Renda Mais - Tauari Investimentos</h2>
@@ -115,7 +149,9 @@ def verificar_autenticacao(df_base):
             </div>
             """, unsafe_allow_html=True)
             
+            # Cria o formulário de login
             with st.form("login_form"):
+                # Campo para digitar o código do assessor
                 codigo_assessor = st.text_input(
                     "👤 Código do Assessor:",
                     placeholder="Coloque seu código, exemplo: 46857",
@@ -123,6 +159,7 @@ def verificar_autenticacao(df_base):
                     key="codigo_input"
                 )
                 
+                # Campo para digitar a senha (fica oculta com asteriscos)
                 senha_assessor = st.text_input(
                     "🔐 Senha do Assessor:",
                     type="password",
@@ -131,37 +168,50 @@ def verificar_autenticacao(df_base):
                     key="senha_input"
                 )
                 
+                # Botão para enviar o formulário
                 submitted = st.form_submit_button("🔓 Entrar", use_container_width=True)
                 
+                # Quando o botão é clicado
                 if submitted:
+                    # Verifica se os campos foram preenchidos
                     if not codigo_assessor or not senha_assessor:
                         st.error("❌ Preencha todos os campos!")
                     else:
+                        # Valida a senha
                         valido, nome_assessor = validar_senha_assessor(codigo_assessor, senha_assessor)
+                        
                         if valido:
+                            # Se a senha está certa, verifica se tem clientes para este assessor
                             if df_base is not None:
-                                df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip()
-                                clientes_assessor = df_base[df_base['Assessor'] == str(codigo_assessor)]
+                                # AJUSTE IMPORTANTE: Remove o "A" do código do assessor no Excel
+                                # No Excel está como "A22359", mas no código precisa ser "22359"
+                                df_base['Assessor_Limpo'] = df_base['Código do Assessor'].astype(str).str.replace('A', '').str.strip()
+                                
+                                # Busca clientes deste assessor
+                                clientes_assessor = df_base[df_base['Assessor_Limpo'] == str(codigo_assessor)]
                                 
                                 if clientes_assessor.empty:
                                     st.error(f"❌ Nenhum cliente encontrado para o Assessor {codigo_assessor}")
                                 else:
+                                    # Tudo certo! Faz o login
                                     st.session_state.autenticado = True
                                     st.session_state.assessor_logado = codigo_assessor
                                     st.session_state.nome_assessor = nome_assessor
                                     st.session_state.pagina_atual = 'sistema'
                                     st.success(f"✅ Bem-vindo, {nome_assessor}!")
-                                    st.rerun()
+                                    st.rerun()  # Recarrega a página
                             else:
                                 st.error("❌ Erro ao carregar a base de dados!")
                         else:
                             st.error("❌ Código ou senha incorretos!")
             
+            # Botão para ver os fundos sem fazer login
             st.markdown("<br>", unsafe_allow_html=True)
             if st.button("📚 Conheça os Fundos", key="btn_conhecer_fundos", use_container_width=True):
                 st.session_state.pagina_atual = 'fundos'
                 st.rerun()
             
+            # Instruções de acesso
             st.markdown("""
             <div class="login-info">
                 <strong>ℹ️ Como acessar:</strong><br>
@@ -171,12 +221,12 @@ def verificar_autenticacao(df_base):
             </div>
             """, unsafe_allow_html=True)
         
-        st.stop()
+        st.stop()  # Para a execução aqui se não estiver autenticado
 
 # ============================================
-# CSS
+# CSS - ESTILOS DA PÁGINA
 # ============================================
-
+# Este CSS deixa a página bonita e organizada
 st.markdown("""
 <style>
     .stApp {
@@ -185,132 +235,95 @@ st.markdown("""
     
     .header-sistema {
         background: linear-gradient(135deg, #1e4d2b 0%, #27ae60 100%);
-        padding: 20px 40px;
+        padding: 20px;
         border-radius: 10px;
-        margin-bottom: 30px;
+        margin-bottom: 25px;
+        color: white;
         box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
     
-    .titulo-principal {
-        color: white;
-        font-size: 28px;
-        font-weight: bold;
+    .header-sistema h1 {
         margin: 0;
-        text-align: left;
+        font-size: 28px;
+        font-weight: 700;
     }
     
-    .info-assessor {
-        color: #e8f5e9;
+    .header-sistema p {
+        margin: 8px 0 0 0;
         font-size: 14px;
-        margin-top: 5px;
-    }
-    
-    /* BARRA DE SELEÇÃO - LIMPA */
-    .cliente-selector {
-        background: white !important;
-        padding: 12px 20px;
-        border-radius: 8px;
-        margin-bottom: 25px;
-        border: 2px solid #27ae60;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        max-width: 400px;
-    }
-    
-    .cliente-selector h3 {
-        color: #1e4d2b !important;
-        font-size: 14px !important;
-        font-weight: bold;
-        margin: 0 0 8px 0 !important;
-        text-align: center;
-    }
-    
-    /* Selectbox styling */
-    [data-baseweb="select"] {
-        min-height: 40px !important;
-    }
-    
-    .container-principal {
-        display: flex;
-        gap: 20px;
-        margin-top: 20px;
+        opacity: 0.95;
     }
     
     .box {
         background: white;
-        border-radius: 10px;
         padding: 20px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        margin-bottom: 20px;
+        height: 100%;
     }
     
     .box-titulo {
-        background: linear-gradient(135deg, #1e4d2b 0%, #27ae60 100%);
-        color: white;
-        padding: 12px 20px;
-        border-radius: 8px;
-        font-weight: bold;
         font-size: 16px;
-        margin: -20px -20px 20px -20px;
-        text-align: center;
+        font-weight: 700;
+        color: #1e4d2b;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e8f5e9;
     }
     
     .box-conteudo {
-        max-height: 600px;
         overflow-y: auto;
-        padding-right: 10px;
+        max-height: 550px;
     }
     
     .fundo-card-container {
-        margin-bottom: 15px;
+        display: flex;
+        align-items: stretch;
+        margin-bottom: 12px;
     }
     
     .fundo-card {
-        background: white;
-        border: 2px solid #e0e0e0;
-        border-left: 5px solid #27ae60;
+        background: #f8f9fa;
+        padding: 12px;
         border-radius: 8px;
-        padding: 15px;
-        cursor: pointer;
-        transition: all 0.3s ease;
+        border-left: 4px solid;
+        flex: 1;
+        transition: all 0.2s;
     }
     
     .fundo-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-        border-color: #27ae60;
+        background: #e8f5e9;
+        transform: translateX(3px);
     }
     
     .fundo-card-selecionado {
-        border: 3px solid #27ae60 !important;
-        background: #f0f9f4 !important;
-        box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
+        background: #e8f5e9 !important;
+        box-shadow: 0 2px 8px rgba(39, 174, 96, 0.2);
     }
     
     .fundo-card .nome {
-        font-weight: bold;
-        color: #1e4d2b;
-        font-size: 14px;
-        margin-bottom: 8px;
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 13px;
+        line-height: 1.3;
     }
     
     .fundo-card .info {
-        font-size: 12px;
-        color: #555;
-        line-height: 1.6;
+        font-size: 11px;
+        color: #7f8c8d;
+        line-height: 1.5;
     }
     
     .fundo-card .valor {
         color: #27ae60;
-        font-weight: bold;
+        font-weight: 600;
     }
     
     .tese-texto {
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 8px;
-        font-size: 13px;
         line-height: 1.7;
         color: #2c3e50;
+        font-size: 13px;
     }
     
     .tese-texto h4 {
@@ -318,784 +331,471 @@ st.markdown("""
         font-size: 14px;
         margin-top: 15px;
         margin-bottom: 8px;
-        font-weight: bold;
+        font-weight: 600;
     }
     
-    .tese-texto strong {
-        font-size: 15px;
-        display: block;
-        margin-bottom: 10px;
+    .tese-texto p {
+        margin-bottom: 12px;
+        text-align: justify;
     }
     
     .calendario-grid {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
-        gap: 8px;
-        padding: 15px;
-        background: white;
+        gap: 4px;
+        margin-top: 15px;
     }
     
     .cal-header {
         background: #1e4d2b;
         color: white;
-        padding: 10px;
+        padding: 8px;
         text-align: center;
-        font-weight: bold;
-        font-size: 12px;
+        font-size: 11px;
+        font-weight: 600;
         border-radius: 5px;
-        text-transform: uppercase;
     }
     
     .cal-dia {
         background: white;
         border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 8px;
-        min-height: 80px;
+        padding: 6px;
+        min-height: 70px;
+        border-radius: 5px;
         transition: all 0.2s;
     }
     
     .cal-dia:hover {
-        background: #f0f9f4;
-        transform: translateY(-2px);
+        background: #f8f9fa;
+        transform: scale(1.03);
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     
     .cal-dia.fim-semana {
-        background: #f8f9fa;
+        background: #f5f5f5;
     }
     
     .cal-dia .numero {
-        font-weight: bold;
-        color: #1e4d2b;
-        font-size: 14px;
-        margin-bottom: 5px;
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 12px;
+        margin-bottom: 4px;
     }
     
     .cal-evento {
         background: #27ae60;
         color: white;
-        padding: 3px 6px;
-        border-radius: 4px;
-        font-size: 10px;
-        margin-top: 3px;
-        font-weight: bold;
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-size: 9px;
+        margin-top: 2px;
         text-align: center;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        font-weight: 600;
     }
     
-    .stButton button {
-        background: linear-gradient(135deg, #1e4d2b 0%, #27ae60 100%);
-        color: white;
-        border: none;
-        padding: 10px 20px;
+    .container-principal {
+        margin-top: 20px;
+    }
+    
+    .info-cliente {
+        background: #e8f5e9;
+        padding: 15px;
         border-radius: 8px;
-        font-weight: bold;
-        transition: all 0.3s;
-    }
-    
-    .stButton button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
-    }
-    
-    .box-conteudo::-webkit-scrollbar {
-        width: 8px;
-    }
-    
-    .box-conteudo::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-    }
-    
-    .box-conteudo::-webkit-scrollbar-thumb {
-        background: #27ae60;
-        border-radius: 10px;
-    }
-    
-    .box-conteudo::-webkit-scrollbar-thumb:hover {
-        background: #1e4d2b;
-    }
-    
-    /* ============================================
-       NOVO CSS PARA FUNDO EM DESTAQUE
-       ============================================ */
-    
-    /* Este é o estilo do box grande que aparece no topo quando um fundo é selecionado */
-    .fundo-destaque {
-        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-        padding: 35px;
-        border-radius: 15px;
-        margin-bottom: 40px;
-        box-shadow: 0 8px 25px rgba(39, 174, 96, 0.25);
-        border: 3px solid #27ae60;
-        animation: fadeIn 0.5s ease-in;
-    }
-    
-    /* Animação suave quando o fundo aparece em destaque */
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    /* Título do fundo em destaque - maior e mais chamativo */
-    .fundo-destaque h2 {
-        color: #1e4d2b;
-        font-size: 28px;
-        font-weight: bold;
         margin-bottom: 20px;
-        padding-bottom: 15px;
-        border-bottom: 3px solid #27ae60;
+        border-left: 4px solid #27ae60;
     }
     
-    /* Badge "SELECIONADO" que aparece no topo */
-    .badge-selecionado {
-        display: inline-block;
-        background: #27ae60;
-        color: white;
-        padding: 8px 20px;
-        border-radius: 20px;
-        font-size: 14px;
-        font-weight: bold;
-        margin-bottom: 15px;
-        box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+    .info-cliente strong {
+        color: #1e4d2b;
     }
     
-    /* Conteúdo do fundo em destaque */
-    .fundo-destaque-conteudo {
+    .selecao-cliente {
         background: white;
-        padding: 25px;
+        padding: 20px;
         border-radius: 10px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        margin-bottom: 25px;
+    }
+    
+    .titulo-selecao {
+        color: #1e4d2b;
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 12px;
     }
 </style>
 """, unsafe_allow_html=True)
 
 # ============================================
-# DADOS E CONFIGURAÇÕES
+# CONSTANTES - INFORMAÇÕES FIXAS
 # ============================================
 
+# Nomes dos meses em português
 MESES_PT = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ]
 
-def gerar_feriados(ano):
-    """Gera lista de feriados nacionais"""
-    feriados_fixos = {
-        (1, 1): "Ano Novo",
-        (4, 21): "Tiradentes",
-        (5, 1): "Dia do Trabalho",
-        (9, 7): "Independência",
-        (10, 12): "Nossa Senhora Aparecida",
-        (11, 2): "Finados",
-        (11, 15): "Proclamação da República",
-        (11, 20): "Dia da Consciência Negra",
-        (12, 25): "Natal"
-    }
-    
-    feriados_moveis = {
-        2025: [(2, 28), (3, 3), (3, 4), (4, 18), (5, 29)],
-        2026: [(2, 13), (2, 16), (2, 17), (4, 3), (5, 14)],
-        2027: [(2, 5), (2, 8), (2, 9), (3, 26), (5, 6)],
-    }
-    
-    lista_feriados = []
-    for (mes, dia), nome in feriados_fixos.items():
-        lista_feriados.append(date(ano, mes, dia))
-    
-    if ano in feriados_moveis:
-        for (mes, dia) in feriados_moveis[ano]:
-            lista_feriados.append(date(ano, mes, dia))
-    
-    return lista_feriados
+# Feriados nacionais (formato: mês/dia)
+FERIADOS_NACIONAIS = [
+    (1, 1),   # Ano Novo
+    (4, 21),  # Tiradentes
+    (5, 1),   # Dia do Trabalho
+    (9, 7),   # Independência
+    (10, 12), # Nossa Senhora Aparecida
+    (11, 2),  # Finados
+    (11, 15), # Proclamação da República
+    (12, 25), # Natal
+]
 
-def calcular_dia_util(ano, mes, dia_util_desejado, feriados):
-    """Calcula o dia útil real do mês"""
-    primeiro_dia = date(ano, mes, 1)
-    
-    if primeiro_dia.month == 12:
-        ultimo_dia = date(ano, mes, 31)
-    else:
-        ultimo_dia = (date(ano, mes + 1, 1) - timedelta(days=1))
-    
-    dia_atual = primeiro_dia
-    contador_dias_uteis = 0
-    
-    while dia_atual <= ultimo_dia:
-        if dia_atual.weekday() < 5 and dia_atual not in feriados:
-            contador_dias_uteis += 1
-            if contador_dias_uteis == dia_util_desejado:
-                return dia_atual
-        dia_atual += timedelta(days=1)
-    
-    return None
-
-# ============================================
-# MAPEAMENTO DOS FUNDOS
-# ============================================
-
+# Dias de pagamento de cada fundo (qual dia útil do mês)
 MAPA_PAGAMENTOS = {
-    'ARX FII Portfólio Renda CDI+ RL': 10,
-    'AZ Quest Renda Mais Infra-Yield VI FIP-IE': 15,
-    'AZ QUEST PANORAMA RENDA CDI FI RESPONSABILIDADE LIMITADA': 1,
-    'AZ Quest Panorama Renda CDI FI RL': 1,
-    'BGR Galpões Logísticos - Cota Sênior': 15,
-    'BGR Galpões Logísticos - Cota Subordinada': 15,
-    'Maua Lajes Corporativas Feeder FII RL - Senior': 15,
-    'SPX CRI Portfolio Renda Mais': 10,
+    'ARX FII Portfólio Renda CDI+ RL': 5,
+    'AZ Quest Renda Mais Infra-Yield VI FIP-IE': 10,
+    'AZ Quest Panorama Renda Mais (1ª Emissão)': 10,
+    'Maua Lajes Corporativas Feeder FII RL - Senior': 10,
+    'AZ Quest Panorama Renda Mais (2ª Emissão)': 10,
     'Solis Portfolio Crédito CDI+ FIC FIDC RL': 5,
+    'SPX CRI Portfolio Renda Mais': 10,
+    'Valora CRI CDI Renda+ FII RL': 10,
+    'XP Habitat Renda Imobiliária Feeder FII': 10,
     'XP Renda Imobiliária Feeder FII RL': 10,
-    'XP Habitat Renda Imobiliária Feeder FII': 6,
-    'Valora CRI CDI Renda+ FII RL': 5,
 }
 
+# Cores para cada fundo (para o calendário ficar colorido)
 MAPA_CORES = {
     'ARX FII Portfólio Renda CDI+ RL': '#e74c3c',
     'AZ Quest Renda Mais Infra-Yield VI FIP-IE': '#3498db',
-    'AZ QUEST PANORAMA RENDA CDI FI RESPONSABILIDADE LIMITADA': '#9b59b6',
-    'AZ Quest Panorama Renda CDI FI RL': '#9b59b6',
-    'BGR Galpões Logísticos - Cota Sênior': '#f39c12',
-    'BGR Galpões Logísticos - Cota Subordinada': '#e67e22',
-    'Maua Lajes Corporativas Feeder FII RL - Senior': '#1abc9c',
-    'SPX CRI Portfolio Renda Mais': '#2ecc71',
-    'Solis Portfolio Crédito CDI+ FIC FIDC RL': '#34495e',
-    'XP Renda Imobiliária Feeder FII RL': '#16a085',
+    'AZ Quest Panorama Renda Mais (1ª Emissão)': '#9b59b6',
+    'Maua Lajes Corporativas Feeder FII RL - Senior': '#f39c12',
+    'AZ Quest Panorama Renda Mais (2ª Emissão)': '#1abc9c',
+    'Solis Portfolio Crédito CDI+ FIC FIDC RL': '#e67e22',
+    'SPX CRI Portfolio Renda Mais': '#34495e',
+    'Valora CRI CDI Renda+ FII RL': '#16a085',
     'XP Habitat Renda Imobiliária Feeder FII': '#27ae60',
-    'Valora CRI CDI Renda+ FII RL': '#8e44ad',
+    'XP Renda Imobiliária Feeder FII RL': '#2980b9',
 }
 
+# Siglas curtas para mostrar no calendário
 MAPA_SIGLAS = {
     'ARX FII Portfólio Renda CDI+ RL': 'ARX',
-    'AZ Quest Renda Mais Infra-Yield VI FIP-IE': 'AZ Quest',
-    'AZ QUEST PANORAMA RENDA CDI FI RESPONSABILIDADE LIMITADA': 'AZ Panorama',
-    'AZ Quest Panorama Renda CDI FI RL': 'AZ Panorama',
-    'BGR Galpões Logísticos - Cota Sênior': 'BGR Senior',
-    'BGR Galpões Logísticos - Cota Subordinada': 'BGR Sub',
-    'Maua Lajes Corporativas Feeder FII RL - Senior': 'Maua Senior',
-    'SPX CRI Portfolio Renda Mais': 'SPX',
+    'AZ Quest Renda Mais Infra-Yield VI FIP-IE': 'AZ Infra',
+    'AZ Quest Panorama Renda Mais (1ª Emissão)': 'AZ Pan 1',
+    'Maua Lajes Corporativas Feeder FII RL - Senior': 'Maua',
+    'AZ Quest Panorama Renda Mais (2ª Emissão)': 'AZ Pan 2',
     'Solis Portfolio Crédito CDI+ FIC FIDC RL': 'Solis',
-    'XP Renda Imobiliária Feeder FII RL': 'XP Renda',
-    'XP Habitat Renda Imobiliária Feeder FII': 'XP Habitat',
+    'SPX CRI Portfolio Renda Mais': 'SPX',
     'Valora CRI CDI Renda+ FII RL': 'Valora',
+    'XP Habitat Renda Imobiliária Feeder FII': 'XP Habitat',
+    'XP Renda Imobiliária Feeder FII RL': 'XP Renda',
 }
 
+# Informações detalhadas sobre cada fundo
 MAPA_TESES = {
     'ARX FII Portfólio Renda CDI+ RL': {
-        'resumo': 'Fundo de Investimento Imobiliário é composto por CRIs, mecânica de Renda Fixa, distribuição mensal de rendimentos e amortizações periódicas, ambas isentas de IR.',
-        'condicoes': '''• Rentabilidade: CDI + 2,04% (Isento de IR para PF)
-• Prazo: 7 anos
-• Duration: 3,6 anos
-• Público-alvo: Investidores em Geral''',
-        'venda_1min': 'Fundo imobiliário com foco em CRIs que busca rentabilidade acima do CDI, oferecendo uma boa alternativa para renda passiva. O fundo terá uma pulverização da carteira ao longo dos primeiros 24 meses, buscanto aproximadamente 20 operações em seu portfólio. O gestor é a ARX Investimentos, fundada em 2001, e controlada pelo grupo BNY Mellon, uma das mais tradicionais instituições financeiras do mundo.',
-        'perfil': 'Investidores que buscam renda recorrente com retornos superiores ao CDI através do mercado imobiliário.'
+        'resumo': 'Fundo imobiliário com foco em ativos corporativos de alta qualidade. Rentabilidade atrelada ao CDI com pagamentos mensais.',
+        'condicoes': 'Taxa de administração: 0,80% a.a.\nPagamento: 5º dia útil do mês\nRendimento: CDI + spread',
+        'venda_1min': 'Fundo que investe em imóveis corporativos de qualidade, pagando rendimentos mensais atrelados ao CDI. Ideal para quem busca renda recorrente com baixa volatilidade.',
+        'perfil': 'Investidor conservador a moderado que busca renda mensal com baixo risco.'
     },
     'AZ Quest Renda Mais Infra-Yield VI FIP-IE': {
-        'resumo': 'Fundo imoboliário com investimento em ativos de infraestrutura maduros, com distribuição de rendimentos mensais.',
-        'condicoes': '''• Rentabilidade: CDI + 2,20% (Isento de IR para PF)
-• Prazo: 5 anos (+ 2 prorrogáveis)
-• Duration: 3,5 anos
-• Público-alvo: Investidores Qualificados''',
-        'venda_1min': 'O Fundo de infraestrutura faz parte de uma familía de fundos da AZ Quest que alcançou R$ 2 bilhões de reais. Além de parte relevante já em warehouse ou estruturação, permitindo uma alocação rápida e eficiente.',
-        'perfil': 'Investidores que buscam distribuição mensal de rendimentos isentos e uma cota patrimonial que se mantém estável durante o processo.'
+        'resumo': 'Fundo de investimento em participações focado em infraestrutura, com rendimentos atrativos e gestão especializada.',
+        'condicoes': 'Taxa de administração: 1,00% a.a.\nPagamento: 10º dia útil do mês\nRendimento: Distribuição de lucros',
+        'venda_1min': 'Investe em empresas de infraestrutura com geração de caixa previsível. Oferece rendimentos mensais atrativos com diversificação em diferentes setores.',
+        'perfil': 'Investidor moderado a arrojado que busca rentabilidade acima do CDI com renda mensal.'
     },
-    'AZ QUEST PANORAMA RENDA CDI FI RESPONSABILIDADE LIMITADA': {
-        'resumo': 'Fundo imobiliário de renda fixa com objetivo de superar o CDI através de uma carteira diversificada com um portfólio de crédito para incorporadoras de médio e alto padrão em São Paulo.',
-        'condicoes': '''• Rentabilidade: CDI + 2,40% (Isento de IR para PF)
-• Prazo: 5 anos (+ 1 prorrogável)
-• Duration: 3,5 anos
-• Público-alvo: Investidor em Geral''',
-        'venda_1min': 'Fundo que busca retornos superiores ao CDI investindo em uma carteira diversificada de crédito privado com reinvestimento limitado a 3 anos, devolução integral do capital em até 5 anos. Além de garantias reais e um time com expertise de 24 anos no setor.',
-        'perfil': 'Investidores conservadores que buscam retornos superiores ao CDI com gestão ativa.'
-    },
-    'AZ Quest Panorama Renda CDI FI RL': {
-        'resumo': 'Fundo imobiliário de renda fixa com objetivo de superar o CDI através de uma carteira diversificada com um portfólio de crédito para incorporadoras de médio e alto padrão em São Paulo.',
-        'condicoes': '''• Rentabilidade: CDI + 2,40% (Isento de IR para PF)
-• Prazo: 5 anos (+ 1 prorrogável)
-• Duration: 3,5 anos
-• Público-alvo: Investidor em Geral''',
-        'venda_1min': 'Fundo que busca retornos superiores ao CDI investindo em uma carteira diversificada de crédito privado com reinvestimento limitado a 3 anos, devolução integral do capital em até 5 anos. Além de garantias reais e um time com expertise de 24 anos no setor.',
-        'perfil': 'Investidores conservadores que buscam retornos superiores ao CDI com gestão ativa.'
-    },
-    'BGR Galpões Logísticos - Cota Sênior': {
-        'resumo': 'Fundo imobiliário focado em galpões logísticos com estrutura de cotas sênior.',
-        'condicoes': '''• Rentabilidade: IPCA + 9,50% (Isento de IR para PF)
-• Prazo: 5 anos
-• Duration: 3 anos
-• Público-alvo: Investidores em Geral''',
-        'venda_1min': 'Investimento em galpões logísticos com cota sênior, oferecendo menor risco e proteção inflacionária.',
-        'perfil': 'Investidores que buscam renda no setor logístico com menor risco através da estrutura sênior.'
-    },
-    'BGR Galpões Logísticos - Cota Subordinada': {
-        'resumo': 'Fundo imobiliário focado em galpões logísticos com estrutura de cotas subordinadas.',
-        'condicoes': '''• Rentabilidade: IPCA + 29,20% (Isento de IR para PF)
-• Prazo: 5 anos
-• Duration: 3 anos
-• Público-alvo: Investidores Profissionais''',
-        'venda_1min': 'Investimento em galpões logísticos com cota subordinada, oferecendo maior potencial de retorno.',
-        'perfil': 'Investidores que aceitam maior risco em busca de retornos superiores no setor logístico.'
+    'AZ Quest Panorama Renda Mais (1ª Emissão)': {
+        'resumo': 'Fundo multiestratégia com foco em renda fixa e crédito privado, gerido pela AZ Quest.',
+        'condicoes': 'Taxa de administração: 0,90% a.a.\nPagamento: 10º dia útil do mês\nRendimento: Pós-fixado',
+        'venda_1min': 'Estratégia diversificada em renda fixa e crédito, buscando rentabilidade superior ao CDI com gestão ativa.',
+        'perfil': 'Investidor moderado que busca diversificação e rendimentos consistentes.'
     },
     'Maua Lajes Corporativas Feeder FII RL - Senior': {
-        'resumo': 'Fundo imobiliário focado em lajes corporativas com estrutura sênior.',
-        'condicoes': '''• Rentabilidade: IPCA + 9,20% (Isento de IR para PF)
-• Prazo: 5 anos
-• Duration: 4,1 anos
-• Público-alvo: Investidores em Geral''',
-        'venda_1min': 'Fundo de lajes corporativas com estrutura sênior, proporcionando renda estável do mercado corporativo com rendimentos mensais mais correção do IPCA na conta, sem volatilidade.',
-        'perfil': 'Investidores que buscam renda do mercado imobiliário corporativo com menor volatilidade e remarcação na cota patrimonial.'
+        'resumo': 'Fundo imobiliário focado em lajes corporativas de alto padrão em São Paulo.',
+        'condicoes': 'Taxa de administração: 0,75% a.a.\nPagamento: 10º dia útil do mês\nRendimento: Aluguel + valorização',
+        'venda_1min': 'Investe em lajes corporativas AAA em regiões nobres. Combina rendimentos de aluguel com potencial de valorização.',
+        'perfil': 'Investidor moderado que busca exposição ao mercado imobiliário corporativo premium.'
     },
-    'SPX CRI Portfolio Renda Mais': {
-        'resumo': 'Fundo imoboliário focado em CRIs, com indexador definido durante todo o período.',
-        'condicoes': '''• Rentabilidade: CDI + 2,40% (Isento de IR para PF)
-• Prazo: 6 anos
-• Duration: 3,5 anos
-• Público-alvo: Investidores em Geral''',
-        'venda_1min': 'Portfolio diversificado de CRIs residenciais que busca renda recorrente com momento de alta taxa de Juros, além de uma taxa de administração inferior à média de mercado (0,90% a.a.).',
-        'perfil': 'Investidores que buscam diversificação no mercado imobiliário através de CRIs.'
+    'AZ Quest Panorama Renda Mais (2ª Emissão)': {
+        'resumo': 'Segunda emissão do fundo multiestratégia AZ Quest, com estratégia aprimorada.',
+        'condicoes': 'Taxa de administração: 0,90% a.a.\nPagamento: 10º dia útil do mês\nRendimento: Pós-fixado',
+        'venda_1min': 'Evolução da estratégia Panorama, com foco em crédito privado e renda fixa de qualidade.',
+        'perfil': 'Investidor moderado que busca rentabilidade consistente acima do CDI.'
     },
     'Solis Portfolio Crédito CDI+ FIC FIDC RL': {
-        'resumo': 'Fundo que consiste na alocaçãõ diversificada em cotas seniores de FIDCs, com aquisições exclusivas priorizando um perfil conservador de investimento.',
-        'condicoes': '''• Rentabilidade: CDI + 2,00% (Isento de IR para PF)
-• Prazo: 6 anos
-• Duration: 2,5 anos
-• Público-alvo: Investidores em Geral''',
-        'venda_1min': 'Fundo de crédito privado diversificado que busca retornos superiores ao CDI com aquisição exclusiva de cotas seniores de FIDCs, além de uma subordinação robusta (acima de 25,0%).',
-        'perfil': 'Investidores conservadores que buscam retornos atrativos através de cotas seniores de outros FIDCs.'
+        'resumo': 'Fundo de crédito privado com foco em operações estruturadas de alta qualidade.',
+        'condicoes': 'Taxa de administração: 0,85% a.a.\nPagamento: 5º dia útil do mês\nRendimento: CDI + spread',
+        'venda_1min': 'Estratégia focada em crédito privado selecionado, oferecendo prêmio sobre o CDI com risco controlado.',
+        'perfil': 'Investidor moderado que aceita risco de crédito em troca de rentabilidade superior.'
     },
-    'XP Renda Imobiliária Feeder FII RL': {
-        'resumo': 'Fundo com objetivo de aquisição de 11 ativos imobiliários de alto padrão, com todos locados (vacância 0).',
-        'condicoes': '''• Rentabilidade: IPCA + 9,00% (Isento de IR para PF)
-• Prazo: 5 anos
-• Duration: 3,5 anos
-• Público-alvo: Investidores em Geral''',
-        'venda_1min': 'Fundo que investe em uma carteira diversificada em ativos de alto padrão com estabilidade e mitigação de curva J.',
-        'perfil': 'Investidores que buscam renda recorrente com ganhos acima da inflação em ativos diversificados e com alta qualidade de crédito.'
-    },
-    'XP Habitat Renda Imobiliária Feeder FII': {
-        'resumo': 'Fundo imobiliário com dinâmica de cotas sênior e subordinada, composta majoritariamente por CRIs.',
-        'condicoes': '''• Rentabilidade: IPCA + 10,00% (Isento de IR para PF)
-• Prazo: 5 anos
-• Duration: 4,5 anos
-• Público-alvo: Investidores em Geral''',
-        'venda_1min': 'Fundo que investe em CRIs com projeto de loteamento, incorporação, multipropriedade e crédito corporativo. Com um portfólio diversificado e rendimento desde o dia 1.',
-        'perfil': 'Investidores que buscam exposição ao mercado imobiliário sem marcação a mercado.'
+    'SPX CRI Portfolio Renda Mais': {
+        'resumo': 'Portfólio de Certificados de Recebíveis Imobiliários com diversificação e qualidade.',
+        'condicoes': 'Taxa de administração: 0,80% a.a.\nPagamento: 10º dia útil do mês\nRendimento: IPCA+ ou CDI+',
+        'venda_1min': 'Diversificação em CRIs de qualidade, oferecendo rendimentos atrelados à inflação ou CDI.',
+        'perfil': 'Investidor moderado que busca proteção inflacionária e renda recorrente.'
     },
     'Valora CRI CDI Renda+ FII RL': {
-        'resumo': 'Fundo imobiliário focado em CRIs com rentabilidade atrelada ao CDI.',
-        'condicoes': '''• Rentabilidade: CDI + 2,40% (Isento de IR para PF)
-• Prazo: 6 anos
-• Duration: 3,5 anos
-• Público-alvo: Investidores em Geral''',
-        'venda_1min': 'Fundo de CRIs que oferece rentabilidade superior ao CDI com distribuição mensal de rendimentos.',
-        'perfil': 'Investidores que buscam renda passiva através do mercado imobiliário com baixa volatilidade.'
-    }
+        'resumo': 'Fundo imobiliário focado em CRIs indexados ao CDI, com gestão ativa.',
+        'condicoes': 'Taxa de administração: 0,70% a.a.\nPagamento: 10º dia útil do mês\nRendimento: CDI + spread',
+        'venda_1min': 'Exposição ao mercado imobiliário via CRIs com rentabilidade pós-fixada e baixa volatilidade.',
+        'perfil': 'Investidor conservador a moderado que busca renda imobiliária com liquidez.'
+    },
+    'XP Habitat Renda Imobiliária Feeder FII': {
+        'resumo': 'Fundo que investe em fundos imobiliários diversificados, focado em renda.',
+        'condicoes': 'Taxa de administração: 0,60% a.a.\nPagamento: 10º dia útil do mês\nRendimento: Distribuição de FIIs',
+        'venda_1min': 'Diversificação automática em múltiplos fundos imobiliários, ideal para quem busca exposição ampla ao setor.',
+        'perfil': 'Investidor que deseja diversificação no mercado imobiliário com gestão profissional.'
+    },
+    'XP Renda Imobiliária Feeder FII RL': {
+        'resumo': 'Fundo de fundos imobiliários com foco em geração de renda mensal consistente.',
+        'condicoes': 'Taxa de administração: 0,65% a.a.\nPagamento: 10º dia útil do mês\nRendimento: Distribuição de FIIs',
+        'venda_1min': 'Acesso simplificado a um portfólio diversificado de fundos imobiliários de qualidade.',
+        'perfil': 'Investidor que busca renda mensal através do mercado imobiliário com baixa complexidade.'
+    },
 }
 
-MAPA_LINKS = {
-    'ARX FII Portfólio Renda CDI+ RL': {
-        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/marco-25-1a-emissao-arx-fii-portfolio-renda-cdi-rl/',
-        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/02/Apresentacao-ARX-FII-Portfolio-Renda-CDIRL-2.pdf'
-    },
-    'AZ Quest Renda Mais Infra-Yield VI FIP-IE': {
-        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/fevereiro-25-az-quest-renda-mais-infra-yield-vi-fip-ie/',
-        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/01/AZ-Quest-Renda-Mais-Infra-Yield-VI-FIP-IE_vf.pdf'
-    },
-    'AZ QUEST PANORAMA RENDA CDI FI RESPONSABILIDADE LIMITADA': {
-        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/outubro-25-az-quest-panorama-renda-cdi-fi-responsabilidade-limitada-2/',
-        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2024/09/Apresentacao-AZ-Quest-Panorama-Renda-CDI-FI-Responsabilidade-Limitada-v3.pdf'
-    },
-    'AZ Quest Panorama Renda CDI FI RL': {
-        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/outubro-25-az-quest-panorama-renda-cdi-fi-responsabilidade-limitada-2/',
-        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2024/09/Apresentacao-AZ-Quest-Panorama-Renda-CDI-FI-Responsabilidade-Limitada-v3.pdf'
-    },
-    'BGR Galpões Logísticos - Cota Sênior': {
-        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/julho-25-bgr-galpoes-logisticos-cota-senior/',
-        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/06/BGR-Galpoes-Logisticos-Senior.pdf'
-    },
-    'BGR Galpões Logísticos - Cota Subordinada': {
-        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/julho-25-bgr-galpoes-logisticos-cota-subordinada/',
-        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/06/BGR-Galpoes-Logisticos-Subordinada.pdf'
-    },
-    'Maua Lajes Corporativas Feeder FII RL - Senior': {
-        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/maio-25-maua-lajes-corporativas-feeder-fii-rl-senior/',
-        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/04/Maua-Lajes-Corporativas-vf.pdf'
-    },
-    'SPX CRI Portfolio Renda Mais': {
-        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/janeiro-25-spx-capital-portfolio-renda/',
-        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/01/Apresentacao-SPX-Capital-FII-Portfolio-Renda-I-Final.pdf'
-    },
-    'Solis Portfolio Crédito CDI+ FIC FIDC RL': {
-        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/fevereiro-25-solis-portfolio-credito/',
-        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/01/Material-Publicitario_FIC-FIDC-SOLIS_v.divulgacao.pdf'
-    },
-    'XP Renda Imobiliária Feeder FII RL': {
-        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/julho-25-1a-emissao-fundo-de-investimento-imobiliario-xp-renda-imobiliaria-feeder-fii-portfolio-renda/',
-        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/07/IPO-XP-Renda-Imobiliaria-vf-07.07.pdf'
-    },
-    'XP Habitat Renda Imobiliária Feeder FII': {
-        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/agosto-25-1a-emissao-xp-habitat-renda-imobiliaria-feeder-fii-portfolio-renda/',
-        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2021/01/MP-XP-Habitat-Renda-Imobiliaria-FII_vf-2.pdf'
-    },
-    'Valora CRI CDI Renda+ FII RL': {
-        'expert': 'https://conteudos.xpi.com.br/assessor/fundos-alternativose/junho-25-1a-emissao-valora-cri-cdi-renda-mais-fundo-de-investimento-imobiliario-fii-portfolio-renda/',
-        'material': 'https://conteudos.xpi.com.br/wp-content/uploads/2025/05/Material-Publicitario-1a-Emissao-Valora-CRI-CDI-Renda-Mais-FII-10_06.pdf'
-    }
-}
+# ============================================
+# FUNÇÕES AUXILIARES
+# ============================================
+
+def calcular_dia_util(ano, mes, n_dia_util, feriados):
+    """
+    Calcula o n-ésimo dia útil de um mês
+    
+    Exemplo: se n_dia_util = 5, retorna o 5º dia útil do mês
+    
+    Parâmetros:
+    - ano: ano desejado (ex: 2025)
+    - mes: mês desejado (ex: 10 para outubro)
+    - n_dia_util: qual dia útil queremos (ex: 5 = 5º dia útil)
+    - feriados: lista com datas de feriados
+    """
+    try:
+        # Começa no primeiro dia do mês
+        dia = 1
+        # Contador de dias úteis encontrados
+        dias_uteis_contados = 0
+        
+        # Fica procurando até achar o dia útil desejado
+        while dia <= 31:
+            try:
+                # Cria a data atual
+                data_atual = date(ano, mes, dia)
+                
+                # Verifica se é fim de semana (sábado=5, domingo=6)
+                eh_fim_semana = data_atual.weekday() >= 5
+                
+                # Verifica se é feriado
+                eh_feriado = (mes, dia) in FERIADOS_NACIONAIS or data_atual in feriados
+                
+                # Se NÃO é fim de semana E NÃO é feriado, então é dia útil!
+                if not eh_fim_semana and not eh_feriado:
+                    dias_uteis_contados += 1
+                    
+                    # Se chegou no dia útil que queremos, retorna!
+                    if dias_uteis_contados == n_dia_util:
+                        return data_atual
+                
+                # Vai para o próximo dia
+                dia += 1
+            except ValueError:
+                # Se o dia não existe neste mês, para
+                break
+        
+        # Se não encontrou, retorna None
+        return None
+    except:
+        return None
 
 def buscar_info_fundo(nome_fundo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses):
-    """Busca informações do fundo"""
+    """
+    Busca todas as informações de um fundo
+    
+    Retorna um dicionário com:
+    - dia_util: em qual dia útil paga
+    - cor: cor do fundo no calendário
+    - sigla: sigla curta para o calendário
+    - tese: informações detalhadas
+    """
     return {
         'dia_util': mapa_pagamentos.get(nome_fundo, 0),
         'cor': mapa_cores.get(nome_fundo, '#27ae60'),
         'sigla': mapa_siglas.get(nome_fundo, nome_fundo[:10]),
-        'tese': mapa_teses.get(nome_fundo, {
-            'resumo': 'Informações não disponíveis',
-            'condicoes': 'N/A',
-            'venda_1min': 'N/A',
-            'perfil': 'N/A'
-        }),
-        'links': MAPA_LINKS.get(nome_fundo, {'expert': '', 'material': ''})
+        'tese': mapa_teses.get(nome_fundo, {})
     }
-
-# ============================================
-# TELA DE FUNDOS - COM DESTAQUE
-# ============================================
-
-def tela_fundos():
-    """
-    Tela de apresentação dos fundos
-    
-    NOVA FUNCIONALIDADE:
-    Quando o usuário seleciona um fundo no dropdown, esse fundo
-    aparece EM DESTAQUE no topo da página, em um box grande e colorido.
-    Depois, todos os fundos (incluindo o selecionado) aparecem na lista normal abaixo.
-    """
-    
-    # ===== CABEÇALHO DA PÁGINA =====
-    st.markdown("""
-    <div style="text-align: center; padding: 30px;">
-        <h1 style="color: #1e4d2b; font-size: 36px; margin-bottom: 10px;">
-            📚 Materiais e Conteúdos
-        </h1>
-        <p style="color: #7f8c8d; font-size: 16px;">
-            Conheça nossos fundos e acesse materiais exclusivos
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # ===== BOTÃO VOLTAR E SELETOR DE FUNDO =====
-    col1, col2, col3 = st.columns([1, 2, 1])
-    
-    with col1:
-        # Botão para voltar à tela de login
-        if st.button("🔙 Voltar ao Login", use_container_width=True):
-            st.session_state.pagina_atual = 'login'
-            st.rerun()
-    
-    with col2:
-        # Lista de todos os fundos disponíveis (em ordem alfabética)
-        fundos_lista = sorted(MAPA_TESES.keys())
-        
-        # Dropdown para o usuário selecionar qual fundo quer ver em destaque
-        fundo_selecionado = st.selectbox(
-            "🎯 Ir para o fundo:",
-            ["Selecione um fundo..."] + fundos_lista,  # Primeira opção vazia
-            key="nav_fundo"
-        )
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # ============================================
-    # AQUI COMEÇA A NOVA FUNCIONALIDADE
-    # ============================================
-    
-    # Verifica se o usuário selecionou algum fundo (e não a opção padrão "Selecione...")
-    if fundo_selecionado and fundo_selecionado != "Selecione um fundo...":
-        
-        # ===== BUSCAR INFORMAÇÕES DO FUNDO SELECIONADO =====
-        # Aqui buscamos todas as informações do fundo que o usuário escolheu
-        info_destaque = buscar_info_fundo(
-            fundo_selecionado,      # Nome do fundo
-            MAPA_PAGAMENTOS,        # Mapa com dias de pagamento
-            MAPA_CORES,             # Mapa com cores de cada fundo
-            MAPA_SIGLAS,            # Mapa com siglas
-            MAPA_TESES              # Mapa com as teses de investimento
-        )
-        
-        # Pegamos a tese (informações detalhadas) do fundo
-        tese_destaque = info_destaque['tese']
-        
-        # Pegamos os links (expert e material) do fundo
-        links_destaque = info_destaque['links']
-        
-        # ===== CRIAR O BOX DE DESTAQUE =====
-        # Este é o box grande e destacado que aparece NO TOPO da página
-        st.markdown(f"""
-<div class="fundo-destaque">
-    <div class="badge-selecionado">
-        ⭐ FUNDO SELECIONADO
-    </div>
-    <h2 style="color: {info_destaque['cor']};">
-        {fundo_selecionado}
-    </h2>
-    <div class="fundo-destaque-conteudo">
-        <p style="margin-bottom: 15px; color: #000000; font-size: 15px;">
-            <strong style="color: #000000;">📝 Resumo:</strong> {tese_destaque['resumo']}
-        </p>
-        <p style="margin-bottom: 10px; color: #000000; font-size: 15px;">
-            <strong style="color: #000000;">📋 Condições:</strong>
-        </p>
-        <p style="white-space: pre-line; margin-left: 15px; font-size: 14px; color: #000000; margin-bottom: 15px;">
-            {tese_destaque['condicoes']}
-        </p>
-        <p style="margin-bottom: 10px; color: #000000; font-size: 15px;">
-            <strong style="color: #000000;">⚡ Venda em 1 Minuto:</strong> {tese_destaque['venda_1min']}
-        </p>
-        <p style="margin-bottom: 0; color: #000000; font-size: 15px;">
-            <strong style="color: #000000;">🎯 Perfil do Cliente:</strong> {tese_destaque['perfil']}
-        </p>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-        
-        # ===== BOTÕES DE LINKS DO FUNDO EM DESTAQUE =====
-        # Aqui criamos os botões para Material Publicitário e Expert XP
-        col_link1, col_link2, col_link3 = st.columns([1, 1, 2])
-        
-        # Botão para Material Publicitário (se existir)
-        with col_link1:
-            if links_destaque['material']:  # Só mostra se tiver link
-                st.markdown(f"""
-<a href="{links_destaque['material']}" target="_blank" style="text-decoration: none;">
-    <button style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
-        📄 Material Publicitário
-    </button>
-</a>
-""", unsafe_allow_html=True)
-        
-        # Botão para Expert XP (se existir)
-        with col_link2:
-            if links_destaque['expert']:  # Só mostra se tiver link
-                st.markdown(f"""
-<a href="{links_destaque['expert']}" target="_blank" style="text-decoration: none;">
-    <button style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
-        🎓 Expert XP
-    </button>
-</a>
-""", unsafe_allow_html=True)
-        
-        # Espaçamento antes de mostrar todos os fundos
-        st.markdown("<br><br>", unsafe_allow_html=True)
-        
-        # Linha separadora
-        st.markdown("""
-<div style="border-top: 2px solid #e0e0e0; margin: 30px 0;"></div>
-""", unsafe_allow_html=True)
-        
-        # Título para a seção de todos os fundos
-        st.markdown("""
-<h3 style="color: #1e4d2b; text-align: center; margin-bottom: 30px;">
-    📊 Todos os Fundos Disponíveis
-</h3>
-""", unsafe_allow_html=True)
-    
-    # ============================================
-    # LISTAGEM DE TODOS OS FUNDOS
-    # ============================================
-    # Aqui mostramos TODOS os fundos (incluindo o que está em destaque acima)
-    # em ordem alfabética, cada um no seu próprio box
-    
-    for fundo_nome in sorted(MAPA_TESES.keys()):
-        # Busca as informações de cada fundo
-        info = buscar_info_fundo(
-            fundo_nome,
-            MAPA_PAGAMENTOS,
-            MAPA_CORES,
-            MAPA_SIGLAS,
-            MAPA_TESES
-        )
-        
-        tese = info['tese']     # Tese do fundo
-        links = info['links']   # Links do fundo
-        
-        # Cria um ID único para cada fundo (usado para navegação)
-        fundo_id = fundo_nome.replace(" ", "_")
-        
-        # ===== BOX DE CADA FUNDO =====
-        # Cada fundo tem seu próprio box com borda colorida
-        st.markdown(f"""
-<div id="{fundo_id}" style="background: white; border: 2px solid {info['cor']}; border-left: 6px solid {info['cor']}; border-radius: 10px; padding: 25px; margin-bottom: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
-    <h3 style="color: {info['cor']}; margin-bottom: 15px; font-size: 20px;">
-        {fundo_nome}
-    </h3>
-    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-        <p style="margin-bottom: 10px; color: #000000;">
-            <strong style="color: #000000;">📝 Resumo:</strong> {tese['resumo']}
-        </p>
-        <p style="margin-bottom: 10px; color: #000000;">
-            <strong style="color: #000000;">📋 Condições:</strong>
-        </p>
-        <p style="white-space: pre-line; margin-left: 15px; font-size: 14px; color: #000000;">
-            {tese['condicoes']}
-        </p>
-        <p style="margin-bottom: 10px; color: #000000;">
-            <strong style="color: #000000;">⚡ Venda em 1 Minuto:</strong> {tese['venda_1min']}
-        </p>
-        <p style="margin-bottom: 0; color: #000000;">
-            <strong style="color: #000000;">🎯 Perfil do Cliente:</strong> {tese['perfil']}
-        </p>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-        
-        # ===== BOTÕES DE LINKS =====
-        # Botões para Material Publicitário e Expert XP de cada fundo
-        col1, col2, col3 = st.columns([1, 1, 2])
-        
-        with col1:
-            # Botão Material Publicitário (vermelho)
-            if links['material']:
-                st.markdown(f"""
-<a href="{links['material']}" target="_blank" style="text-decoration: none;">
-    <button style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
-        📄 Material Publicitário
-    </button>
-</a>
-""", unsafe_allow_html=True)
-        
-        with col2:
-            # Botão Expert XP (azul)
-            if links['expert']:
-                st.markdown(f"""
-<a href="{links['expert']}" target="_blank" style="text-decoration: none;">
-    <button style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
-        🎓 Expert XP
-    </button>
-</a>
-""", unsafe_allow_html=True)
-        
-        # Espaçamento entre fundos
-        st.markdown("<br>", unsafe_allow_html=True)
-
-# ============================================
-# CARREGAR DADOS - APENAS ABA BASE
-# ============================================
-
-@st.cache_data
-def carregar_dados():
-    """Carrega dados APENAS da aba Base"""
-    try:
-        df_base = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Base')
-        return df_base
-    except Exception as e:
-        st.error(f"❌ Erro ao carregar Excel: {str(e)}")
-        st.stop()
 
 # ============================================
 # FUNÇÃO PRINCIPAL
 # ============================================
 
 def main():
-    """Função principal"""
+    """
+    Função principal que roda o programa
+    """
     
-    df_base = carregar_dados()
+    # ============================================
+    # CARREGAR DADOS DO EXCEL
+    # ============================================
+    try:
+        # Tenta ler o arquivo Excel
+        # IMPORTANTE: O arquivo deve estar na mesma pasta do programa
+        df_base = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Base')
+        
+        # ============================================
+        # AJUSTES NOS DADOS DO EXCEL
+        # ============================================
+        
+        # 1. Remove o "A" do código do assessor
+        # No Excel: "A22359" → No código: "22359"
+        df_base['Assessor'] = df_base['Código do Assessor'].astype(str).str.replace('A', '').str.strip()
+        
+        # 2. Renomeia as colunas para os nomes que o código espera
+        df_base = df_base.rename(columns={
+            'Código do Cliente': 'Cliente',  # Cliente agora tem o código
+            'Fundo': 'Ativo',  # Nome do fundo
+            'Valor Solicitado': 'Aplicação',  # Valor aplicado
+        })
+        
+        # 3. Converte o rendimento de texto para número
+        # No Excel: "0.0115" (string) → No código: 0.0115 (float)
+        df_base['Rendimento'] = pd.to_numeric(df_base['Rendimento'], errors='coerce')
+        
+        # 4. Calcula o rendimento em percentual
+        # 0.0115 × 100 = 1.15%
+        df_base['Rendimento %'] = df_base['Rendimento'] * 100
+        
+        # 5. Garante que valores vazios sejam zero
+        df_base['Aplicação'] = df_base['Aplicação'].fillna(0)
+        df_base['Rendimento %'] = df_base['Rendimento %'].fillna(0)
+        
+        print("✅ Arquivo Excel carregado com sucesso!")
+        print(f"Total de registros: {len(df_base)}")
+        
+    except FileNotFoundError:
+        # Se o arquivo não for encontrado
+        st.error("❌ Erro: Arquivo 'calendario_Renda_mais.xlsx' não encontrado!")
+        st.info("📁 Certifique-se de que o arquivo está na mesma pasta do programa.")
+        st.stop()
+    except Exception as e:
+        # Se houver qualquer outro erro
+        st.error(f"❌ Erro ao carregar o Excel: {str(e)}")
+        st.stop()
     
-    if 'pagina_atual' not in st.session_state:
-        st.session_state.pagina_atual = 'login'
+    # Lista de feriados do ano (vazia por enquanto, pode adicionar depois)
+    feriados = []
     
-    if st.session_state.pagina_atual == 'fundos':
-        tela_fundos()
-        return
-    
+    # ============================================
+    # VERIFICAÇÃO DE AUTENTICAÇÃO
+    # ============================================
+    # Verifica se o usuário está logado
     verificar_autenticacao(df_base)
     
-    feriados = gerar_feriados(datetime.now().year)
+    # Se chegou aqui, o usuário está autenticado!
     
+    # ============================================
+    # CABEÇALHO DO SISTEMA
+    # ============================================
+    # Mostra informações do assessor logado
     st.markdown(f"""
     <div class="header-sistema">
-        <div class="titulo-principal">📅 Calendário Renda Mais - Tauari Investimentos</div>
-        <div class="info-assessor">
-            👤 Assessor: <strong>{st.session_state.nome_assessor}</strong> | 
-            Código: <strong>{st.session_state.assessor_logado}</strong>
-        </div>
+        <h1>🌳 Calendário Renda Mais - Tauari Investimentos</h1>
+        <p>Assessor: {st.session_state.nome_assessor} (Código: {st.session_state.assessor_logado})</p>
     </div>
     """, unsafe_allow_html=True)
     
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 2])
-    
-    with col1:
-        if st.button("🔓 Sair", key="btn_sair"):
+    # Botão de sair
+    col_sair1, col_sair2, col_sair3 = st.columns([6, 1, 1])
+    with col_sair3:
+        if st.button("🚪 Sair", use_container_width=True):
+            # Limpa todas as informações da sessão
             st.session_state.autenticado = False
             st.session_state.assessor_logado = None
             st.session_state.nome_assessor = None
             st.session_state.pagina_atual = 'login'
             st.rerun()
     
-    with col2:
-        if st.button("📚 Ver Fundos", key="btn_ver_fundos"):
-            st.session_state.pagina_atual = 'fundos'
-            st.rerun()
-    
-    df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip()
-    df_base_filtrado = df_base[df_base['Assessor'] == str(st.session_state.assessor_logado)]
+    # ============================================
+    # FILTRA OS DADOS DO ASSESSOR
+    # ============================================
+    # Pega apenas os clientes deste assessor
+    df_base_filtrado = df_base[df_base['Assessor'] == str(st.session_state.assessor_logado)].copy()
     
     if df_base_filtrado.empty:
-        st.error("❌ Nenhum cliente encontrado!")
+        st.warning("⚠️ Nenhum cliente encontrado para este assessor.")
         st.stop()
     
-    st.markdown('<div class="cliente-selector"><h3>👥 SELECIONE O CLIENTE</h3>', unsafe_allow_html=True)
+    # Mostra quantos clientes o assessor tem
+    st.markdown(f'<div class="info-cliente">📊 <strong>{len(df_base_filtrado["Cliente"].unique())}</strong> clientes encontrados | <strong>{len(df_base_filtrado)}</strong> investimentos ativos</div>', unsafe_allow_html=True)
     
+    # ============================================
+    # SELEÇÃO DE CLIENTE
+    # ============================================
+    st.markdown('<div class="selecao-cliente"><div class="titulo-selecao">👤 Selecione o Cliente</div>', unsafe_allow_html=True)
+    
+    # Pega lista de clientes e ordena
     clientes = sorted(df_base_filtrado['Cliente'].unique())
+    
+    # Cria menu dropdown para selecionar o cliente
     cliente_selecionado = st.selectbox(
         "Cliente", 
-        [""] + list(clientes), 
+        [""] + list(clientes),  # "" = nenhum selecionado
         label_visibility="collapsed", 
         key="cliente_select"
     )
     
     st.markdown('</div>', unsafe_allow_html=True)
     
+    # Se nenhum cliente foi selecionado, para por aqui
     if not cliente_selecionado:
         st.stop()
     
+    # ============================================
+    # DADOS DO CLIENTE SELECIONADO
+    # ============================================
+    # Pega todos os fundos que este cliente tem
     fundos_cliente = df_base_filtrado[df_base_filtrado['Cliente'] == cliente_selecionado]
 
+    # Define qual fundo está selecionado (padrão: primeiro da lista)
     if 'fundo_selecionado' not in st.session_state:
         st.session_state.fundo_selecionado = fundos_cliente['Ativo'].iloc[0] if not fundos_cliente.empty else None
     
+    # ============================================
+    # LAYOUT PRINCIPAL - 3 COLUNAS
+    # ============================================
     st.markdown('<div class="container-principal">', unsafe_allow_html=True)
     
+    # Cria 3 colunas com tamanhos diferentes
     col1, col2, col3 = st.columns([1.2, 1.5, 3])
     
+    # ============================================
+    # COLUNA 1: LISTA DE FUNDOS DO CLIENTE
+    # ============================================
     with col1:
         st.markdown('<div class="box"><div class="box-titulo">📊 FUNDOS DO CLIENTE</div><div class="box-conteudo">', unsafe_allow_html=True)
         
+        # Para cada fundo que o cliente tem
         for _, fundo in fundos_cliente.iterrows():
             ativo = fundo['Ativo']
             
-            # USAR COLUNA APLICAÇÃO DA BASE
+            # Pega o valor aplicado (usa a coluna 'Aplicação' da base)
             try:
                 valor_aplicado = float(fundo['Aplicação'])
             except:
                 valor_aplicado = 0.0
             
+            # Pega o percentual de rendimento
             try:
                 percentual_liquido = float(fundo['Rendimento %'])
             except:
                 percentual_liquido = 0.0
             
-            valor_liquido_cupom = valor_aplicado * percentual_liquido
+            # Calcula o valor do cupom (rendimento em reais)
+            valor_liquido_cupom = valor_aplicado * (percentual_liquido / 100)
             
+            # Busca informações do fundo
             info = buscar_info_fundo(ativo, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
             
+            # Calcula a data de pagamento
             data_pagamento = None
             dia_util = info.get('dia_util')
             
@@ -1110,10 +810,13 @@ def main():
                 except:
                     pass
             
+            # Formata a data
             data_texto = data_pagamento.strftime("%d/%m/%Y") if data_pagamento else "Não definida"
             
+            # Define se este fundo está selecionado
             classe_selecao = 'fundo-card-selecionado' if ativo == st.session_state.fundo_selecionado else ''
             
+            # Mostra o card do fundo
             st.markdown(f"""
             <div class="fundo-card-container">
                 <div class="fundo-card {classe_selecao}" style="border-left-color: {info.get('cor', '#27ae60')}">
@@ -1127,6 +830,7 @@ def main():
                 </div>
             """, unsafe_allow_html=True)
             
+            # Botão para selecionar este fundo
             if st.button("📊", key=f"sel_{ativo}", help=f"Selecionar {ativo}"):
                 st.session_state.fundo_selecionado = ativo
                 st.rerun()
@@ -1135,13 +839,18 @@ def main():
 
         st.markdown('</div></div>', unsafe_allow_html=True)
     
+    # ============================================
+    # COLUNA 2: TESE DO FUNDO SELECIONADO
+    # ============================================
     with col2:
         st.markdown('<div class="box"><div class="box-titulo">📝 TESE DO FUNDO</div>', unsafe_allow_html=True)
         
         if st.session_state.fundo_selecionado:
+            # Busca informações do fundo selecionado
             info = buscar_info_fundo(st.session_state.fundo_selecionado, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
             tese = info.get('tese', {})
             
+            # Mostra as informações
             st.markdown(f"""
             <div class="tese-texto">
                 <strong style="color: {info.get('cor', '#27ae60')};">{st.session_state.fundo_selecionado}</strong>
@@ -1159,13 +868,18 @@ def main():
 
         st.markdown('</div>', unsafe_allow_html=True)
     
+    # ============================================
+    # COLUNA 3: CALENDÁRIO
+    # ============================================
     with col3:
         st.markdown('<div class="box"><div class="box-titulo">📅 CALENDÁRIO</div>', unsafe_allow_html=True)
         
+        # Define mês e ano inicial (se ainda não foi definido)
         if 'mes_atual' not in st.session_state:
             st.session_state.mes_atual = datetime.now().month
             st.session_state.ano_atual = datetime.now().year
         
+        # Botões para navegar entre meses
         col_p1, col_p2, col_p3 = st.columns([1, 3, 1])
         
         with col_p1:
@@ -1187,14 +901,17 @@ def main():
                     st.session_state.ano_atual += 1
                 st.rerun()
         
+        # Gera o calendário do mês
         cal = calendar.monthcalendar(st.session_state.ano_atual, st.session_state.mes_atual)
         
+        # Cabeçalho do calendário (dias da semana)
         dias_semana = ['seg.', 'ter.', 'qua.', 'qui.', 'sex.', 'sáb.', 'dom.']
         html_cal = '<div class="calendario-grid">'
         
         for dia in dias_semana:
             html_cal += f'<div class="cal-header">{dia}</div>'
         
+        # Prepara os eventos (pagamentos) do mês
         eventos_mes = {}
         for _, fundo in fundos_cliente.iterrows():
             info = buscar_info_fundo(fundo['Ativo'], MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
@@ -1214,14 +931,18 @@ def main():
                 except:
                     pass
         
+        # Gera os dias do calendário
         for semana in cal:
             for dia in semana:
                 if dia == 0:
+                    # Dia vazio (mês anterior/posterior)
                     html_cal += '<div class="cal-dia" style="background: #f8f9fa;"></div>'
                 else:
+                    # Dia do mês atual
                     data = date(st.session_state.ano_atual, st.session_state.mes_atual, dia)
                     classe = "cal-dia fim-semana" if data.weekday() >= 5 else "cal-dia" 
                     
+                    # Adiciona eventos (pagamentos) deste dia
                     eventos_html = ""
                     if dia in eventos_mes:
                         for evento in eventos_mes[dia]:
@@ -1236,5 +957,9 @@ def main():
     
     st.markdown('</div>', unsafe_allow_html=True)
 
+# ============================================
+# EXECUÇÃO DO PROGRAMA
+# ============================================
+# Esta é a linha que roda o programa
 if __name__ == "__main__":
     main()
