@@ -874,7 +874,7 @@ def tela_fundos():
             if links_destaque['material']:  # Só mostra se tiver link
                 st.markdown(f"""
 <a href="{links_destaque['material']}" target="_blank" style="text-decoration: none;">
-    <button style="background: linear-gradient(135deg, #1e4d2b 0%, #27ae60 100%); ...
+    <button style="background: linear-gradient(135deg, #26874E 0%, #c0392b 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
         📄 Material Publicitário
     </button>
 </a>
@@ -885,7 +885,7 @@ def tela_fundos():
             if links_destaque['expert']:  # Só mostra se tiver link
                 st.markdown(f"""
 <a href="{links_destaque['expert']}" target="_blank" style="text-decoration: none;">
-    <button style="background: linear-gradient(135deg, #1e4d2b 0%, #27ae60 100%); ...
+    <button style="background: linear-gradient(135deg, #26874E 0%, #2980b9 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
         🎓 Expert XP
     </button>
 </a>
