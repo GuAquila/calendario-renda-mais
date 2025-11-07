@@ -139,7 +139,7 @@ def verificar_autenticacao(df_base):
                         valido, nome_assessor = validar_senha_assessor(codigo_assessor, senha_assessor)
                         if valido:
                             if df_base is not None:
-                                df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip()
+                                df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip().str.replace('A', '', 1)
                                 clientes_assessor = df_base[df_base['Assessor'] == str(codigo_assessor)]
                                 
                                 if clientes_assessor.empty:
@@ -993,7 +993,7 @@ def main():
             st.session_state.pagina_atual = 'fundos'
             st.rerun()
     
-    df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip()
+    df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip().str.replace('A', '', 1)
     df_base_filtrado = df_base[df_base['Assessor'] == str(st.session_state.assessor_logado)]
     
     if df_base_filtrado.empty:
@@ -1018,6 +1018,10 @@ def main():
     fundos_cliente = df_base_filtrado[df_base_filtrado['Cliente'] == cliente_selecionado]
 
     if 'fundo_selecionado' not in st.session_state:
+        st.session_state.fundo_selecionado = fundos_cliente['Fundo'].iloc[0] if not fundos_cliente.empty else None
+    
+    # Garantir que fundo_selecionado ainda existe na lista de fundos do cliente
+    if st.session_state.fundo_selecionado not in fundos_cliente['Fundo'].values:
         st.session_state.fundo_selecionado = fundos_cliente['Fundo'].iloc[0] if not fundos_cliente.empty else None
     
     st.markdown('<div class="container-principal">', unsafe_allow_html=True)
