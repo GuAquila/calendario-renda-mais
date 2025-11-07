@@ -769,16 +769,8 @@ def buscar_info_fundo(nome_fundo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa
 # ============================================
 
 def tela_fundos():
-    """
-    Tela de apresentação dos fundos
+    """Tela de apresentação dos fundos"""
     
-    NOVA FUNCIONALIDADE:
-    Quando o usuário seleciona um fundo no dropdown, esse fundo
-    aparece EM DESTAQUE no topo da página, em um box grande e colorido.
-    Depois, todos os fundos (incluindo o selecionado) aparecem na lista normal abaixo.
-    """
-    
-    # ===== CABEÇALHO DA PÁGINA =====
     st.markdown("""
     <div style="text-align: center; padding: 30px;">
         <h1 style="color: #1e4d2b; font-size: 36px; margin-bottom: 10px;">
@@ -790,53 +782,35 @@ def tela_fundos():
     </div>
     """, unsafe_allow_html=True)
     
-    # ===== BOTÃO VOLTAR E SELETOR DE FUNDO =====
     col1, col2, col3 = st.columns([1, 2, 1])
     
     with col1:
-        # Botão para voltar à tela de login
         if st.button("🔙 Voltar ao Login", use_container_width=True):
             st.session_state.pagina_atual = 'login'
             st.rerun()
     
     with col2:
-        # Lista de todos os fundos disponíveis (em ordem alfabética)
         fundos_lista = sorted(MAPA_TESES.keys())
-        
-        # Dropdown para o usuário selecionar qual fundo quer ver em destaque
         fundo_selecionado = st.selectbox(
             "🎯 Ir para o fundo:",
-            ["Selecione um fundo..."] + fundos_lista,  # Primeira opção vazia
+            ["Selecione um fundo..."] + fundos_lista,
             key="nav_fundo"
         )
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # ============================================
-    # AQUI COMEÇA A NOVA FUNCIONALIDADE
-    # ============================================
-    
-    # Verifica se o usuário selecionou algum fundo (e não a opção padrão "Selecione...")
     if fundo_selecionado and fundo_selecionado != "Selecione um fundo...":
-        
-        # ===== BUSCAR INFORMAÇÕES DO FUNDO SELECIONADO =====
-        # Aqui buscamos todas as informações do fundo que o usuário escolheu
         info_destaque = buscar_info_fundo(
-            fundo_selecionado,      # Nome do fundo
-            MAPA_PAGAMENTOS,        # Mapa com dias de pagamento
-            MAPA_CORES,             # Mapa com cores de cada fundo
-            MAPA_SIGLAS,            # Mapa com siglas
-            MAPA_TESES              # Mapa com as teses de investimento
+            fundo_selecionado,
+            MAPA_PAGAMENTOS,
+            MAPA_CORES,
+            MAPA_SIGLAS,
+            MAPA_TESES
         )
         
-        # Pegamos a tese (informações detalhadas) do fundo
         tese_destaque = info_destaque['tese']
-        
-        # Pegamos os links (expert e material) do fundo
         links_destaque = info_destaque['links']
         
-        # ===== CRIAR O BOX DE DESTAQUE =====
-        # Este é o box grande e destacado que aparece NO TOPO da página
         st.markdown(f"""
 <div class="fundo-destaque">
     <div class="badge-selecionado">
@@ -865,13 +839,10 @@ def tela_fundos():
 </div>
 """, unsafe_allow_html=True)
         
-        # ===== BOTÕES DE LINKS DO FUNDO EM DESTAQUE =====
-        # Aqui criamos os botões para Material Publicitário e Expert XP
         col_link1, col_link2, col_link3 = st.columns([1, 1, 2])
         
-        # Botão para Material Publicitário (se existir)
         with col_link1:
-            if links_destaque['material']:  # Só mostra se tiver link
+            if links_destaque['material']:
                 st.markdown(f"""
 <a href="{links_destaque['material']}" target="_blank" style="text-decoration: none;">
     <button style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
@@ -880,9 +851,8 @@ def tela_fundos():
 </a>
 """, unsafe_allow_html=True)
         
-        # Botão para Expert XP (se existir)
         with col_link2:
-            if links_destaque['expert']:  # Só mostra se tiver link
+            if links_destaque['expert']:
                 st.markdown(f"""
 <a href="{links_destaque['expert']}" target="_blank" style="text-decoration: none;">
     <button style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
@@ -891,29 +861,18 @@ def tela_fundos():
 </a>
 """, unsafe_allow_html=True)
         
-        # Espaçamento antes de mostrar todos os fundos
         st.markdown("<br><br>", unsafe_allow_html=True)
-        
-        # Linha separadora
         st.markdown("""
 <div style="border-top: 2px solid #e0e0e0; margin: 30px 0;"></div>
 """, unsafe_allow_html=True)
         
-        # Título para a seção de todos os fundos
         st.markdown("""
 <h3 style="color: #1e4d2b; text-align: center; margin-bottom: 30px;">
     📊 Todos os Fundos Disponíveis
 </h3>
 """, unsafe_allow_html=True)
     
-    # ============================================
-    # LISTAGEM DE TODOS OS FUNDOS
-    # ============================================
-    # Aqui mostramos TODOS os fundos (incluindo o que está em destaque acima)
-    # em ordem alfabética, cada um no seu próprio box
-    
     for fundo_nome in sorted(MAPA_TESES.keys()):
-        # Busca as informações de cada fundo
         info = buscar_info_fundo(
             fundo_nome,
             MAPA_PAGAMENTOS,
@@ -922,14 +881,10 @@ def tela_fundos():
             MAPA_TESES
         )
         
-        tese = info['tese']     # Tese do fundo
-        links = info['links']   # Links do fundo
-        
-        # Cria um ID único para cada fundo (usado para navegação)
+        tese = info['tese']
+        links = info['links']
         fundo_id = fundo_nome.replace(" ", "_")
         
-        # ===== BOX DE CADA FUNDO =====
-        # Cada fundo tem seu próprio box com borda colorida
         st.markdown(f"""
 <div id="{fundo_id}" style="background: white; border: 2px solid {info['cor']}; border-left: 6px solid {info['cor']}; border-radius: 10px; padding: 25px; margin-bottom: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
     <h3 style="color: {info['cor']}; margin-bottom: 15px; font-size: 20px;">
@@ -955,12 +910,9 @@ def tela_fundos():
 </div>
 """, unsafe_allow_html=True)
         
-        # ===== BOTÕES DE LINKS =====
-        # Botões para Material Publicitário e Expert XP de cada fundo
         col1, col2, col3 = st.columns([1, 1, 2])
         
         with col1:
-            # Botão Material Publicitário (vermelho)
             if links['material']:
                 st.markdown(f"""
 <a href="{links['material']}" target="_blank" style="text-decoration: none;">
@@ -971,7 +923,6 @@ def tela_fundos():
 """, unsafe_allow_html=True)
         
         with col2:
-            # Botão Expert XP (azul)
             if links['expert']:
                 st.markdown(f"""
 <a href="{links['expert']}" target="_blank" style="text-decoration: none;">
@@ -981,7 +932,6 @@ def tela_fundos():
 </a>
 """, unsafe_allow_html=True)
         
-        # Espaçamento entre fundos
         st.markdown("<br>", unsafe_allow_html=True)
 
 # ============================================
@@ -1068,7 +1018,7 @@ def main():
     fundos_cliente = df_base_filtrado[df_base_filtrado['Cliente'] == cliente_selecionado]
 
     if 'fundo_selecionado' not in st.session_state:
-        st.session_state.fundo_selecionado = fundos_cliente['Ativo'].iloc[0] if not fundos_cliente.empty else None
+        st.session_state.fundo_selecionado = fundos_cliente['Fundo'].iloc[0] if not fundos_cliente.empty else None
     
     st.markdown('<div class="container-principal">', unsafe_allow_html=True)
     
@@ -1078,32 +1028,48 @@ def main():
         st.markdown('<div class="box"><div class="box-titulo">📊 FUNDOS DO CLIENTE</div><div class="box-conteudo">', unsafe_allow_html=True)
         
         for _, fundo in fundos_cliente.iterrows():
-            ativo = fundo['Ativo']
+            nome_fundo = fundo['Fundo']
             
-            # USAR COLUNA APLICAÇÃO DA BASE
+            # CORREÇÃO: Usar as colunas corretas do Excel
+            # Coluna C = "Aplicado"
             try:
-                valor_aplicado = float(fundo['Aplicação'])
+                valor_aplicado = float(fundo['Aplicado'])
             except:
                 valor_aplicado = 0.0
             
+            # Coluna E = "%"
             try:
-                percentual_liquido = float(fundo['Rendimento %'])
+                percentual_str = str(fundo['%']).strip()
+                if percentual_str == '-' or percentual_str == '' or percentual_str == 'nan':
+                    percentual_liquido = 0.0
+                else:
+                    percentual_liquido = float(percentual_str) * 100  # Converter para porcentagem
             except:
                 percentual_liquido = 0.0
             
-            valor_liquido_cupom = valor_aplicado * percentual_liquido
+            # Calcular valor líquido
+            valor_liquido_cupom = valor_aplicado * (percentual_liquido / 100)
             
-            info = buscar_info_fundo(ativo, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
+            # Coluna G = "Data"
+            try:
+                data_str = str(fundo['Data']).strip()
+                if data_str == '-' or data_str == '' or data_str == 'nan':
+                    dia_pagamento = None
+                else:
+                    dia_pagamento = int(float(data_str))
+            except:
+                dia_pagamento = None
             
+            info = buscar_info_fundo(nome_fundo, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
+            
+            # Calcular data de pagamento
             data_pagamento = None
-            dia_util = info.get('dia_util')
-            
-            if dia_util and dia_util > 0:
+            if dia_pagamento and dia_pagamento > 0:
                 try:
                     data_pagamento = calcular_dia_util(
                         st.session_state.ano_atual, 
                         st.session_state.mes_atual, 
-                        dia_util, 
+                        dia_pagamento, 
                         feriados
                     )
                 except:
@@ -1111,12 +1077,12 @@ def main():
             
             data_texto = data_pagamento.strftime("%d/%m/%Y") if data_pagamento else "Não definida"
             
-            classe_selecao = 'fundo-card-selecionado' if ativo == st.session_state.fundo_selecionado else ''
+            classe_selecao = 'fundo-card-selecionado' if nome_fundo == st.session_state.fundo_selecionado else ''
             
             st.markdown(f"""
             <div class="fundo-card-container">
                 <div class="fundo-card {classe_selecao}" style="border-left-color: {info.get('cor', '#27ae60')}">
-                    <div class="nome">{ativo}</div>
+                    <div class="nome">{nome_fundo}</div>
                     <div class="info" style="margin-top: 8px;">
                         <div style="margin-bottom: 4px;">💰 <strong>Valor Aplicado:</strong> <span class="valor">R$ {valor_aplicado:,.2f}</span></div>
                         <div style="margin-bottom: 4px;">📅 <strong>Data Pagamento:</strong> {data_texto}</div>
@@ -1126,8 +1092,8 @@ def main():
                 </div>
             """, unsafe_allow_html=True)
             
-            if st.button("📊", key=f"sel_{ativo}", help=f"Selecionar {ativo}"):
-                st.session_state.fundo_selecionado = ativo
+            if st.button("📊", key=f"sel_{nome_fundo}", help=f"Selecionar {nome_fundo}"):
+                st.session_state.fundo_selecionado = nome_fundo
                 st.rerun()
             
             st.markdown("</div>", unsafe_allow_html=True)
@@ -1196,9 +1162,18 @@ def main():
         
         eventos_mes = {}
         for _, fundo in fundos_cliente.iterrows():
-            info = buscar_info_fundo(fundo['Ativo'], MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
+            info = buscar_info_fundo(fundo['Fundo'], MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
             
-            dia_util = info.get('dia_util')
+            # Usar a coluna Data do Excel
+            try:
+                data_str = str(fundo['Data']).strip()
+                if data_str != '-' and data_str != '' and data_str != 'nan':
+                    dia_util = int(float(data_str))
+                else:
+                    dia_util = None
+            except:
+                dia_util = None
+            
             if dia_util and dia_util > 0:
                 try:
                     data_pagamento = calcular_dia_util(st.session_state.ano_atual, st.session_state.mes_atual, dia_util, feriados)
@@ -1207,7 +1182,7 @@ def main():
                         if dia not in eventos_mes:
                             eventos_mes[dia] = []
                         eventos_mes[dia].append({
-                            'sigla': info.get('sigla', fundo['Ativo'][:10]), 
+                            'sigla': info.get('sigla', fundo['Fundo'][:10]), 
                             'cor': info.get('cor', '#27ae60')
                         })
                 except:
