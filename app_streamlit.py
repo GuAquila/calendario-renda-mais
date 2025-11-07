@@ -1,6 +1,12 @@
 """
 CALENDÁRIO RENDA MAIS - COM AUTENTICAÇÃO POR ASSESSOR
 ======================================================
+Sistema multi-assessor com senhas individuais
+VERSÃO FINAL LIMPA - 25/10/2025
+Usa APENAS aba "Base" do Excel
+
+MODIFICAÇÃO: Página "Conheça os Fundos" agora destaca o fundo selecionado no topo
+"""
 
 import streamlit as st
 import pandas as pd
