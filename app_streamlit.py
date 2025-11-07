@@ -994,10 +994,34 @@ def carregar_dados():
     """Carrega dados APENAS da aba Base"""
     try:
         df_base = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Base')
+        
+        # Limpar os nomes das colunas (remover espaços extras)
+        df_base.columns = df_base.columns.str.strip()
+        
+        # Mostrar os nomes das colunas para debug
+        st.sidebar.write("📋 Colunas encontradas no Excel:")
+        for col in df_base.columns:
+            st.sidebar.write(f"- {col}")
+        
         return df_base
     except Exception as e:
         st.error(f"❌ Erro ao carregar Excel: {str(e)}")
         st.stop()
+
+def encontrar_coluna(df, possiveis_nomes):
+    """
+    Encontra uma coluna no DataFrame testando vários nomes possíveis
+    
+    Parâmetros:
+    - df: DataFrame do pandas
+    - possiveis_nomes: lista de nomes possíveis para a coluna
+    
+    Retorna: nome da coluna encontrada ou None
+    """
+    for nome in possiveis_nomes:
+        if nome in df.columns:
+            return nome
+    return None
 
 # ============================================
 # FUNÇÃO PRINCIPAL
@@ -1082,35 +1106,69 @@ def main():
             ativo = fundo['Ativo']
             
             # ========================================
-            # 🎯 AQUI ESTÃO AS CORREÇÕES SOLICITADAS!
+            # 🎯 BUSCA ROBUSTA DAS COLUNAS
             # ========================================
             
-            # 1️⃣ PEGAR VALOR SOLICITADO DA COLUNA C
-            try:
-                valor_aplicado = float(fundo['Valor Solicitado'])
-            except:
+            # 1️⃣ VALOR APLICADO - tentar vários nomes possíveis
+            col_valor = encontrar_coluna(fundos_cliente, [
+                'Valor Solicitado', 'Valor solicitado', 'valor solicitado',
+                'Aplicação', 'Aplicacao', 'aplicação', 'aplicacao',
+                'Valor', 'valor'
+            ])
+            
+            if col_valor:
+                try:
+                    valor_aplicado = float(fundo[col_valor])
+                except:
+                    valor_aplicado = 0.0
+            else:
                 valor_aplicado = 0.0
+                st.warning(f"⚠️ Coluna de Valor Aplicado não encontrada!")
             
-            # 2️⃣ PEGAR RENDIMENTO DA COLUNA E
-            try:
-                percentual_liquido = float(fundo['Rendimento'])
-            except:
+            # 2️⃣ RENDIMENTO - tentar vários nomes possíveis
+            col_rendimento = encontrar_coluna(fundos_cliente, [
+                'Rendimento', 'rendimento',
+                'Rendimento %', 'Rendimento Líquido', 'Rendimento Liquido',
+                'Rendimento liquido', 'rendimento líquido',
+                '% Líquido', '% Liquido', 'Percentual'
+            ])
+            
+            if col_rendimento:
+                try:
+                    percentual_liquido = float(fundo[col_rendimento])
+                except:
+                    percentual_liquido = 0.0
+            else:
                 percentual_liquido = 0.0
+                st.warning(f"⚠️ Coluna de Rendimento não encontrada!")
             
-            # Calcular o valor líquido (rendimento em reais)
-            # O percentual está em decimal (exemplo: 0.02 para 2%)
-            # Por isso multiplicamos por 100 para exibir corretamente
-            valor_liquido_cupom = valor_aplicado * (percentual_liquido / 100)
+            # Calcular o valor líquido
+            # Se o percentual já estiver em formato decimal (0.02), multiplicar por 100
+            # Se já estiver em formato percentual (2), não multiplicar
+            if percentual_liquido < 1:  # Provavelmente está em decimal
+                valor_liquido_cupom = valor_aplicado * percentual_liquido
+            else:  # Provavelmente já está em percentual
+                valor_liquido_cupom = valor_aplicado * (percentual_liquido / 100)
             
-            # 3️⃣ PEGAR DATA DO PAGAMENTO DA COLUNA G
-            try:
-                data_pagamento = pd.to_datetime(fundo['Data do Pagamento'])
-                data_texto = data_pagamento.strftime("%d/%m/%Y")
-            except:
+            # 3️⃣ DATA DE PAGAMENTO - tentar vários nomes possíveis
+            col_data = encontrar_coluna(fundos_cliente, [
+                'Data do Pagamento', 'Data de Pagamento', 'Data Pagamento',
+                'data do pagamento', 'data de pagamento', 'data pagamento',
+                'Data', 'data'
+            ])
+            
+            if col_data:
+                try:
+                    data_pagamento = pd.to_datetime(fundo[col_data])
+                    data_texto = data_pagamento.strftime("%d/%m/%Y")
+                except:
+                    data_texto = "Não definida"
+            else:
                 data_texto = "Não definida"
+                st.warning(f"⚠️ Coluna de Data de Pagamento não encontrada!")
             
             # ========================================
-            # FIM DAS CORREÇÕES
+            # FIM DA BUSCA ROBUSTA
             # ========================================
             
             info = buscar_info_fundo(ativo, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
@@ -1200,22 +1258,29 @@ def main():
         
         eventos_mes = {}
         for _, fundo in fundos_cliente.iterrows():
-            # Pegar a data do pagamento direto da planilha (Coluna G)
-            try:
-                data_pagamento = pd.to_datetime(fundo['Data do Pagamento'])
-                # Verificar se a data de pagamento está no mês atual sendo exibido
-                if data_pagamento.year == st.session_state.ano_atual and data_pagamento.month == st.session_state.mes_atual:
-                    dia = data_pagamento.day
-                    info = buscar_info_fundo(fundo['Ativo'], MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
-                    
-                    if dia not in eventos_mes:
-                        eventos_mes[dia] = []
-                    eventos_mes[dia].append({
-                        'sigla': info.get('sigla', fundo['Ativo'][:10]), 
-                        'cor': info.get('cor', '#27ae60')
-                    })
-            except:
-                pass
+            # Pegar a data do pagamento direto da planilha usando busca robusta
+            col_data = encontrar_coluna(fundos_cliente, [
+                'Data do Pagamento', 'Data de Pagamento', 'Data Pagamento',
+                'data do pagamento', 'data de pagamento', 'data pagamento',
+                'Data', 'data'
+            ])
+            
+            if col_data:
+                try:
+                    data_pagamento = pd.to_datetime(fundo[col_data])
+                    # Verificar se a data de pagamento está no mês atual sendo exibido
+                    if data_pagamento.year == st.session_state.ano_atual and data_pagamento.month == st.session_state.mes_atual:
+                        dia = data_pagamento.day
+                        info = buscar_info_fundo(fundo['Ativo'], MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
+                        
+                        if dia not in eventos_mes:
+                            eventos_mes[dia] = []
+                        eventos_mes[dia].append({
+                            'sigla': info.get('sigla', fundo['Ativo'][:10]), 
+                            'cor': info.get('cor', '#27ae60')
+                        })
+                except:
+                    pass
         
         for semana in cal:
             for dia in semana:
