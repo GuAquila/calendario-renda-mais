@@ -1,13 +1,6 @@
 """
 CALENDÁRIO RENDA MAIS - COM AUTENTICAÇÃO POR ASSESSOR
 ======================================================
-Sistema multi-assessor com senhas individuais
-VERSÃO FINAL LIMPA - 25/10/2025
-Usa APENAS aba "Base" do Excel
-
-MODIFICAÇÃO: Página "Conheça os Fundos" agora destaca o fundo selecionado no topo
-ATUALIZAÇÃO: Colunas corretas da planilha Excel
-"""
 
 import streamlit as st
 import pandas as pd
@@ -106,7 +99,7 @@ def verificar_autenticacao(df_base):
             try:
                 st.image("logo_tauari.png", width=350)
             except:
-                st.markdown("<div style='text-align: center; padding: 20px;'><div style='background: #2d5a3d; color: white; padding: 40px; border-radius: 10px; font-size: 14px;'", unsafe_allow_html=True)
+                st.markdown("<div style='text-align: center; padding: 20px;'><div style='background: #2d5a3d; color: white; padding: 40px; border-radius: 10px; font-size: 14px;'>📁 Salve a logo como 'logo_tauari.png'<br>na mesma pasta do código</div></div>", unsafe_allow_html=True)
             
             st.markdown("""
             <div class="login-titulo">
@@ -875,7 +868,7 @@ def tela_fundos():
             if links_destaque['material']:  # Só mostra se tiver link
                 st.markdown(f"""
 <a href="{links_destaque['material']}" target="_blank" style="text-decoration: none;">
-    <button style="background: linear-gradient(135deg, #26874E 0%, #c0392b 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
+    <button style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
         📄 Material Publicitário
     </button>
 </a>
@@ -886,7 +879,7 @@ def tela_fundos():
             if links_destaque['expert']:  # Só mostra se tiver link
                 st.markdown(f"""
 <a href="{links_destaque['expert']}" target="_blank" style="text-decoration: none;">
-    <button style="background: linear-gradient(135deg, #26874E 0%, #2980b9 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
+    <button style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
         🎓 Expert XP
     </button>
 </a>
@@ -994,34 +987,10 @@ def carregar_dados():
     """Carrega dados APENAS da aba Base"""
     try:
         df_base = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Base')
-        
-        # Limpar os nomes das colunas (remover espaços extras)
-        df_base.columns = df_base.columns.str.strip()
-        
-        # Mostrar os nomes das colunas para debug
-        st.sidebar.write("📋 Colunas encontradas no Excel:")
-        for col in df_base.columns:
-            st.sidebar.write(f"- {col}")
-        
         return df_base
     except Exception as e:
         st.error(f"❌ Erro ao carregar Excel: {str(e)}")
         st.stop()
-
-def encontrar_coluna(df, possiveis_nomes):
-    """
-    Encontra uma coluna no DataFrame testando vários nomes possíveis
-    
-    Parâmetros:
-    - df: DataFrame do pandas
-    - possiveis_nomes: lista de nomes possíveis para a coluna
-    
-    Retorna: nome da coluna encontrada ou None
-    """
-    for nome in possiveis_nomes:
-        if nome in df.columns:
-            return nome
-    return None
 
 # ============================================
 # FUNÇÃO PRINCIPAL
@@ -1105,73 +1074,36 @@ def main():
         for _, fundo in fundos_cliente.iterrows():
             ativo = fundo['Ativo']
             
-            # ========================================
-            # 🎯 BUSCA ROBUSTA DAS COLUNAS
-            # ========================================
-            
-            # 1️⃣ VALOR APLICADO - tentar vários nomes possíveis
-            col_valor = encontrar_coluna(fundos_cliente, [
-                'Valor Solicitado', 'Valor solicitado', 'valor solicitado',
-                'Aplicação', 'Aplicacao', 'aplicação', 'aplicacao',
-                'Valor', 'valor'
-            ])
-            
-            if col_valor:
-                try:
-                    valor_aplicado = float(fundo[col_valor])
-                except:
-                    valor_aplicado = 0.0
-            else:
+            # USAR COLUNA APLICAÇÃO DA BASE
+            try:
+                valor_aplicado = float(fundo['Aplicação'])
+            except:
                 valor_aplicado = 0.0
-                st.warning(f"⚠️ Coluna de Valor Aplicado não encontrada!")
             
-            # 2️⃣ RENDIMENTO - tentar vários nomes possíveis
-            col_rendimento = encontrar_coluna(fundos_cliente, [
-                'Rendimento', 'rendimento',
-                'Rendimento %', 'Rendimento Líquido', 'Rendimento Liquido',
-                'Rendimento liquido', 'rendimento líquido',
-                '% Líquido', '% Liquido', 'Percentual'
-            ])
-            
-            if col_rendimento:
-                try:
-                    percentual_liquido = float(fundo[col_rendimento])
-                except:
-                    percentual_liquido = 0.0
-            else:
+            try:
+                percentual_liquido = float(fundo['Rendimento %'])
+            except:
                 percentual_liquido = 0.0
-                st.warning(f"⚠️ Coluna de Rendimento não encontrada!")
             
-            # Calcular o valor líquido
-            # Se o percentual já estiver em formato decimal (0.02), multiplicar por 100
-            # Se já estiver em formato percentual (2), não multiplicar
-            if percentual_liquido < 1:  # Provavelmente está em decimal
-                valor_liquido_cupom = valor_aplicado * percentual_liquido
-            else:  # Provavelmente já está em percentual
-                valor_liquido_cupom = valor_aplicado * (percentual_liquido / 100)
-            
-            # 3️⃣ DATA DE PAGAMENTO - tentar vários nomes possíveis
-            col_data = encontrar_coluna(fundos_cliente, [
-                'Data do Pagamento', 'Data de Pagamento', 'Data Pagamento',
-                'data do pagamento', 'data de pagamento', 'data pagamento',
-                'Data', 'data'
-            ])
-            
-            if col_data:
-                try:
-                    data_pagamento = pd.to_datetime(fundo[col_data])
-                    data_texto = data_pagamento.strftime("%d/%m/%Y")
-                except:
-                    data_texto = "Não definida"
-            else:
-                data_texto = "Não definida"
-                st.warning(f"⚠️ Coluna de Data de Pagamento não encontrada!")
-            
-            # ========================================
-            # FIM DA BUSCA ROBUSTA
-            # ========================================
+            valor_liquido_cupom = valor_aplicado * percentual_liquido
             
             info = buscar_info_fundo(ativo, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
+            
+            data_pagamento = None
+            dia_util = info.get('dia_util')
+            
+            if dia_util and dia_util > 0:
+                try:
+                    data_pagamento = calcular_dia_util(
+                        st.session_state.ano_atual, 
+                        st.session_state.mes_atual, 
+                        dia_util, 
+                        feriados
+                    )
+                except:
+                    pass
+            
+            data_texto = data_pagamento.strftime("%d/%m/%Y") if data_pagamento else "Não definida"
             
             classe_selecao = 'fundo-card-selecionado' if ativo == st.session_state.fundo_selecionado else ''
             
@@ -1230,7 +1162,7 @@ def main():
         col_p1, col_p2, col_p3 = st.columns([1, 3, 1])
         
         with col_p1:
-            if st.button("◀ Anterior", key="prev_mes"):
+            if st.button("◀️ Anterior", key="prev_mes"):
                 st.session_state.mes_atual -= 1
                 if st.session_state.mes_atual < 1:
                     st.session_state.mes_atual = 12
@@ -1241,7 +1173,7 @@ def main():
             st.markdown(f'<div style="text-align: center; padding: 8px; font-size: 18px; font-weight: bold; color: #1e4d2b;">{MESES_PT[st.session_state.mes_atual-1]} {st.session_state.ano_atual}</div>', unsafe_allow_html=True)
         
         with col_p3:
-            if st.button("Próximo ▶", key="next_mes"):
+            if st.button("Próximo ▶️", key="next_mes"):
                 st.session_state.mes_atual += 1
                 if st.session_state.mes_atual > 12:
                     st.session_state.mes_atual = 1
@@ -1258,21 +1190,14 @@ def main():
         
         eventos_mes = {}
         for _, fundo in fundos_cliente.iterrows():
-            # Pegar a data do pagamento direto da planilha usando busca robusta
-            col_data = encontrar_coluna(fundos_cliente, [
-                'Data do Pagamento', 'Data de Pagamento', 'Data Pagamento',
-                'data do pagamento', 'data de pagamento', 'data pagamento',
-                'Data', 'data'
-            ])
+            info = buscar_info_fundo(fundo['Ativo'], MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
             
-            if col_data:
+            dia_util = info.get('dia_util')
+            if dia_util and dia_util > 0:
                 try:
-                    data_pagamento = pd.to_datetime(fundo[col_data])
-                    # Verificar se a data de pagamento está no mês atual sendo exibido
-                    if data_pagamento.year == st.session_state.ano_atual and data_pagamento.month == st.session_state.mes_atual:
+                    data_pagamento = calcular_dia_util(st.session_state.ano_atual, st.session_state.mes_atual, dia_util, feriados)
+                    if data_pagamento:
                         dia = data_pagamento.day
-                        info = buscar_info_fundo(fundo['Ativo'], MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
-                        
                         if dia not in eventos_mes:
                             eventos_mes[dia] = []
                         eventos_mes[dia].append({
