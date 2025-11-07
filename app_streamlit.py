@@ -6,6 +6,7 @@ VERSÃO FINAL LIMPA - 25/10/2025
 Usa APENAS aba "Base" do Excel
 
 MODIFICAÇÃO: Página "Conheça os Fundos" agora destaca o fundo selecionado no topo
+ATUALIZAÇÃO: Colunas corretas da planilha Excel
 """
 
 import streamlit as st
@@ -1080,36 +1081,39 @@ def main():
         for _, fundo in fundos_cliente.iterrows():
             ativo = fundo['Ativo']
             
-            # USAR COLUNA APLICAÇÃO DA BASE
+            # ========================================
+            # 🎯 AQUI ESTÃO AS CORREÇÕES SOLICITADAS!
+            # ========================================
+            
+            # 1️⃣ PEGAR VALOR SOLICITADO DA COLUNA C
             try:
-                valor_aplicado = float(fundo['Aplicação'])
+                valor_aplicado = float(fundo['Valor Solicitado'])
             except:
                 valor_aplicado = 0.0
             
+            # 2️⃣ PEGAR RENDIMENTO DA COLUNA E
             try:
-                percentual_liquido = float(fundo['Rendimento %'])
+                percentual_liquido = float(fundo['Rendimento'])
             except:
                 percentual_liquido = 0.0
             
-            valor_liquido_cupom = valor_aplicado * percentual_liquido
+            # Calcular o valor líquido (rendimento em reais)
+            # O percentual está em decimal (exemplo: 0.02 para 2%)
+            # Por isso multiplicamos por 100 para exibir corretamente
+            valor_liquido_cupom = valor_aplicado * (percentual_liquido / 100)
+            
+            # 3️⃣ PEGAR DATA DO PAGAMENTO DA COLUNA G
+            try:
+                data_pagamento = pd.to_datetime(fundo['Data do Pagamento'])
+                data_texto = data_pagamento.strftime("%d/%m/%Y")
+            except:
+                data_texto = "Não definida"
+            
+            # ========================================
+            # FIM DAS CORREÇÕES
+            # ========================================
             
             info = buscar_info_fundo(ativo, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
-            
-            data_pagamento = None
-            dia_util = info.get('dia_util')
-            
-            if dia_util and dia_util > 0:
-                try:
-                    data_pagamento = calcular_dia_util(
-                        st.session_state.ano_atual, 
-                        st.session_state.mes_atual, 
-                        dia_util, 
-                        feriados
-                    )
-                except:
-                    pass
-            
-            data_texto = data_pagamento.strftime("%d/%m/%Y") if data_pagamento else "Não definida"
             
             classe_selecao = 'fundo-card-selecionado' if ativo == st.session_state.fundo_selecionado else ''
             
@@ -1196,22 +1200,22 @@ def main():
         
         eventos_mes = {}
         for _, fundo in fundos_cliente.iterrows():
-            info = buscar_info_fundo(fundo['Ativo'], MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
-            
-            dia_util = info.get('dia_util')
-            if dia_util and dia_util > 0:
-                try:
-                    data_pagamento = calcular_dia_util(st.session_state.ano_atual, st.session_state.mes_atual, dia_util, feriados)
-                    if data_pagamento:
-                        dia = data_pagamento.day
-                        if dia not in eventos_mes:
-                            eventos_mes[dia] = []
-                        eventos_mes[dia].append({
-                            'sigla': info.get('sigla', fundo['Ativo'][:10]), 
-                            'cor': info.get('cor', '#27ae60')
-                        })
-                except:
-                    pass
+            # Pegar a data do pagamento direto da planilha (Coluna G)
+            try:
+                data_pagamento = pd.to_datetime(fundo['Data do Pagamento'])
+                # Verificar se a data de pagamento está no mês atual sendo exibido
+                if data_pagamento.year == st.session_state.ano_atual and data_pagamento.month == st.session_state.mes_atual:
+                    dia = data_pagamento.day
+                    info = buscar_info_fundo(fundo['Ativo'], MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
+                    
+                    if dia not in eventos_mes:
+                        eventos_mes[dia] = []
+                    eventos_mes[dia].append({
+                        'sigla': info.get('sigla', fundo['Ativo'][:10]), 
+                        'cor': info.get('cor', '#27ae60')
+                    })
+            except:
+                pass
         
         for semana in cal:
             for dia in semana:
