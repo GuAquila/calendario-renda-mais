@@ -2,10 +2,11 @@
 CALENDÁRIO RENDA MAIS - COM AUTENTICAÇÃO POR ASSESSOR
 ======================================================
 Sistema multi-assessor com senhas individuais
-VERSÃO FINAL CORRIGIDA - 07/11/2025
+VERSÃO FINAL LIMPA - 25/10/2025
 Usa APENAS aba "Base" do Excel
 
-CORREÇÃO: Ajustado para as colunas REAIS do Excel
+MODIFICAÇÃO: Página "Conheça os Fundos" agora destaca o fundo selecionado no topo
+ATUALIZAÇÃO: Colunas corretas da planilha Excel
 """
 
 import streamlit as st
@@ -110,7 +111,7 @@ def verificar_autenticacao(df_base):
             st.markdown("""
             <div class="login-titulo">
                 <h2 style='margin: 10px 0; font-size: 24px;'>Calendário Renda Mais - Tauari Investimentos</h2>
-                <p style='color: #7f8c8d; font-size: 14px; margin-top: 15px;'>Acesso restrito por Assessor (uso interno) - Última atualização 07/11</p>
+                <p style='color: #7f8c8d; font-size: 14px; margin-top: 15px;'>Acesso restrito por Assessor (uso interno) - Última atualização 24/10</p>
             </div>
             """, unsafe_allow_html=True)
             
@@ -139,9 +140,8 @@ def verificar_autenticacao(df_base):
                         valido, nome_assessor = validar_senha_assessor(codigo_assessor, senha_assessor)
                         if valido:
                             if df_base is not None:
-                                # CORREÇÃO: Usar 'Código do Assessor' e adicionar 'A' na frente
-                                codigo_com_a = f"A{codigo_assessor}"
-                                clientes_assessor = df_base[df_base['Código do Assessor'] == codigo_com_a]
+                                df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip()
+                                clientes_assessor = df_base[df_base['Assessor'] == str(codigo_assessor)]
                                 
                                 if clientes_assessor.empty:
                                     st.error(f"❌ Nenhum cliente encontrado para o Assessor {codigo_assessor}")
@@ -205,6 +205,7 @@ st.markdown("""
         margin-top: 5px;
     }
     
+    /* BARRA DE SELEÇÃO - LIMPA */
     .cliente-selector {
         background: white !important;
         padding: 12px 20px;
@@ -223,6 +224,7 @@ st.markdown("""
         text-align: center;
     }
     
+    /* Selectbox styling */
     [data-baseweb="select"] {
         min-height: 40px !important;
     }
@@ -417,6 +419,11 @@ st.markdown("""
         background: #1e4d2b;
     }
     
+    /* ============================================
+       NOVO CSS PARA FUNDO EM DESTAQUE
+       ============================================ */
+    
+    /* Este é o estilo do box grande que aparece no topo quando um fundo é selecionado */
     .fundo-destaque {
         background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
         padding: 35px;
@@ -427,6 +434,7 @@ st.markdown("""
         animation: fadeIn 0.5s ease-in;
     }
     
+    /* Animação suave quando o fundo aparece em destaque */
     @keyframes fadeIn {
         from {
             opacity: 0;
@@ -438,6 +446,7 @@ st.markdown("""
         }
     }
     
+    /* Título do fundo em destaque - maior e mais chamativo */
     .fundo-destaque h2 {
         color: #1e4d2b;
         font-size: 28px;
@@ -447,6 +456,7 @@ st.markdown("""
         border-bottom: 3px solid #27ae60;
     }
     
+    /* Badge "SELECIONADO" que aparece no topo */
     .badge-selecionado {
         display: inline-block;
         background: #27ae60;
@@ -459,6 +469,7 @@ st.markdown("""
         box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
     }
     
+    /* Conteúdo do fundo em destaque */
     .fundo-destaque-conteudo {
         background: white;
         padding: 25px;
@@ -759,8 +770,16 @@ def buscar_info_fundo(nome_fundo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa
 # ============================================
 
 def tela_fundos():
-    """Tela de apresentação dos fundos"""
+    """
+    Tela de apresentação dos fundos
     
+    NOVA FUNCIONALIDADE:
+    Quando o usuário seleciona um fundo no dropdown, esse fundo
+    aparece EM DESTAQUE no topo da página, em um box grande e colorido.
+    Depois, todos os fundos (incluindo o selecionado) aparecem na lista normal abaixo.
+    """
+    
+    # ===== CABEÇALHO DA PÁGINA =====
     st.markdown("""
     <div style="text-align: center; padding: 30px;">
         <h1 style="color: #1e4d2b; font-size: 36px; margin-bottom: 10px;">
@@ -772,35 +791,53 @@ def tela_fundos():
     </div>
     """, unsafe_allow_html=True)
     
+    # ===== BOTÃO VOLTAR E SELETOR DE FUNDO =====
     col1, col2, col3 = st.columns([1, 2, 1])
     
     with col1:
+        # Botão para voltar à tela de login
         if st.button("🔙 Voltar ao Login", use_container_width=True):
             st.session_state.pagina_atual = 'login'
             st.rerun()
     
     with col2:
+        # Lista de todos os fundos disponíveis (em ordem alfabética)
         fundos_lista = sorted(MAPA_TESES.keys())
+        
+        # Dropdown para o usuário selecionar qual fundo quer ver em destaque
         fundo_selecionado = st.selectbox(
             "🎯 Ir para o fundo:",
-            ["Selecione um fundo..."] + fundos_lista,
+            ["Selecione um fundo..."] + fundos_lista,  # Primeira opção vazia
             key="nav_fundo"
         )
     
     st.markdown("<br>", unsafe_allow_html=True)
     
+    # ============================================
+    # AQUI COMEÇA A NOVA FUNCIONALIDADE
+    # ============================================
+    
+    # Verifica se o usuário selecionou algum fundo (e não a opção padrão "Selecione...")
     if fundo_selecionado and fundo_selecionado != "Selecione um fundo...":
+        
+        # ===== BUSCAR INFORMAÇÕES DO FUNDO SELECIONADO =====
+        # Aqui buscamos todas as informações do fundo que o usuário escolheu
         info_destaque = buscar_info_fundo(
-            fundo_selecionado,
-            MAPA_PAGAMENTOS,
-            MAPA_CORES,
-            MAPA_SIGLAS,
-            MAPA_TESES
+            fundo_selecionado,      # Nome do fundo
+            MAPA_PAGAMENTOS,        # Mapa com dias de pagamento
+            MAPA_CORES,             # Mapa com cores de cada fundo
+            MAPA_SIGLAS,            # Mapa com siglas
+            MAPA_TESES              # Mapa com as teses de investimento
         )
         
+        # Pegamos a tese (informações detalhadas) do fundo
         tese_destaque = info_destaque['tese']
+        
+        # Pegamos os links (expert e material) do fundo
         links_destaque = info_destaque['links']
         
+        # ===== CRIAR O BOX DE DESTAQUE =====
+        # Este é o box grande e destacado que aparece NO TOPO da página
         st.markdown(f"""
 <div class="fundo-destaque">
     <div class="badge-selecionado">
@@ -829,10 +866,13 @@ def tela_fundos():
 </div>
 """, unsafe_allow_html=True)
         
+        # ===== BOTÕES DE LINKS DO FUNDO EM DESTAQUE =====
+        # Aqui criamos os botões para Material Publicitário e Expert XP
         col_link1, col_link2, col_link3 = st.columns([1, 1, 2])
         
+        # Botão para Material Publicitário (se existir)
         with col_link1:
-            if links_destaque['material']:
+            if links_destaque['material']:  # Só mostra se tiver link
                 st.markdown(f"""
 <a href="{links_destaque['material']}" target="_blank" style="text-decoration: none;">
     <button style="background: linear-gradient(135deg, #26874E 0%, #c0392b 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
@@ -841,8 +881,9 @@ def tela_fundos():
 </a>
 """, unsafe_allow_html=True)
         
+        # Botão para Expert XP (se existir)
         with col_link2:
-            if links_destaque['expert']:
+            if links_destaque['expert']:  # Só mostra se tiver link
                 st.markdown(f"""
 <a href="{links_destaque['expert']}" target="_blank" style="text-decoration: none;">
     <button style="background: linear-gradient(135deg, #26874E 0%, #2980b9 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px;">
@@ -851,17 +892,29 @@ def tela_fundos():
 </a>
 """, unsafe_allow_html=True)
         
+        # Espaçamento antes de mostrar todos os fundos
         st.markdown("<br><br>", unsafe_allow_html=True)
+        
+        # Linha separadora
         st.markdown("""
 <div style="border-top: 2px solid #e0e0e0; margin: 30px 0;"></div>
 """, unsafe_allow_html=True)
+        
+        # Título para a seção de todos os fundos
         st.markdown("""
 <h3 style="color: #1e4d2b; text-align: center; margin-bottom: 30px;">
     📊 Todos os Fundos Disponíveis
 </h3>
 """, unsafe_allow_html=True)
     
+    # ============================================
+    # LISTAGEM DE TODOS OS FUNDOS
+    # ============================================
+    # Aqui mostramos TODOS os fundos (incluindo o que está em destaque acima)
+    # em ordem alfabética, cada um no seu próprio box
+    
     for fundo_nome in sorted(MAPA_TESES.keys()):
+        # Busca as informações de cada fundo
         info = buscar_info_fundo(
             fundo_nome,
             MAPA_PAGAMENTOS,
@@ -870,10 +923,14 @@ def tela_fundos():
             MAPA_TESES
         )
         
-        tese = info['tese']
-        links = info['links']
+        tese = info['tese']     # Tese do fundo
+        links = info['links']   # Links do fundo
+        
+        # Cria um ID único para cada fundo (usado para navegação)
         fundo_id = fundo_nome.replace(" ", "_")
         
+        # ===== BOX DE CADA FUNDO =====
+        # Cada fundo tem seu próprio box com borda colorida
         st.markdown(f"""
 <div id="{fundo_id}" style="background: white; border: 2px solid {info['cor']}; border-left: 6px solid {info['cor']}; border-radius: 10px; padding: 25px; margin-bottom: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
     <h3 style="color: {info['cor']}; margin-bottom: 15px; font-size: 20px;">
@@ -899,9 +956,12 @@ def tela_fundos():
 </div>
 """, unsafe_allow_html=True)
         
+        # ===== BOTÕES DE LINKS =====
+        # Botões para Material Publicitário e Expert XP de cada fundo
         col1, col2, col3 = st.columns([1, 1, 2])
         
         with col1:
+            # Botão Material Publicitário (vermelho)
             if links['material']:
                 st.markdown(f"""
 <a href="{links['material']}" target="_blank" style="text-decoration: none;">
@@ -912,6 +972,7 @@ def tela_fundos():
 """, unsafe_allow_html=True)
         
         with col2:
+            # Botão Expert XP (azul)
             if links['expert']:
                 st.markdown(f"""
 <a href="{links['expert']}" target="_blank" style="text-decoration: none;">
@@ -921,10 +982,11 @@ def tela_fundos():
 </a>
 """, unsafe_allow_html=True)
         
+        # Espaçamento entre fundos
         st.markdown("<br>", unsafe_allow_html=True)
 
 # ============================================
-# CARREGAR DADOS
+# CARREGAR DADOS - APENAS ABA BASE
 # ============================================
 
 @st.cache_data
@@ -932,11 +994,34 @@ def carregar_dados():
     """Carrega dados APENAS da aba Base"""
     try:
         df_base = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Base')
+        
+        # Limpar os nomes das colunas (remover espaços extras)
         df_base.columns = df_base.columns.str.strip()
+        
+        # Mostrar os nomes das colunas para debug
+        st.sidebar.write("📋 Colunas encontradas no Excel:")
+        for col in df_base.columns:
+            st.sidebar.write(f"- {col}")
+        
         return df_base
     except Exception as e:
         st.error(f"❌ Erro ao carregar Excel: {str(e)}")
         st.stop()
+
+def encontrar_coluna(df, possiveis_nomes):
+    """
+    Encontra uma coluna no DataFrame testando vários nomes possíveis
+    
+    Parâmetros:
+    - df: DataFrame do pandas
+    - possiveis_nomes: lista de nomes possíveis para a coluna
+    
+    Retorna: nome da coluna encontrada ou None
+    """
+    for nome in possiveis_nomes:
+        if nome in df.columns:
+            return nome
+    return None
 
 # ============================================
 # FUNÇÃO PRINCIPAL
@@ -983,9 +1068,8 @@ def main():
             st.session_state.pagina_atual = 'fundos'
             st.rerun()
     
-    # CORREÇÃO: Usar 'Código do Assessor' com 'A' na frente
-    codigo_com_a = f"A{st.session_state.assessor_logado}"
-    df_base_filtrado = df_base[df_base['Código do Assessor'] == codigo_com_a]
+    df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip()
+    df_base_filtrado = df_base[df_base['Assessor'] == str(st.session_state.assessor_logado)]
     
     if df_base_filtrado.empty:
         st.error("❌ Nenhum cliente encontrado!")
@@ -993,8 +1077,7 @@ def main():
     
     st.markdown('<div class="cliente-selector"><h3>👥 SELECIONE O CLIENTE</h3>', unsafe_allow_html=True)
     
-    # CORREÇÃO: Usar 'Código do Cliente' ao invés de 'Cliente'
-    clientes = sorted(df_base_filtrado['Código do Cliente'].unique())
+    clientes = sorted(df_base_filtrado['Cliente'].unique())
     cliente_selecionado = st.selectbox(
         "Cliente", 
         [""] + list(clientes), 
@@ -1007,12 +1090,10 @@ def main():
     if not cliente_selecionado:
         st.stop()
     
-    # CORREÇÃO: Filtrar por 'Código do Cliente'
-    fundos_cliente = df_base_filtrado[df_base_filtrado['Código do Cliente'] == cliente_selecionado]
+    fundos_cliente = df_base_filtrado[df_base_filtrado['Cliente'] == cliente_selecionado]
 
-    # CORREÇÃO: Usar 'Fundo' ao invés de 'Ativo'
     if 'fundo_selecionado' not in st.session_state:
-        st.session_state.fundo_selecionado = fundos_cliente['Fundo'].iloc[0] if not fundos_cliente.empty else None
+        st.session_state.fundo_selecionado = fundos_cliente['Ativo'].iloc[0] if not fundos_cliente.empty else None
     
     st.markdown('<div class="container-principal">', unsafe_allow_html=True)
     
@@ -1022,53 +1103,73 @@ def main():
         st.markdown('<div class="box"><div class="box-titulo">📊 FUNDOS DO CLIENTE</div><div class="box-conteudo">', unsafe_allow_html=True)
         
         for _, fundo in fundos_cliente.iterrows():
-            # CORREÇÃO: Usar 'Fundo' ao invés de 'Ativo'
-            ativo = fundo['Fundo']
+            ativo = fundo['Ativo']
             
-            # ==================================================
-            # 🎯 VALORES CORRETOS DAS COLUNAS DO EXCEL
-            # ==================================================
+            # ========================================
+            # 🎯 BUSCA ROBUSTA DAS COLUNAS
+            # ========================================
             
-            # 1️⃣ VALOR APLICADO - Coluna "Valor Solicitado"
-            try:
-                valor_aplicado = float(fundo['Valor Solicitado'])
-            except:
+            # 1️⃣ VALOR APLICADO - tentar vários nomes possíveis
+            col_valor = encontrar_coluna(fundos_cliente, [
+                'Valor Solicitado', 'Valor solicitado', 'valor solicitado',
+                'Aplicação', 'Aplicacao', 'aplicação', 'aplicacao',
+                'Valor', 'valor'
+            ])
+            
+            if col_valor:
+                try:
+                    valor_aplicado = float(fundo[col_valor])
+                except:
+                    valor_aplicado = 0.0
+            else:
                 valor_aplicado = 0.0
+                st.warning(f"⚠️ Coluna de Valor Aplicado não encontrada!")
             
-            # 2️⃣ PERCENTUAL - Coluna "Rendimento" (já em decimal, ex: 0.0115 = 1.15%)
-            try:
-                # Converter para string primeiro, remover vírgulas, depois para float
-                percentual_str = str(fundo['Rendimento']).replace(',', '.')
-                percentual_liquido = float(percentual_str) * 100  # Multiplicar por 100 para mostrar como %
-            except:
+            # 2️⃣ RENDIMENTO - tentar vários nomes possíveis
+            col_rendimento = encontrar_coluna(fundos_cliente, [
+                'Rendimento', 'rendimento',
+                'Rendimento %', 'Rendimento Líquido', 'Rendimento Liquido',
+                'Rendimento liquido', 'rendimento líquido',
+                '% Líquido', '% Liquido', 'Percentual'
+            ])
+            
+            if col_rendimento:
+                try:
+                    percentual_liquido = float(fundo[col_rendimento])
+                except:
+                    percentual_liquido = 0.0
+            else:
                 percentual_liquido = 0.0
+                st.warning(f"⚠️ Coluna de Rendimento não encontrada!")
             
-            # 3️⃣ VALOR LÍQUIDO - Coluna "Rendimento Liquido" (já calculado!)
-            try:
-                valor_liquido_cupom = float(fundo['Rendimento Liquido'])
-            except:
-                valor_liquido_cupom = 0.0
+            # Calcular o valor líquido
+            # Se o percentual já estiver em formato decimal (0.02), multiplicar por 100
+            # Se já estiver em formato percentual (2), não multiplicar
+            if percentual_liquido < 1:  # Provavelmente está em decimal
+                valor_liquido_cupom = valor_aplicado * percentual_liquido
+            else:  # Provavelmente já está em percentual
+                valor_liquido_cupom = valor_aplicado * (percentual_liquido / 100)
             
-            # 4️⃣ DATA DE PAGAMENTO - Coluna "Data do Pagamento" (só o dia)
-            try:
-                dia_pagamento = int(fundo['Data do Pagamento'])
-                # Calcular a data completa usando o dia útil
-                data_pagamento_calculada = calcular_dia_util(
-                    st.session_state.ano_atual, 
-                    st.session_state.mes_atual, 
-                    dia_pagamento, 
-                    feriados
-                )
-                if data_pagamento_calculada:
-                    data_texto = data_pagamento_calculada.strftime("%d/%m/%Y")
-                else:
-                    data_texto = f"Dia útil {dia_pagamento}"
-            except:
+            # 3️⃣ DATA DE PAGAMENTO - tentar vários nomes possíveis
+            col_data = encontrar_coluna(fundos_cliente, [
+                'Data do Pagamento', 'Data de Pagamento', 'Data Pagamento',
+                'data do pagamento', 'data de pagamento', 'data pagamento',
+                'Data', 'data'
+            ])
+            
+            if col_data:
+                try:
+                    data_pagamento = pd.to_datetime(fundo[col_data])
+                    data_texto = data_pagamento.strftime("%d/%m/%Y")
+                except:
+                    data_texto = "Não definida"
+            else:
                 data_texto = "Não definida"
+                st.warning(f"⚠️ Coluna de Data de Pagamento não encontrada!")
             
-            # ==================================================
-            # FIM DAS CORREÇÕES
-            # ==================================================
+            # ========================================
+            # FIM DA BUSCA ROBUSTA
+            # ========================================
             
             info = buscar_info_fundo(ativo, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
             
@@ -1157,28 +1258,29 @@ def main():
         
         eventos_mes = {}
         for _, fundo in fundos_cliente.iterrows():
-            try:
-                dia_pagamento = int(fundo['Data do Pagamento'])
-                data_pagamento_calc = calcular_dia_util(
-                    st.session_state.ano_atual, 
-                    st.session_state.mes_atual, 
-                    dia_pagamento, 
-                    feriados
-                )
-                
-                if data_pagamento_calc:
-                    dia = data_pagamento_calc.day
-                    # CORREÇÃO: Usar 'Fundo' ao invés de 'Ativo'
-                    info = buscar_info_fundo(fundo['Fundo'], MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
-                    
-                    if dia not in eventos_mes:
-                        eventos_mes[dia] = []
-                    eventos_mes[dia].append({
-                        'sigla': info.get('sigla', fundo['Fundo'][:10]), 
-                        'cor': info.get('cor', '#27ae60')
-                    })
-            except:
-                pass
+            # Pegar a data do pagamento direto da planilha usando busca robusta
+            col_data = encontrar_coluna(fundos_cliente, [
+                'Data do Pagamento', 'Data de Pagamento', 'Data Pagamento',
+                'data do pagamento', 'data de pagamento', 'data pagamento',
+                'Data', 'data'
+            ])
+            
+            if col_data:
+                try:
+                    data_pagamento = pd.to_datetime(fundo[col_data])
+                    # Verificar se a data de pagamento está no mês atual sendo exibido
+                    if data_pagamento.year == st.session_state.ano_atual and data_pagamento.month == st.session_state.mes_atual:
+                        dia = data_pagamento.day
+                        info = buscar_info_fundo(fundo['Ativo'], MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
+                        
+                        if dia not in eventos_mes:
+                            eventos_mes[dia] = []
+                        eventos_mes[dia].append({
+                            'sigla': info.get('sigla', fundo['Ativo'][:10]), 
+                            'cor': info.get('cor', '#27ae60')
+                        })
+                except:
+                    pass
         
         for semana in cal:
             for dia in semana:
