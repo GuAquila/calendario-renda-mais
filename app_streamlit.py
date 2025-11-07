@@ -749,8 +749,27 @@ MAPA_LINKS = {
     }
 }
 
-def buscar_info_fundo(nome_fundo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses):
-    """Busca informações do fundo"""
+def buscar_info_fundo(nome_fundo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses, fundo_data=None):
+    """Busca informações do fundo, com opção de usar links do Excel"""
+    
+    # Se temos dados do fundo do Excel, usar os links de lá
+    if fundo_data is not None:
+        try:
+            link_expert = str(fundo_data.get('Link Expert', '')).strip()
+            link_material = str(fundo_data.get('Material Publicitário', '')).strip()
+            
+            # Limpar valores 'nan'
+            if link_expert == 'nan' or link_expert == '':
+                link_expert = ''
+            if link_material == 'nan' or link_material == '':
+                link_material = ''
+            
+            links = {'expert': link_expert, 'material': link_material}
+        except:
+            links = MAPA_LINKS.get(nome_fundo, {'expert': '', 'material': ''})
+    else:
+        links = MAPA_LINKS.get(nome_fundo, {'expert': '', 'material': ''})
+    
     return {
         'dia_util': mapa_pagamentos.get(nome_fundo, 0),
         'cor': mapa_cores.get(nome_fundo, '#27ae60'),
@@ -761,7 +780,7 @@ def buscar_info_fundo(nome_fundo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa
             'venda_1min': 'N/A',
             'perfil': 'N/A'
         }),
-        'links': MAPA_LINKS.get(nome_fundo, {'expert': '', 'material': ''})
+        'links': links
     }
 
 # ============================================
@@ -1021,7 +1040,7 @@ def main():
         st.session_state.fundo_selecionado = fundos_cliente['Fundo'].iloc[0] if not fundos_cliente.empty else None
     
     # Garantir que fundo_selecionado ainda existe na lista de fundos do cliente
-    if st.session_state.fundo_selecionado not in fundos_cliente['Fundo'].values:
+    if st.session_state.fundo_selecionado is not None and st.session_state.fundo_selecionado not in fundos_cliente['Fundo'].values:
         st.session_state.fundo_selecionado = fundos_cliente['Fundo'].iloc[0] if not fundos_cliente.empty else None
     
     st.markdown('<div class="container-principal">', unsafe_allow_html=True)
@@ -1064,7 +1083,7 @@ def main():
             except:
                 dia_pagamento = None
             
-            info = buscar_info_fundo(nome_fundo, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
+            info = buscar_info_fundo(nome_fundo, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES, fundo)
             
             # Calcular data de pagamento
             data_pagamento = None
@@ -1108,7 +1127,11 @@ def main():
         st.markdown('<div class="box"><div class="box-titulo">📝 TESE DO FUNDO</div>', unsafe_allow_html=True)
         
         if st.session_state.fundo_selecionado:
-            info = buscar_info_fundo(st.session_state.fundo_selecionado, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
+            # Buscar dados do fundo selecionado no dataframe
+            fundo_selecionado_data = fundos_cliente[fundos_cliente['Fundo'] == st.session_state.fundo_selecionado]
+            fundo_data = fundo_selecionado_data.iloc[0] if not fundo_selecionado_data.empty else None
+            
+            info = buscar_info_fundo(st.session_state.fundo_selecionado, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES, fundo_data)
             tese = info.get('tese', {})
             
             st.markdown(f"""
@@ -1166,7 +1189,7 @@ def main():
         
         eventos_mes = {}
         for _, fundo in fundos_cliente.iterrows():
-            info = buscar_info_fundo(fundo['Fundo'], MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES)
+            info = buscar_info_fundo(fundo['Fundo'], MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES, fundo)
             
             # Usar a coluna Data do Excel
             try:
