@@ -253,10 +253,10 @@ def buscar_info_fundo(nome_fundo):
 
 @st.cache_data
 def carregar_dados():
-    """Carrega dados do Excel"""
+    """Carrega dados do Excel - SEM MODIFICAR nomes das colunas"""
     try:
         df = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Base')
-        df.columns = df.columns.str.strip()
+        # NÃO mexer nos nomes das colunas - usar exatamente como está no Excel
         return df
     except Exception as e:
         st.error(f"❌ Erro ao carregar Excel: {str(e)}")
