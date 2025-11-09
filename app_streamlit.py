@@ -954,12 +954,50 @@ def tela_fundos():
 
 @st.cache_data
 def carregar_dados():
-    """Carrega dados APENAS da aba Base"""
+    """Carrega dados APENAS da aba Base com validação completa"""
     try:
+        # Carregar o Excel
         df_base = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Base')
+        
+        # Limpar nomes das colunas (remover espaços extras)
+        df_base.columns = df_base.columns.str.strip()
+        
+        # Validar se as colunas necessárias existem
+        colunas_necessarias = ['Assessor', 'Cliente', 'Fundo', 'Aplicado', '%', 'Data']
+        colunas_faltando = [col for col in colunas_necessarias if col not in df_base.columns]
+        
+        if colunas_faltando:
+            st.error(f"❌ Colunas faltando no Excel: {', '.join(colunas_faltando)}")
+            st.error(f"📋 Colunas encontradas: {', '.join(df_base.columns.tolist())}")
+            st.info("""
+            ✅ **Estrutura esperada do Excel:**
+            - Coluna A: Assessor
+            - Coluna B: Cliente  
+            - Coluna C: Aplicado
+            - Coluna D: Fundo
+            - Coluna E: %
+            - Coluna F: (pode ter outras colunas)
+            - Coluna G: Data
+            """)
+            st.stop()
+        
+        # Verificar se há dados
+        if df_base.empty:
+            st.error("❌ O arquivo Excel está vazio!")
+            st.stop()
+        
+        # Debug: mostrar primeiras linhas (apenas em desenvolvimento)
+        # st.write("Debug - Primeiras linhas:", df_base.head())
+        
         return df_base
+        
+    except FileNotFoundError:
+        st.error("❌ Arquivo 'calendario_Renda_mais.xlsx' não encontrado!")
+        st.error("📁 Certifique-se de que o arquivo está na mesma pasta do código.")
+        st.stop()
     except Exception as e:
         st.error(f"❌ Erro ao carregar Excel: {str(e)}")
+        st.error(f"🔍 Tipo do erro: {type(e).__name__}")
         st.stop()
 
 # ============================================
@@ -1007,16 +1045,30 @@ def main():
             st.session_state.pagina_atual = 'fundos'
             st.rerun()
     
-    df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip().str.replace('A', '', 1)
-    df_base_filtrado = df_base[df_base['Assessor'] == str(st.session_state.assessor_logado)]
+    # Validar se a coluna Assessor existe e processar
+    try:
+        df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip().str.replace('A', '', 1)
+        df_base_filtrado = df_base[df_base['Assessor'] == str(st.session_state.assessor_logado)]
+    except Exception as e:
+        st.error(f"❌ Erro ao filtrar assessor: {str(e)}")
+        st.error("🔍 Verifique se a coluna 'Assessor' existe no Excel")
+        st.stop()
     
     if df_base_filtrado.empty:
-        st.error("❌ Nenhum cliente encontrado!")
+        st.error("❌ Nenhum cliente encontrado para este assessor!")
+        st.error(f"🔍 Assessor logado: {st.session_state.assessor_logado}")
         st.stop()
     
     st.markdown('<div class="cliente-selector"><h3>👥 SELECIONE O CLIENTE</h3>', unsafe_allow_html=True)
     
-    clientes = sorted(df_base_filtrado['Cliente'].unique())
+    # Validar se a coluna Cliente existe
+    try:
+        clientes = sorted(df_base_filtrado['Cliente'].unique())
+    except Exception as e:
+        st.error(f"❌ Erro ao buscar clientes: {str(e)}")
+        st.error("🔍 Verifique se a coluna 'Cliente' existe no Excel")
+        st.stop()
+    
     cliente_selecionado = st.selectbox(
         "Cliente", 
         [""] + list(clientes), 
@@ -1029,13 +1081,36 @@ def main():
     if not cliente_selecionado:
         st.stop()
     
-    fundos_cliente = df_base_filtrado[df_base_filtrado['Cliente'] == cliente_selecionado]
+    # Filtrar fundos do cliente com validação
+    try:
+        fundos_cliente = df_base_filtrado[df_base_filtrado['Cliente'] == cliente_selecionado]
+    except Exception as e:
+        st.error(f"❌ Erro ao filtrar fundos do cliente: {str(e)}")
+        st.stop()
+    
+    if fundos_cliente.empty:
+        st.error("❌ Nenhum fundo encontrado para este cliente!")
+        st.stop()
+    
+    # Validar se a coluna Fundo existe
+    if 'Fundo' not in fundos_cliente.columns:
+        st.error("❌ Coluna 'Fundo' não encontrada no Excel!")
+        st.stop()
 
+    # Inicializar fundo selecionado com segurança
     if 'fundo_selecionado' not in st.session_state:
-        st.session_state.fundo_selecionado = fundos_cliente['Fundo'].iloc[0] if not fundos_cliente.empty else None
+        try:
+            st.session_state.fundo_selecionado = fundos_cliente['Fundo'].iloc[0] if not fundos_cliente.empty else None
+        except Exception as e:
+            st.error(f"❌ Erro ao selecionar fundo inicial: {str(e)}")
+            st.session_state.fundo_selecionado = None
     
     # Garantir que fundo_selecionado ainda existe na lista de fundos do cliente
-    if st.session_state.fundo_selecionado is not None and st.session_state.fundo_selecionado not in fundos_cliente['Fundo'].values:
+    try:
+        if st.session_state.fundo_selecionado is not None and st.session_state.fundo_selecionado not in fundos_cliente['Fundo'].values:
+            st.session_state.fundo_selecionado = fundos_cliente['Fundo'].iloc[0] if not fundos_cliente.empty else None
+    except Exception as e:
+        st.warning(f"⚠️ Aviso ao validar fundo selecionado: {str(e)}")
         st.session_state.fundo_selecionado = fundos_cliente['Fundo'].iloc[0] if not fundos_cliente.empty else None
     
     st.markdown('<div class="container-principal">', unsafe_allow_html=True)
@@ -1046,70 +1121,75 @@ def main():
         st.markdown('<div class="box"><div class="box-titulo">📊 FUNDOS DO CLIENTE</div><div class="box-conteudo">', unsafe_allow_html=True)
         
         for _, fundo in fundos_cliente.iterrows():
-            nome_fundo = fundo['Fundo']
-            
-            # Ler Valor Aplicado da Coluna C
             try:
-                valor_aplicado = float(fundo['Aplicado'])
-            except:
-                valor_aplicado = 0.0
-            
-            # Ler Rendimento % da Coluna E
-            try:
-                rendimento_str = str(fundo['%']).strip()
-                if rendimento_str == '-' or rendimento_str == '' or rendimento_str == 'nan':
-                    rendimento_percentual = 0.0
-                else:
-                    rendimento_percentual = float(rendimento_str) * 100  # Converter para porcentagem
-            except:
-                rendimento_percentual = 0.0
-            
-            # Coluna G = "Data"
-            try:
-                data_str = str(fundo['Data']).strip()
-                if data_str == '-' or data_str == '' or data_str == 'nan':
-                    dia_pagamento = None
-                else:
-                    dia_pagamento = int(float(data_str))
-            except:
-                dia_pagamento = None
-            
-            info = buscar_info_fundo(nome_fundo, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES, fundo)
-            
-            # Calcular data de pagamento
-            data_pagamento = None
-            if dia_pagamento and dia_pagamento > 0:
+                nome_fundo = str(fundo.get('Fundo', 'Fundo Desconhecido'))
+                
+                # Ler Valor Aplicado da Coluna C (Aplicado)
                 try:
-                    data_pagamento = calcular_dia_util(
-                        st.session_state.ano_atual, 
-                        st.session_state.mes_atual, 
-                        dia_pagamento, 
-                        feriados
-                    )
-                except:
-                    pass
-            
-            data_texto = data_pagamento.strftime("%d/%m/%Y") if data_pagamento else "Não definida"
-            
-            classe_selecao = 'fundo-card-selecionado' if nome_fundo == st.session_state.fundo_selecionado else ''
-            
-            st.markdown(f"""
-            <div class="fundo-card-container">
-                <div class="fundo-card {classe_selecao}" style="border-left-color: {info.get('cor', '#27ae60')}">
-                    <div class="nome">{nome_fundo}</div>
-                    <div class="info" style="margin-top: 8px;">
-                        <div style="margin-bottom: 4px;">💰 <strong>Valor Aplicado:</strong> <span class="valor">R$ {valor_aplicado:,.2f}</span></div>
-                        <div style="margin-bottom: 4px;">📅 <strong>Data Pagamento:</strong> {data_texto}</div>
-                        <div>📈 <strong>Rendimento %:</strong> <span class="valor">{rendimento_percentual:.2f}%</span></div>
+                    valor_aplicado = float(fundo.get('Aplicado', 0))
+                except (ValueError, TypeError):
+                    valor_aplicado = 0.0
+                
+                # Ler Rendimento % da Coluna E (%)
+                try:
+                    rendimento_str = str(fundo.get('%', '0')).strip()
+                    if rendimento_str in ['-', '', 'nan', 'None']:
+                        rendimento_percentual = 0.0
+                    else:
+                        rendimento_percentual = float(rendimento_str) * 100  # Converter para porcentagem
+                except (ValueError, TypeError):
+                    rendimento_percentual = 0.0
+                
+                # Ler Data da Coluna G (Data)
+                try:
+                    data_str = str(fundo.get('Data', '')).strip()
+                    if data_str in ['-', '', 'nan', 'None']:
+                        dia_pagamento = None
+                    else:
+                        dia_pagamento = int(float(data_str))
+                except (ValueError, TypeError):
+                    dia_pagamento = None
+                
+                info = buscar_info_fundo(nome_fundo, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES, fundo)
+                
+                # Calcular data de pagamento
+                data_pagamento = None
+                if dia_pagamento and dia_pagamento > 0:
+                    try:
+                        data_pagamento = calcular_dia_util(
+                            st.session_state.ano_atual, 
+                            st.session_state.mes_atual, 
+                            dia_pagamento, 
+                            feriados
+                        )
+                    except Exception:
+                        pass
+                
+                data_texto = data_pagamento.strftime("%d/%m/%Y") if data_pagamento else "Não definida"
+                
+                classe_selecao = 'fundo-card-selecionado' if nome_fundo == st.session_state.fundo_selecionado else ''
+                
+                st.markdown(f"""
+                <div class="fundo-card-container">
+                    <div class="fundo-card {classe_selecao}" style="border-left-color: {info.get('cor', '#27ae60')}">
+                        <div class="nome">{nome_fundo}</div>
+                        <div class="info" style="margin-top: 8px;">
+                            <div style="margin-bottom: 4px;">💰 <strong>Valor Aplicado:</strong> <span class="valor">R$ {valor_aplicado:,.2f}</span></div>
+                            <div style="margin-bottom: 4px;">📅 <strong>Data Pagamento:</strong> {data_texto}</div>
+                            <div>📈 <strong>Rendimento %:</strong> <span class="valor">{rendimento_percentual:.2f}%</span></div>
+                        </div>
                     </div>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            if st.button("📊", key=f"sel_{nome_fundo}", help=f"Selecionar {nome_fundo}"):
-                st.session_state.fundo_selecionado = nome_fundo
-                st.rerun()
-            
-            st.markdown("</div>", unsafe_allow_html=True)
+                """, unsafe_allow_html=True)
+                
+                if st.button("📊", key=f"sel_{nome_fundo}", help=f"Selecionar {nome_fundo}"):
+                    st.session_state.fundo_selecionado = nome_fundo
+                    st.rerun()
+                
+                st.markdown("</div>", unsafe_allow_html=True)
+                
+            except Exception as e:
+                st.error(f"❌ Erro ao processar fundo: {str(e)}")
+                continue
 
         st.markdown('</div></div>', unsafe_allow_html=True)
     
@@ -1179,31 +1259,34 @@ def main():
         
         eventos_mes = {}
         for _, fundo in fundos_cliente.iterrows():
-            info = buscar_info_fundo(fundo['Fundo'], MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES, fundo)
-            
-            # Usar a coluna Data do Excel
             try:
-                data_str = str(fundo['Data']).strip()
-                if data_str != '-' and data_str != '' and data_str != 'nan':
-                    dia_util = int(float(data_str))
-                else:
-                    dia_util = None
-            except:
-                dia_util = None
-            
-            if dia_util and dia_util > 0:
+                info = buscar_info_fundo(fundo.get('Fundo', ''), MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES, fundo)
+                
+                # Usar a coluna Data do Excel
                 try:
-                    data_pagamento = calcular_dia_util(st.session_state.ano_atual, st.session_state.mes_atual, dia_util, feriados)
-                    if data_pagamento:
-                        dia = data_pagamento.day
-                        if dia not in eventos_mes:
-                            eventos_mes[dia] = []
-                        eventos_mes[dia].append({
-                            'sigla': info.get('sigla', fundo['Fundo'][:10]), 
-                            'cor': info.get('cor', '#27ae60')
-                        })
-                except:
-                    pass
+                    data_str = str(fundo.get('Data', '')).strip()
+                    if data_str not in ['-', '', 'nan', 'None']:
+                        dia_util = int(float(data_str))
+                    else:
+                        dia_util = None
+                except (ValueError, TypeError):
+                    dia_util = None
+                
+                if dia_util and dia_util > 0:
+                    try:
+                        data_pagamento = calcular_dia_util(st.session_state.ano_atual, st.session_state.mes_atual, dia_util, feriados)
+                        if data_pagamento:
+                            dia = data_pagamento.day
+                            if dia not in eventos_mes:
+                                eventos_mes[dia] = []
+                            eventos_mes[dia].append({
+                                'sigla': info.get('sigla', str(fundo.get('Fundo', 'N/A'))[:10]), 
+                                'cor': info.get('cor', '#27ae60')
+                            })
+                    except Exception:
+                        pass
+            except Exception as e:
+                continue  # Se houver erro, apenas pula esse fundo
         
         for semana in cal:
             for dia in semana:
