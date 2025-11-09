@@ -962,61 +962,19 @@ def carregar_dados():
         # Limpar nomes das colunas (remover espaços extras)
         df_base.columns = df_base.columns.str.strip()
         
-        # Mapear colunas para nomes padronizados
-        # Estrutura real: Assessor, Cliente, Produto, Sub Produto, Ativo, Financeiro
-        # Estrutura esperada: Assessor, Cliente, Fundo, Aplicado, %, Data
-        
-        mapeamento_colunas = {}
-        
-        # Verificar e mapear cada coluna
-        if 'Produto' in df_base.columns:
-            mapeamento_colunas['Produto'] = 'Fundo'
-        elif 'Sub Produto' in df_base.columns:
-            mapeamento_colunas['Sub Produto'] = 'Fundo'
-        
-        if 'Financeiro' in df_base.columns:
-            mapeamento_colunas['Financeiro'] = 'Aplicado'
-        
-        # Renomear colunas se necessário
-        if mapeamento_colunas:
-            df_base = df_base.rename(columns=mapeamento_colunas)
-        
-        # Adicionar colunas que não existem com valores padrão
-        if '%' not in df_base.columns:
-            df_base['%'] = 0.0  # Percentual padrão
-        
-        if 'Data' not in df_base.columns:
-            df_base['Data'] = '-'  # Data padrão (não definida)
-        
-        # Agora validar se as colunas essenciais existem
-        colunas_essenciais = ['Assessor', 'Cliente', 'Fundo', 'Aplicado']
-        colunas_faltando = [col for col in colunas_essenciais if col not in df_base.columns]
+        # Validar se as colunas necessárias existem
+        colunas_necessarias = ['Assessor', 'Cliente', 'Fundo', 'Aplicado', '%', 'Data']
+        colunas_faltando = [col for col in colunas_necessarias if col not in df_base.columns]
         
         if colunas_faltando:
-            st.error(f"❌ Colunas essenciais faltando: {', '.join(colunas_faltando)}")
-            st.error(f"📋 Colunas encontradas no Excel: {', '.join(df_base.columns.tolist())}")
-            st.info("""
-            ✅ **Estrutura aceita pelo sistema:**
-            
-            **Opção 1 (colunas originais):**
-            - Assessor, Cliente, Fundo, Aplicado, %, Data
-            
-            **Opção 2 (seu Excel atual):**
-            - Assessor, Cliente, Produto (ou Sub Produto), Financeiro
-            - O sistema vai mapear automaticamente:
-              • Produto/Sub Produto → Fundo
-              • Financeiro → Aplicado
-              • % e Data serão criadas com valores padrão
-            """)
+            st.error(f"❌ Colunas faltando no Excel: {', '.join(colunas_faltando)}")
+            st.error(f"📋 Colunas encontradas: {', '.join(df_base.columns.tolist())}")
             st.stop()
         
         # Verificar se há dados
         if df_base.empty:
             st.error("❌ O arquivo Excel está vazio!")
             st.stop()
-        
-        # Informação de debug (opcional - pode comentar depois)
-        st.success(f"✅ Excel carregado com sucesso! {len(df_base)} linhas encontradas.")
         
         return df_base
         
@@ -1027,8 +985,6 @@ def carregar_dados():
     except Exception as e:
         st.error(f"❌ Erro ao carregar Excel: {str(e)}")
         st.error(f"🔍 Tipo do erro: {type(e).__name__}")
-        import traceback
-        st.error(f"Detalhes: {traceback.format_exc()}")
         st.stop()
 
 # ============================================
@@ -1151,17 +1107,17 @@ def main():
     with col1:
         st.markdown('<div class="box"><div class="box-titulo">📊 FUNDOS DO CLIENTE</div><div class="box-conteudo">', unsafe_allow_html=True)
         
-        for _, fundo in fundos_cliente.iterrows():
+        for idx, (row_idx, fundo) in enumerate(fundos_cliente.iterrows()):
             try:
                 nome_fundo = str(fundo.get('Fundo', 'Fundo Desconhecido'))
                 
-                # Ler Valor Aplicado da Coluna C (Aplicado)
+                # Ler Valor Aplicado da Coluna Aplicado
                 try:
                     valor_aplicado = float(fundo.get('Aplicado', 0))
                 except (ValueError, TypeError):
                     valor_aplicado = 0.0
                 
-                # Ler Rendimento % da Coluna E (%)
+                # Ler Rendimento % da Coluna %
                 try:
                     rendimento_str = str(fundo.get('%', '0')).strip()
                     if rendimento_str in ['-', '', 'nan', 'None']:
@@ -1171,7 +1127,7 @@ def main():
                 except (ValueError, TypeError):
                     rendimento_percentual = 0.0
                 
-                # Ler Data da Coluna G (Data)
+                # Ler Data da Coluna Data
                 try:
                     data_str = str(fundo.get('Data', '')).strip()
                     if data_str in ['-', '', 'nan', 'None']:
@@ -1212,7 +1168,8 @@ def main():
                     </div>
                 """, unsafe_allow_html=True)
                 
-                if st.button("📊", key=f"sel_{nome_fundo}", help=f"Selecionar {nome_fundo}"):
+                # CHAVE ÚNICA: usa índice + nome do fundo
+                if st.button("📊", key=f"sel_{idx}_{row_idx}", help=f"Selecionar {nome_fundo}"):
                     st.session_state.fundo_selecionado = nome_fundo
                     st.rerun()
                 
