@@ -529,6 +529,8 @@ def calcular_dia_util(ano, mes, dia_util_desejado, feriados):
 MAPA_PAGAMENTOS = {
     'ARX FII Portfólio Renda CDI+ RL': 15,
     'AZ Quest Renda Mais Infra-Yield VI FIP-IE': 5,
+    'AZ Quest Panorama Renda Mais (1ª Emissão)': 5,
+    'AZ Quest Panorama Renda Mais (2ª Emissão)': 5,
     'AZ QUEST PANORAMA RENDA CDI FI RESPONSABILIDADE LIMITADA': 5,
     'AZ Quest Panorama Renda CDI FI RL': 5,
     'BGR Galpões Logísticos - Cota Sênior': 15,
@@ -544,6 +546,8 @@ MAPA_PAGAMENTOS = {
 MAPA_CORES = {
     'ARX FII Portfólio Renda CDI+ RL': '#e74c3c',
     'AZ Quest Renda Mais Infra-Yield VI FIP-IE': '#3498db',
+    'AZ Quest Panorama Renda Mais (1ª Emissão)': '#9b59b6',
+    'AZ Quest Panorama Renda Mais (2ª Emissão)': '#8e44ad',
     'AZ QUEST PANORAMA RENDA CDI FI RESPONSABILIDADE LIMITADA': '#9b59b6',
     'AZ Quest Panorama Renda CDI FI RL': '#9b59b6',
     'BGR Galpões Logísticos - Cota Sênior': '#f39c12',
@@ -559,6 +563,8 @@ MAPA_CORES = {
 MAPA_SIGLAS = {
     'ARX FII Portfólio Renda CDI+ RL': 'ARX',
     'AZ Quest Renda Mais Infra-Yield VI FIP-IE': 'AZ Quest',
+    'AZ Quest Panorama Renda Mais (1ª Emissão)': 'AZ Panorama 1',
+    'AZ Quest Panorama Renda Mais (2ª Emissão)': 'AZ Panorama 2',
     'AZ QUEST PANORAMA RENDA CDI FI RESPONSABILIDADE LIMITADA': 'AZ Panorama',
     'AZ Quest Panorama Renda CDI FI RL': 'AZ Panorama',
     'BGR Galpões Logísticos - Cota Sênior': 'BGR Senior',
@@ -580,6 +586,24 @@ MAPA_TESES = {
 • Público-alvo: Investidores em Geral''',
         'venda_1min': 'Fundo imobiliário com foco em CRIs que busca rentabilidade acima do CDI, oferecendo uma boa alternativa para renda passiva. O fundo terá uma pulverização da carteira ao longo dos primeiros 24 meses, buscanto aproximadamente 20 operações em seu portfólio. O gestor é a ARX Investimentos, fundada em 2001, e controlada pelo grupo BNY Mellon, uma das mais tradicionais instituições financeiras do mundo.',
         'perfil': 'Investidores que buscam renda recorrente com retornos superiores ao CDI através do mercado imobiliário.'
+    },
+    'AZ Quest Panorama Renda Mais (1ª Emissão)': {
+        'resumo': 'Fundo imobiliário de renda fixa com objetivo de superar o CDI através de uma carteira diversificada com um portfólio de crédito para incorporadoras de médio e alto padrão em São Paulo.',
+        'condicoes': '''• Rentabilidade: CDI + 2,40% (Isento de IR para PF)
+• Prazo: 5 anos (+ 1 prorrogável)
+• Duration: 3,5 anos
+• Público-alvo: Investidor em Geral''',
+        'venda_1min': 'Fundo que busca retornos superiores ao CDI investindo em uma carteira diversificada de crédito privado com reinvestimento limitado a 3 anos, devolução integral do capital em até 5 anos. Além de garantias reais e um time com expertise de 24 anos no setor.',
+        'perfil': 'Investidores conservadores que buscam retornos superiores ao CDI com gestão ativa.'
+    },
+    'AZ Quest Panorama Renda Mais (2ª Emissão)': {
+        'resumo': 'Fundo imobiliário de renda fixa com objetivo de superar o CDI através de uma carteira diversificada com um portfólio de crédito para incorporadoras de médio e alto padrão em São Paulo.',
+        'condicoes': '''• Rentabilidade: CDI + 2,40% (Isento de IR para PF)
+• Prazo: 5 anos (+ 1 prorrogável)
+• Duration: 3,5 anos
+• Público-alvo: Investidor em Geral''',
+        'venda_1min': 'Fundo que busca retornos superiores ao CDI investindo em uma carteira diversificada de crédito privado com reinvestimento limitado a 3 anos, devolução integral do capital em até 5 anos. Além de garantias reais e um time com expertise de 24 anos no setor.',
+        'perfil': 'Investidores conservadores que buscam retornos superiores ao CDI com gestão ativa.'
     },
     'AZ Quest Renda Mais Infra-Yield VI FIP-IE': {
         'resumo': 'Fundo imoboliário com investimento em ativos de infraestrutura maduros, com distribuição de rendimentos mensais.',
