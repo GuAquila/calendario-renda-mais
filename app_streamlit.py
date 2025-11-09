@@ -962,22 +962,51 @@ def carregar_dados():
         # Limpar nomes das colunas (remover espaços extras)
         df_base.columns = df_base.columns.str.strip()
         
-        # Validar se as colunas necessárias existem
-        colunas_necessarias = ['Assessor', 'Cliente', 'Fundo', 'Aplicado', '%', 'Data']
-        colunas_faltando = [col for col in colunas_necessarias if col not in df_base.columns]
+        # Mapear colunas para nomes padronizados
+        # Estrutura real: Assessor, Cliente, Produto, Sub Produto, Ativo, Financeiro
+        # Estrutura esperada: Assessor, Cliente, Fundo, Aplicado, %, Data
+        
+        mapeamento_colunas = {}
+        
+        # Verificar e mapear cada coluna
+        if 'Produto' in df_base.columns:
+            mapeamento_colunas['Produto'] = 'Fundo'
+        elif 'Sub Produto' in df_base.columns:
+            mapeamento_colunas['Sub Produto'] = 'Fundo'
+        
+        if 'Financeiro' in df_base.columns:
+            mapeamento_colunas['Financeiro'] = 'Aplicado'
+        
+        # Renomear colunas se necessário
+        if mapeamento_colunas:
+            df_base = df_base.rename(columns=mapeamento_colunas)
+        
+        # Adicionar colunas que não existem com valores padrão
+        if '%' not in df_base.columns:
+            df_base['%'] = 0.0  # Percentual padrão
+        
+        if 'Data' not in df_base.columns:
+            df_base['Data'] = '-'  # Data padrão (não definida)
+        
+        # Agora validar se as colunas essenciais existem
+        colunas_essenciais = ['Assessor', 'Cliente', 'Fundo', 'Aplicado']
+        colunas_faltando = [col for col in colunas_essenciais if col not in df_base.columns]
         
         if colunas_faltando:
-            st.error(f"❌ Colunas faltando no Excel: {', '.join(colunas_faltando)}")
-            st.error(f"📋 Colunas encontradas: {', '.join(df_base.columns.tolist())}")
+            st.error(f"❌ Colunas essenciais faltando: {', '.join(colunas_faltando)}")
+            st.error(f"📋 Colunas encontradas no Excel: {', '.join(df_base.columns.tolist())}")
             st.info("""
-            ✅ **Estrutura esperada do Excel:**
-            - Coluna A: Assessor
-            - Coluna B: Cliente  
-            - Coluna C: Aplicado
-            - Coluna D: Fundo
-            - Coluna E: %
-            - Coluna F: (pode ter outras colunas)
-            - Coluna G: Data
+            ✅ **Estrutura aceita pelo sistema:**
+            
+            **Opção 1 (colunas originais):**
+            - Assessor, Cliente, Fundo, Aplicado, %, Data
+            
+            **Opção 2 (seu Excel atual):**
+            - Assessor, Cliente, Produto (ou Sub Produto), Financeiro
+            - O sistema vai mapear automaticamente:
+              • Produto/Sub Produto → Fundo
+              • Financeiro → Aplicado
+              • % e Data serão criadas com valores padrão
             """)
             st.stop()
         
@@ -986,8 +1015,8 @@ def carregar_dados():
             st.error("❌ O arquivo Excel está vazio!")
             st.stop()
         
-        # Debug: mostrar primeiras linhas (apenas em desenvolvimento)
-        # st.write("Debug - Primeiras linhas:", df_base.head())
+        # Informação de debug (opcional - pode comentar depois)
+        st.success(f"✅ Excel carregado com sucesso! {len(df_base)} linhas encontradas.")
         
         return df_base
         
@@ -998,6 +1027,8 @@ def carregar_dados():
     except Exception as e:
         st.error(f"❌ Erro ao carregar Excel: {str(e)}")
         st.error(f"🔍 Tipo do erro: {type(e).__name__}")
+        import traceback
+        st.error(f"Detalhes: {traceback.format_exc()}")
         st.stop()
 
 # ============================================
