@@ -2,10 +2,8 @@
 CALENDÁRIO RENDA MAIS - COM AUTENTICAÇÃO POR ASSESSOR
 ======================================================
 Sistema multi-assessor com senhas individuais
-VERSÃO FINAL LIMPA - 25/10/2025
+VERSÃO FINAL - Novembro 2025
 Usa APENAS aba "Base" do Excel
-
-MODIFICAÇÃO: Página "Conheça os Fundos" agora destaca o fundo selecionado no topo
 """
 
 import streamlit as st
@@ -413,11 +411,6 @@ st.markdown("""
         background: #1e4d2b;
     }
     
-    /* ============================================
-       NOVO CSS PARA FUNDO EM DESTAQUE
-       ============================================ */
-    
-    /* Este é o estilo do box grande que aparece no topo quando um fundo é selecionado */
     .fundo-destaque {
         background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
         padding: 35px;
@@ -428,7 +421,6 @@ st.markdown("""
         animation: fadeIn 0.5s ease-in;
     }
     
-    /* Animação suave quando o fundo aparece em destaque */
     @keyframes fadeIn {
         from {
             opacity: 0;
@@ -440,7 +432,6 @@ st.markdown("""
         }
     }
     
-    /* Título do fundo em destaque - maior e mais chamativo */
     .fundo-destaque h2 {
         color: #1e4d2b;
         font-size: 28px;
@@ -450,7 +441,6 @@ st.markdown("""
         border-bottom: 3px solid #27ae60;
     }
     
-    /* Badge "SELECIONADO" que aparece no topo */
     .badge-selecionado {
         display: inline-block;
         background: #27ae60;
@@ -463,7 +453,6 @@ st.markdown("""
         box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
     }
     
-    /* Conteúdo do fundo em destaque */
     .fundo-destaque-conteudo {
         background: white;
         padding: 25px;
@@ -954,7 +943,7 @@ def tela_fundos():
 
 @st.cache_data
 def carregar_dados():
-    """Carrega dados APENAS da aba Base com validação completa"""
+    """Carrega dados APENAS da aba Base com mapeamento automático de colunas"""
     try:
         # Carregar o Excel
         df_base = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Base')
@@ -962,13 +951,46 @@ def carregar_dados():
         # Limpar nomes das colunas (remover espaços extras)
         df_base.columns = df_base.columns.str.strip()
         
-        # Validar se as colunas necessárias existem
-        colunas_necessarias = ['Assessor', 'Cliente', 'Fundo', 'Aplicado', '%', 'Data']
-        colunas_faltando = [col for col in colunas_necessarias if col not in df_base.columns]
+        # ============================================
+        # MAPEAMENTO AUTOMÁTICO DE COLUNAS
+        # ============================================
+        
+        # 1. Mapear FUNDO
+        if 'Fundo' not in df_base.columns:
+            if 'Produto' in df_base.columns:
+                df_base['Fundo'] = df_base['Produto']
+            elif 'Sub Produto' in df_base.columns:
+                df_base['Fundo'] = df_base['Sub Produto']
+            else:
+                st.error("❌ Não foi encontrada coluna para 'Fundo' (tentei: Produto, Sub Produto)")
+                st.stop()
+        
+        # 2. Mapear APLICADO
+        if 'Aplicado' not in df_base.columns:
+            if 'Financeiro' in df_base.columns:
+                df_base['Aplicado'] = df_base['Financeiro']
+            else:
+                st.error("❌ Não foi encontrada coluna para 'Aplicado' (tentei: Financeiro)")
+                st.stop()
+        
+        # 3. Criar coluna % se não existir
+        if '%' not in df_base.columns:
+            df_base['%'] = 0.0  # Valor padrão
+        
+        # 4. Criar coluna Data se não existir
+        if 'Data' not in df_base.columns:
+            df_base['Data'] = None  # Valor padrão
+        
+        # ============================================
+        # VALIDAR COLUNAS ESSENCIAIS
+        # ============================================
+        
+        colunas_essenciais = ['Assessor', 'Cliente', 'Fundo', 'Aplicado']
+        colunas_faltando = [col for col in colunas_essenciais if col not in df_base.columns]
         
         if colunas_faltando:
-            st.error(f"❌ Colunas faltando no Excel: {', '.join(colunas_faltando)}")
-            st.error(f"📋 Colunas encontradas: {', '.join(df_base.columns.tolist())}")
+            st.error(f"❌ Colunas essenciais faltando: {', '.join(colunas_faltando)}")
+            st.error(f"📋 Colunas disponíveis: {', '.join(df_base.columns.tolist())}")
             st.stop()
         
         # Verificar se há dados
