@@ -1131,7 +1131,7 @@ def main():
         st.stop()
 
     # Inicializar fundo selecionado com segurança
-    if 'fundo_selecionado' not in st.session_state:
+    if 'fundo_selecionado' not in st.session_state or st.session_state.fundo_selecionado is None:
         try:
             st.session_state.fundo_selecionado = fundos_cliente['Fundo'].iloc[0] if not fundos_cliente.empty else None
         except Exception as e:
@@ -1140,8 +1140,9 @@ def main():
     
     # Garantir que fundo_selecionado ainda existe na lista de fundos do cliente
     try:
-        if st.session_state.fundo_selecionado is not None and st.session_state.fundo_selecionado not in fundos_cliente['Fundo'].values:
-            st.session_state.fundo_selecionado = fundos_cliente['Fundo'].iloc[0] if not fundos_cliente.empty else None
+        if st.session_state.fundo_selecionado is not None:
+            if st.session_state.fundo_selecionado not in fundos_cliente['Fundo'].values:
+                st.session_state.fundo_selecionado = fundos_cliente['Fundo'].iloc[0] if not fundos_cliente.empty else None
     except Exception as e:
         st.warning(f"⚠️ Aviso ao validar fundo selecionado: {str(e)}")
         st.session_state.fundo_selecionado = fundos_cliente['Fundo'].iloc[0] if not fundos_cliente.empty else None
@@ -1166,24 +1167,28 @@ def main():
                 # Ler Rendimento % da Coluna %
                 try:
                     rendimento_str = str(fundo.get('%', '0')).strip()
-                    if rendimento_str in ['-', '', 'nan', 'None']:
+                    if rendimento_str in ['-', '', 'nan', 'None', 'NaN']:
                         rendimento_percentual = 0.0
                     else:
                         rendimento_percentual = float(rendimento_str) * 100  # Converter para porcentagem
                 except (ValueError, TypeError):
                     rendimento_percentual = 0.0
                 
-                # Ler Data da Coluna Data
+                # Buscar info do fundo para obter dia de pagamento padrão
+                info = buscar_info_fundo(nome_fundo, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES, fundo)
+                
+                # Ler Data da Coluna Data ou usar padrão do MAPA_PAGAMENTOS
+                dia_pagamento = None
                 try:
                     data_str = str(fundo.get('Data', '')).strip()
-                    if data_str in ['-', '', 'nan', 'None']:
-                        dia_pagamento = None
-                    else:
+                    if data_str not in ['-', '', 'nan', 'None', 'NaN']:
                         dia_pagamento = int(float(data_str))
                 except (ValueError, TypeError):
-                    dia_pagamento = None
+                    pass
                 
-                info = buscar_info_fundo(nome_fundo, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES, fundo)
+                # Se não tem data no Excel, usar o padrão do mapa
+                if not dia_pagamento or dia_pagamento == 0:
+                    dia_pagamento = info.get('dia_util', None)
                 
                 # Calcular data de pagamento
                 data_pagamento = None
