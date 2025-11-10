@@ -110,7 +110,7 @@ def verificar_autenticacao(df_base):
             st.markdown("""
             <div class="login-titulo">
                 <h2 style='margin: 10px 0; font-size: 24px;'>Calendário Renda Mais - Tauari Investimentos</h2>
-                <p style='color: #7f8c8d; font-size: 14px; margin-top: 15px;'>Acesso restrito por Assessor (uso interno) - Última atualização 24/10</p>
+                <p style='color: #7f8c8d; font-size: 14px; margin-top: 15px;'>Acesso restrito por Assessor (uso interno) - Última atualização 10/11</p>
             </div>
             """, unsafe_allow_html=True)
             
