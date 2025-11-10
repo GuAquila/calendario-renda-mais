@@ -2,26 +2,40 @@
 CALENDÁRIO RENDA MAIS - COM AUTENTICAÇÃO POR ASSESSOR
 ======================================================
 Sistema multi-assessor com senhas individuais
-VERSÃO FINAL - Novembro 2025
+VERSÃO CORRIGIDA E COMENTADA - Novembro 2025
 Usa APENAS aba "Base" do Excel
+
+ESTE CÓDIGO FOI COMENTADO DETALHADAMENTE PARA INICIANTES!
+Cada parte importante tem explicações claras.
 """
 
-import streamlit as st
-import pandas as pd
-from datetime import datetime, date, timedelta
-import calendar
-import os
+# ==============================================================================
+# PASSO 1: IMPORTAR AS BIBLIOTECAS NECESSÁRIAS
+# ==============================================================================
+# Estas são as "ferramentas" que vamos usar no programa
+
+import streamlit as st  # Para criar a interface web
+import pandas as pd     # Para trabalhar com Excel/dados
+from datetime import datetime, date, timedelta  # Para trabalhar com datas
+import calendar        # Para criar calendários
+import os             # Para trabalhar com arquivos do sistema
+
+# ==============================================================================
+# PASSO 2: CONFIGURAR A PÁGINA DO STREAMLIT
+# ==============================================================================
+# Define como a página web vai aparecer para o usuário
 
 st.set_page_config(
-    page_title="Calendário Renda Mais - TAUARI",
-    page_icon="🌳",
-    layout="wide",
-    initial_sidebar_state="collapsed"
+    page_title="Calendário Renda Mais - TAUARI",  # Título na aba do navegador
+    page_icon="🌳",                                # Ícone na aba do navegador
+    layout="wide",                                 # Layout largo (usa toda a tela)
+    initial_sidebar_state="collapsed"              # Esconde a barra lateral
 )
 
-# ============================================
-# AUTENTICAÇÃO POR ASSESSOR
-# ============================================
+# ==============================================================================
+# PASSO 3: DEFINIR OS ASSESSORES E SUAS SENHAS
+# ==============================================================================
+# Dicionário com código do assessor: (nome, senha)
 
 ASSESSORES = {
     '21743': ('Andre Miyada', 'AM2025'),
@@ -44,29 +58,76 @@ ASSESSORES = {
     '67756': ('Vinicius Nunes Palacios', 'VNP2025'),
 }
 
+# ==============================================================================
+# FUNÇÃO: VALIDAR SENHA DO ASSESSOR
+# ==============================================================================
 def validar_senha_assessor(codigo_assessor, senha):
-    """Valida a senha do assessor"""
-    if codigo_assessor not in ASSESSORES:
-        return False, None
+    """
+    Esta função verifica se o código e senha do assessor estão corretos.
     
+    O que ela faz:
+    1. Verifica se o código do assessor existe no dicionário ASSESSORES
+    2. Se existir, compara a senha digitada com a senha correta
+    3. Retorna True/False e o nome do assessor
+    
+    Parâmetros:
+        codigo_assessor: código digitado pelo usuário (ex: '46857')
+        senha: senha digitada pelo usuário (ex: 'GA2025')
+    
+    Retorna:
+        (True, 'Nome do Assessor') se a senha estiver correta
+        (False, None) se a senha estiver errada
+    """
+    
+    # Verifica se o código existe no dicionário
+    if codigo_assessor not in ASSESSORES:
+        return False, None  # Código não existe
+    
+    # Pega o nome e senha esperada do dicionário
     nome_assessor, senha_esperada = ASSESSORES[codigo_assessor]
+    
+    # Compara a senha digitada com a senha esperada
     if senha == senha_esperada:
-        return True, nome_assessor
-    return False, None
+        return True, nome_assessor  # Senha correta!
+    
+    return False, None  # Senha incorreta
 
+# ==============================================================================
+# FUNÇÃO: VERIFICAR AUTENTICAÇÃO (TELA DE LOGIN)
+# ==============================================================================
 def verificar_autenticacao(df_base):
-    """Tela de login por assessor"""
+    """
+    Esta função cria a tela de login e verifica se o assessor pode acessar.
+    
+    O que ela faz:
+    1. Mostra uma tela de login bonita
+    2. Pede código e senha do assessor
+    3. Verifica se estão corretos
+    4. Se corretos, libera o acesso ao sistema
+    
+    Parâmetro:
+        df_base: dados do Excel carregados
+    """
+    
+    # ===== INICIALIZAR VARIÁVEIS DE SESSÃO =====
+    # session_state guarda informações enquanto o usuário usa o sistema
     
     if 'autenticado' not in st.session_state:
-        st.session_state.autenticado = False
-    if 'assessor_logado' not in st.session_state:
-        st.session_state.assessor_logado = None
-    if 'nome_assessor' not in st.session_state:
-        st.session_state.nome_assessor = None
-    if 'pagina_atual' not in st.session_state:
-        st.session_state.pagina_atual = 'login'
+        st.session_state.autenticado = False  # Usuário ainda não entrou
     
+    if 'assessor_logado' not in st.session_state:
+        st.session_state.assessor_logado = None  # Nenhum assessor logado
+    
+    if 'nome_assessor' not in st.session_state:
+        st.session_state.nome_assessor = None  # Nome do assessor
+    
+    if 'pagina_atual' not in st.session_state:
+        st.session_state.pagina_atual = 'login'  # Começa na tela de login
+    
+    # ===== SE NÃO ESTÁ AUTENTICADO, MOSTRAR TELA DE LOGIN =====
     if not st.session_state.autenticado:
+        
+        # CSS: código que deixa a tela bonita
         st.markdown("""
         <style>
             .stApp {
@@ -97,9 +158,12 @@ def verificar_autenticacao(df_base):
         </style>
         """, unsafe_allow_html=True)
         
+        # Criar 3 colunas para centralizar o formulário
         col1, col2, col3 = st.columns([1, 2, 1])
         
-        with col2:
+        with col2:  # Usar apenas a coluna do meio
+            
+            # Título da página
             st.markdown("""
             <div class="login-titulo">
                 <h2 style='margin: 10px 0; font-size: 24px;'>Calendário Renda Mais - Tauari Investimentos</h2>
@@ -107,7 +171,10 @@ def verificar_autenticacao(df_base):
             </div>
             """, unsafe_allow_html=True)
             
+            # Criar formulário de login
             with st.form("login_form"):
+                
+                # Campo para digitar o código do assessor
                 codigo_assessor = st.text_input(
                     "👤 Código do Assessor:",
                     placeholder="Coloque seu código, exemplo: 46857",
@@ -115,45 +182,63 @@ def verificar_autenticacao(df_base):
                     key="codigo_input"
                 )
                 
+                # Campo para digitar a senha (oculta os caracteres)
                 senha_assessor = st.text_input(
                     "🔐 Senha do Assessor:",
-                    type="password",
+                    type="password",  # Esconde a senha com asteriscos
                     placeholder="Digite sua senha",
                     max_chars=20,
                     key="senha_input"
                 )
                 
+                # Botão para enviar o formulário
                 submitted = st.form_submit_button("🔓 Entrar", use_container_width=True)
                 
+                # ===== QUANDO O USUÁRIO CLICA EM "ENTRAR" =====
                 if submitted:
+                    
+                    # Verificar se os campos foram preenchidos
                     if not codigo_assessor or not senha_assessor:
                         st.error("❌ Preencha todos os campos!")
+                    
                     else:
+                        # Validar o código e senha
                         valido, nome_assessor = validar_senha_assessor(codigo_assessor, senha_assessor)
-                        if valido:
+                        
+                        if valido:  # Se a senha estiver correta
+                            
                             if df_base is not None:
+                                # Limpar a coluna Assessor (remover 'A' do início)
                                 df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip().str.replace('A', '', 1)
+                                
+                                # Filtrar apenas os clientes deste assessor
                                 clientes_assessor = df_base[df_base['Assessor'] == str(codigo_assessor)]
                                 
                                 if clientes_assessor.empty:
                                     st.error(f"❌ Nenhum cliente encontrado para o Assessor {codigo_assessor}")
+                                
                                 else:
+                                    # SUCESSO! Salvar informações e liberar acesso
                                     st.session_state.autenticado = True
                                     st.session_state.assessor_logado = codigo_assessor
                                     st.session_state.nome_assessor = nome_assessor
                                     st.session_state.pagina_atual = 'sistema'
                                     st.success(f"✅ Bem-vindo, {nome_assessor}!")
-                                    st.rerun()
+                                    st.rerun()  # Recarrega a página
+                            
                             else:
                                 st.error("❌ Erro ao carregar a base de dados!")
+                        
                         else:
                             st.error("❌ Código ou senha incorretos!")
             
+            # Botão para ver os fundos sem fazer login
             st.markdown("<br>", unsafe_allow_html=True)
             if st.button("📚 Conheça os Fundos", key="btn_conhecer_fundos", use_container_width=True):
                 st.session_state.pagina_atual = 'fundos'
                 st.rerun()
             
+            # Informações de ajuda
             st.markdown("""
             <div class="login-info">
                 <strong>ℹ️ Como acessar:</strong><br>
@@ -163,11 +248,12 @@ def verificar_autenticacao(df_base):
             </div>
             """, unsafe_allow_html=True)
         
-        st.stop()
+        st.stop()  # Para aqui se não estiver autenticado
 
-# ============================================
-# CSS
-# ============================================
+# ==============================================================================
+# CSS: ESTILOS DA PÁGINA
+# ==============================================================================
+# Este código CSS deixa a página bonita com cores, sombras, etc.
 
 st.markdown("""
 <style>
@@ -462,17 +548,36 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ============================================
+# ==============================================================================
 # DADOS E CONFIGURAÇÕES
-# ============================================
+# ==============================================================================
 
+# Nomes dos meses em português
 MESES_PT = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ]
 
+# ==============================================================================
+# FUNÇÃO: GERAR FERIADOS
+# ==============================================================================
 def gerar_feriados(ano):
-    """Gera lista de feriados nacionais"""
+    """
+    Esta função cria uma lista com todos os feriados do ano.
+    
+    Por que isso é importante?
+    - Feriados não são dias úteis
+    - Pagamentos não acontecem em feriados
+    - Precisamos pular os feriados ao calcular datas de pagamento
+    
+    Parâmetro:
+        ano: ano para gerar os feriados (ex: 2025)
+    
+    Retorna:
+        lista com objetos date de cada feriado
+    """
+    
+    # Feriados fixos (acontecem todo ano na mesma data)
     feriados_fixos = {
         (1, 1): "Ano Novo",
         (4, 21): "Tiradentes",
@@ -485,46 +590,92 @@ def gerar_feriados(ano):
         (12, 25): "Natal"
     }
     
+    # Feriados móveis (mudam de data todo ano - como Carnaval e Páscoa)
     feriados_moveis = {
         2025: [(2, 28), (3, 3), (3, 4), (4, 18), (5, 29)],
         2026: [(2, 13), (2, 16), (2, 17), (4, 3), (5, 14)],
         2027: [(2, 5), (2, 8), (2, 9), (3, 26), (5, 6)],
     }
     
+    # Criar lista vazia para guardar os feriados
     lista_feriados = []
+    
+    # Adicionar feriados fixos
     for (mes, dia), nome in feriados_fixos.items():
         lista_feriados.append(date(ano, mes, dia))
     
+    # Adicionar feriados móveis (se existirem para este ano)
     if ano in feriados_moveis:
         for (mes, dia) in feriados_moveis[ano]:
             lista_feriados.append(date(ano, mes, dia))
     
     return lista_feriados
 
+# ==============================================================================
+# FUNÇÃO: CALCULAR DIA ÚTIL
+# ==============================================================================
 def calcular_dia_util(ano, mes, dia_util_desejado, feriados):
-    """Calcula o dia útil real do mês"""
+    """
+    Esta função encontra qual é a DATA do Nº dia útil do mês.
+    
+    Exemplo: "Quero o 5º dia útil de novembro de 2025"
+    A função vai contar os dias úteis e retornar a data exata.
+    
+    O que é dia útil?
+    - Segunda a sexta-feira
+    - Que NÃO seja feriado
+    
+    Parâmetros:
+        ano: ano desejado (ex: 2025)
+        mes: mês desejado (ex: 11 para novembro)
+        dia_util_desejado: qual dia útil queremos (ex: 5 = quinto dia útil)
+        feriados: lista com os feriados do ano
+    
+    Retorna:
+        objeto date com a data encontrada
+        ou None se não encontrar
+    """
+    
+    # Pegar o primeiro dia do mês
     primeiro_dia = date(ano, mes, 1)
     
+    # Calcular o último dia do mês
     if primeiro_dia.month == 12:
-        ultimo_dia = date(ano, mes, 31)
+        ultimo_dia = date(ano, mes, 31)  # Dezembro tem 31 dias
     else:
+        # Pega o dia antes do primeiro dia do próximo mês
         ultimo_dia = (date(ano, mes + 1, 1) - timedelta(days=1))
     
+    # Começar a contar do primeiro dia
     dia_atual = primeiro_dia
     contador_dias_uteis = 0
     
+    # Loop: percorrer todos os dias do mês
     while dia_atual <= ultimo_dia:
+        
+        # Verificar se é dia útil:
+        # - weekday() < 5 significa segunda a sexta (0=segunda, 4=sexta)
+        # - dia_atual not in feriados significa que não é feriado
+        
         if dia_atual.weekday() < 5 and dia_atual not in feriados:
+            # É um dia útil! Aumentar o contador
             contador_dias_uteis += 1
+            
+            # Verificar se chegamos no dia útil que queremos
             if contador_dias_uteis == dia_util_desejado:
-                return dia_atual
+                return dia_atual  # Encontramos! Retornar esta data
+        
+        # Avançar para o próximo dia
         dia_atual += timedelta(days=1)
     
+    # Se chegou aqui, não encontrou (o mês não tem tantos dias úteis)
     return None
 
-# ============================================
-# MAPEAMENTO DOS FUNDOS
-# ============================================
+# ==============================================================================
+# MAPEAMENTO DOS FUNDOS - DIA DE PAGAMENTO
+# ==============================================================================
+# Este dicionário define em qual DIA ÚTIL cada fundo paga
+# Exemplo: 'ARX FII' paga no 15º dia útil do mês
 
 MAPA_PAGAMENTOS = {
     'ARX FII Portfólio Renda CDI+ RL': 15,
@@ -543,6 +694,11 @@ MAPA_PAGAMENTOS = {
     'Valora CRI CDI Renda+ FII RL': 15,
 }
 
+# ==============================================================================
+# MAPEAMENTO DOS FUNDOS - CORES
+# ==============================================================================
+# Define a cor de cada fundo (para deixar o visual mais bonito)
+
 MAPA_CORES = {
     'ARX FII Portfólio Renda CDI+ RL': '#e74c3c',
     'AZ Quest Renda Mais Infra-Yield VI FIP-IE': '#3498db',
@@ -560,6 +716,11 @@ MAPA_CORES = {
     'Valora CRI CDI Renda+ FII RL': '#8e44ad',
 }
 
+# ==============================================================================
+# MAPEAMENTO DOS FUNDOS - SIGLAS
+# ==============================================================================
+# Nome curto de cada fundo (para mostrar no calendário)
+
 MAPA_SIGLAS = {
     'ARX FII Portfólio Renda CDI+ RL': 'ARX',
     'AZ Quest Renda Mais Infra-Yield VI FIP-IE': 'AZ Quest',
@@ -576,6 +737,11 @@ MAPA_SIGLAS = {
     'XP Habitat Renda Imobiliária Feeder FII': 'XP Habitat',
     'Valora CRI CDI Renda+ FII RL': 'Valora',
 }
+
+# ==============================================================================
+# MAPEAMENTO DOS FUNDOS - TESES DE INVESTIMENTO
+# ==============================================================================
+# Informações detalhadas sobre cada fundo
 
 MAPA_TESES = {
     'ARX FII Portfólio Renda CDI+ RL': {
@@ -656,7 +822,7 @@ MAPA_TESES = {
 • Prazo: 5 anos
 • Duration: 4,1 anos
 • Público-alvo: Investidores em Geral''',
-        'venda_1min': 'Fundo de lajes corporativas com estrutura sênior, proporcionando renda estável do mercado corporativo com rendimentos mensais mais correção do IPCA na conta, sem volatilidade.',
+        'venda_1min': 'Fundo de lajes corporativas com estrutura sênior, proporcionando renda estável do mercado corporativo com rendimentos mensais mais correção do IPCA na cota, sem volatilidade.',
         'perfil': 'Investidores que buscam renda do mercado imobiliário corporativo com menor volatilidade e remarcação na cota patrimonial.'
     },
     'SPX CRI Portfolio Renda Mais': {
@@ -705,6 +871,11 @@ MAPA_TESES = {
         'perfil': 'Investidores que buscam renda passiva através do mercado imobiliário com baixa volatilidade.'
     }
 }
+
+# ==============================================================================
+# MAPEAMENTO DOS FUNDOS - LINKS
+# ==============================================================================
+# Links para materiais e documentos de cada fundo
 
 MAPA_LINKS = {
     'ARX FII Portfólio Renda CDI+ RL': {
@@ -757,16 +928,43 @@ MAPA_LINKS = {
     }
 }
 
+# ==============================================================================
+# FUNÇÃO: BUSCAR INFORMAÇÕES DO FUNDO
+# ==============================================================================
 def buscar_info_fundo(nome_fundo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa_teses, fundo_data=None):
-    """Busca informações do fundo, com opção de usar links do Excel"""
+    """
+    Esta função busca todas as informações de um fundo.
     
-    # Se temos dados do fundo do Excel, usar os links de lá
+    O que ela retorna:
+    - Dia útil de pagamento
+    - Cor para exibição
+    - Sigla (nome curto)
+    - Tese de investimento
+    - Links para materiais
+    
+    Parâmetros:
+        nome_fundo: nome completo do fundo
+        mapa_pagamentos: dicionário com dias de pagamento
+        mapa_cores: dicionário com cores
+        mapa_siglas: dicionário com siglas
+        mapa_teses: dicionário com teses
+        fundo_data: dados do fundo do Excel (opcional)
+    
+    Retorna:
+        dicionário com todas as informações
+    """
+    
+    # ===== BUSCAR LINKS =====
+    # Se temos dados do Excel, usar os links de lá
+    # Senão, usar os links padrão do MAPA_LINKS
+    
     if fundo_data is not None:
         try:
+            # Tentar pegar os links do Excel
             link_expert = str(fundo_data.get('Link Expert', '')).strip()
             link_material = str(fundo_data.get('Material Publicitário', '')).strip()
             
-            # Limpar valores 'nan'
+            # Limpar valores vazios ou 'nan'
             if link_expert == 'nan' or link_expert == '':
                 link_expert = ''
             if link_material == 'nan' or link_material == '':
@@ -774,30 +972,38 @@ def buscar_info_fundo(nome_fundo, mapa_pagamentos, mapa_cores, mapa_siglas, mapa
             
             links = {'expert': link_expert, 'material': link_material}
         except:
+            # Se der erro, usar os links padrão
             links = MAPA_LINKS.get(nome_fundo, {'expert': '', 'material': ''})
     else:
+        # Usar os links padrão
         links = MAPA_LINKS.get(nome_fundo, {'expert': '', 'material': ''})
     
+    # ===== MONTAR E RETORNAR O DICIONÁRIO COM TODAS AS INFORMAÇÕES =====
     return {
-        'dia_util': mapa_pagamentos.get(nome_fundo, 0),
-        'cor': mapa_cores.get(nome_fundo, '#27ae60'),
-        'sigla': mapa_siglas.get(nome_fundo, nome_fundo[:10]),
-        'tese': mapa_teses.get(nome_fundo, {
+        'dia_util': mapa_pagamentos.get(nome_fundo, 0),           # Dia útil de pagamento
+        'cor': mapa_cores.get(nome_fundo, '#27ae60'),             # Cor do fundo
+        'sigla': mapa_siglas.get(nome_fundo, nome_fundo[:10]),   # Sigla (nome curto)
+        'tese': mapa_teses.get(nome_fundo, {                     # Tese de investimento
             'resumo': 'Informações não disponíveis',
             'condicoes': 'N/A',
             'venda_1min': 'N/A',
             'perfil': 'N/A'
         }),
-        'links': links
+        'links': links  # Links para materiais
     }
 
-# ============================================
-# TELA DE FUNDOS - COM DESTAQUE
-# ============================================
-
+# ==============================================================================
+# TELA DE FUNDOS (COM DESTAQUE)
+# ==============================================================================
 def tela_fundos():
-    """Tela de apresentação dos fundos"""
+    """
+    Esta função cria a tela onde o usuário pode ver todos os fundos
+    disponíveis e suas informações detalhadas.
     
+    Não precisa de login para acessar esta tela.
+    """
+    
+    # Título da página
     st.markdown("""
     <div style="text-align: center; padding: 30px;">
         <h1 style="color: #1e4d2b; font-size: 36px; margin-bottom: 10px;">
@@ -809,14 +1015,17 @@ def tela_fundos():
     </div>
     """, unsafe_allow_html=True)
     
+    # Criar 3 colunas para os botões
     col1, col2, col3 = st.columns([1, 2, 1])
     
     with col1:
+        # Botão para voltar ao login
         if st.button("🔙 Voltar ao Login", use_container_width=True):
             st.session_state.pagina_atual = 'login'
             st.rerun()
     
     with col2:
+        # Seletor para ir direto para um fundo
         fundos_lista = sorted(MAPA_TESES.keys())
         fundo_selecionado = st.selectbox(
             "🎯 Ir para o fundo:",
@@ -826,7 +1035,10 @@ def tela_fundos():
     
     st.markdown("<br>", unsafe_allow_html=True)
     
+    # ===== SE SELECIONOU UM FUNDO, MOSTRAR EM DESTAQUE =====
     if fundo_selecionado and fundo_selecionado != "Selecione um fundo...":
+        
+        # Buscar informações do fundo
         info_destaque = buscar_info_fundo(
             fundo_selecionado,
             MAPA_PAGAMENTOS,
@@ -838,6 +1050,7 @@ def tela_fundos():
         tese_destaque = info_destaque['tese']
         links_destaque = info_destaque['links']
         
+        # Mostrar fundo em destaque (box grande e colorido)
         st.markdown(f"""
 <div class="fundo-destaque">
     <div class="badge-selecionado">
@@ -866,6 +1079,7 @@ def tela_fundos():
 </div>
 """, unsafe_allow_html=True)
         
+        # Botões para links
         col_link1, col_link2, col_link3 = st.columns([1, 1, 2])
         
         with col_link1:
@@ -899,7 +1113,10 @@ def tela_fundos():
 </h3>
 """, unsafe_allow_html=True)
     
+    # ===== MOSTRAR TODOS OS FUNDOS =====
     for fundo_nome in sorted(MAPA_TESES.keys()):
+        
+        # Buscar informações do fundo
         info = buscar_info_fundo(
             fundo_nome,
             MAPA_PAGAMENTOS,
@@ -912,6 +1129,7 @@ def tela_fundos():
         links = info['links']
         fundo_id = fundo_nome.replace(" ", "_")
         
+        # Mostrar card do fundo
         st.markdown(f"""
 <div id="{fundo_id}" style="background: white; border: 2px solid {info['cor']}; border-left: 6px solid {info['cor']}; border-radius: 10px; padding: 25px; margin-bottom: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
     <h3 style="color: {info['cor']}; margin-bottom: 15px; font-size: 20px;">
@@ -937,6 +1155,7 @@ def tela_fundos():
 </div>
 """, unsafe_allow_html=True)
         
+        # Botões de links
         col1, col2, col3 = st.columns([1, 1, 2])
         
         with col1:
@@ -961,98 +1180,106 @@ def tela_fundos():
         
         st.markdown("<br>", unsafe_allow_html=True)
 
-# ============================================
-# CARREGAR DADOS - APENAS ABA BASE
-# ============================================
-
+# ==============================================================================
+# FUNÇÃO: CARREGAR DADOS DO EXCEL
+# ==============================================================================
 @st.cache_data
 def carregar_dados():
-    """Carrega dados APENAS da aba Base com mapeamento automático de colunas"""
+    """
+    Esta função carrega os dados do arquivo Excel.
+    
+    O que ela faz:
+    1. Abre o arquivo Excel
+    2. Lê a aba 'Base'
+    3. Verifica se as colunas necessárias existem
+    4. Retorna os dados para usar no sistema
+    
+    O @st.cache_data faz o Streamlit guardar os dados na memória,
+    assim não precisa ler o Excel toda vez (fica mais rápido!)
+    
+    Retorna:
+        DataFrame do pandas com os dados do Excel
+    """
+    
     try:
-        # Carregar o Excel
+        # ===== PASSO 1: CARREGAR O EXCEL =====
+        # Lê o arquivo e pega apenas a aba 'Base'
         df_base = pd.read_excel('calendario_Renda_mais.xlsx', sheet_name='Base')
         
-        # Limpar nomes das colunas (remover espaços extras)
+        # ===== PASSO 2: LIMPAR NOMES DAS COLUNAS =====
+        # Remove espaços extras que podem causar problemas
         df_base.columns = df_base.columns.str.strip()
         
-        # ============================================
-        # MAPEAMENTO AUTOMÁTICO DE COLUNAS
-        # ============================================
-        
-        # 1. Mapear FUNDO
-        if 'Fundo' not in df_base.columns:
-            if 'Produto' in df_base.columns:
-                df_base['Fundo'] = df_base['Produto']
-            elif 'Sub Produto' in df_base.columns:
-                df_base['Fundo'] = df_base['Sub Produto']
-            else:
-                st.error("❌ Não foi encontrada coluna para 'Fundo' (tentei: Produto, Sub Produto)")
-                st.stop()
-        
-        # 2. Mapear APLICADO
-        if 'Aplicado' not in df_base.columns:
-            if 'Financeiro' in df_base.columns:
-                df_base['Aplicado'] = df_base['Financeiro']
-            else:
-                st.error("❌ Não foi encontrada coluna para 'Aplicado' (tentei: Financeiro)")
-                st.stop()
-        
-        # 3. Criar coluna % se não existir
-        if '%' not in df_base.columns:
-            df_base['%'] = 0.0  # Valor padrão
-        
-        # 4. Criar coluna Data se não existir
-        if 'Data' not in df_base.columns:
-            df_base['Data'] = None  # Valor padrão
-        
-        # ============================================
-        # VALIDAR COLUNAS ESSENCIAIS
-        # ============================================
-        
-        colunas_essenciais = ['Assessor', 'Cliente', 'Fundo', 'Aplicado']
-        colunas_faltando = [col for col in colunas_essenciais if col not in df_base.columns]
-        
-        if colunas_faltando:
-            st.error(f"❌ Colunas essenciais faltando: {', '.join(colunas_faltando)}")
-            st.error(f"📋 Colunas disponíveis: {', '.join(df_base.columns.tolist())}")
-            st.stop()
-        
-        # Verificar se há dados
+        # ===== PASSO 3: VERIFICAR SE TEM DADOS =====
         if df_base.empty:
             st.error("❌ O arquivo Excel está vazio!")
             st.stop()
         
+        # ===== PASSO 4: VALIDAR COLUNAS ESSENCIAIS =====
+        # Estas colunas PRECISAM existir no Excel
+        colunas_essenciais = ['Assessor', 'Cliente', 'Fundo', 'Aplicado']
+        
+        # Verificar quais colunas estão faltando
+        colunas_faltando = [col for col in colunas_essenciais if col not in df_base.columns]
+        
+        if colunas_faltando:
+            # Se alguma coluna essencial estiver faltando, mostrar erro
+            st.error(f"❌ Colunas essenciais faltando: {', '.join(colunas_faltando)}")
+            st.error(f"📋 Colunas disponíveis no Excel: {', '.join(df_base.columns.tolist())}")
+            st.stop()
+        
+        # ===== SUCESSO! RETORNAR OS DADOS =====
         return df_base
         
     except FileNotFoundError:
+        # Se o arquivo não foi encontrado
         st.error("❌ Arquivo 'calendario_Renda_mais.xlsx' não encontrado!")
         st.error("📁 Certifique-se de que o arquivo está na mesma pasta do código.")
         st.stop()
+        
     except Exception as e:
+        # Se deu algum outro erro
         st.error(f"❌ Erro ao carregar Excel: {str(e)}")
         st.error(f"🔍 Tipo do erro: {type(e).__name__}")
         st.stop()
 
-# ============================================
-# FUNÇÃO PRINCIPAL
-# ============================================
-
+# ==============================================================================
+# FUNÇÃO PRINCIPAL DO SISTEMA
+# ==============================================================================
 def main():
-    """Função principal"""
+    """
+    Esta é a função PRINCIPAL do sistema!
     
+    Ela coordena tudo:
+    1. Carrega os dados do Excel
+    2. Mostra a tela de login (se necessário)
+    3. Mostra a tela principal do sistema (depois de logado)
+    
+    É aqui que o programa começa a rodar!
+    """
+    
+    # ===== PASSO 1: CARREGAR DADOS DO EXCEL =====
     df_base = carregar_dados()
     
+    # ===== PASSO 2: VERIFICAR QUAL PÁGINA MOSTRAR =====
     if 'pagina_atual' not in st.session_state:
-        st.session_state.pagina_atual = 'login'
+        st.session_state.pagina_atual = 'login'  # Começa na tela de login
     
+    # Se estiver na tela de fundos, mostrar ela e parar aqui
     if st.session_state.pagina_atual == 'fundos':
         tela_fundos()
         return
     
+    # ===== PASSO 3: VERIFICAR AUTENTICAÇÃO =====
+    # Se não estiver logado, para aqui
     verificar_autenticacao(df_base)
     
+    # ===== A PARTIR DAQUI, O USUÁRIO ESTÁ LOGADO! =====
+    
+    # ===== PASSO 4: GERAR FERIADOS DO ANO =====
     feriados = gerar_feriados(datetime.now().year)
     
+    # ===== PASSO 5: MOSTRAR CABEÇALHO DO SISTEMA =====
     st.markdown(f"""
     <div class="header-sistema">
         <div class="titulo-principal">📅 Calendário Renda Mais - Tauari Investimentos</div>
@@ -1063,9 +1290,11 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
+    # ===== PASSO 6: BOTÕES DO TOPO =====
     col1, col2, col3, col4 = st.columns([1, 1, 1, 2])
     
     with col1:
+        # Botão para sair (fazer logout)
         if st.button("🔓 Sair", key="btn_sair"):
             st.session_state.autenticado = False
             st.session_state.assessor_logado = None
@@ -1074,139 +1303,195 @@ def main():
             st.rerun()
     
     with col2:
+        # Botão para ver os fundos
         if st.button("📚 Ver Fundos", key="btn_ver_fundos"):
             st.session_state.pagina_atual = 'fundos'
             st.rerun()
     
-    # Validar se a coluna Assessor existe e processar
+    # ===== PASSO 7: FILTRAR DADOS DO ASSESSOR =====
     try:
+        # Limpar a coluna Assessor (remover 'A' do início se tiver)
         df_base['Assessor'] = df_base['Assessor'].astype(str).str.strip().str.replace('A', '', 1)
+        
+        # Filtrar apenas os clientes deste assessor
         df_base_filtrado = df_base[df_base['Assessor'] == str(st.session_state.assessor_logado)]
+        
     except Exception as e:
         st.error(f"❌ Erro ao filtrar assessor: {str(e)}")
         st.error("🔍 Verifique se a coluna 'Assessor' existe no Excel")
         st.stop()
     
+    # Verificar se tem clientes para este assessor
     if df_base_filtrado.empty:
         st.error("❌ Nenhum cliente encontrado para este assessor!")
         st.error(f"🔍 Assessor logado: {st.session_state.assessor_logado}")
         st.stop()
     
+    # ===== PASSO 8: SELETOR DE CLIENTE =====
     st.markdown('<div class="cliente-selector"><h3>👥 SELECIONE O CLIENTE</h3>', unsafe_allow_html=True)
     
-    # Validar se a coluna Cliente existe
     try:
+        # Pegar lista de clientes únicos
         clientes = sorted(df_base_filtrado['Cliente'].unique())
     except Exception as e:
         st.error(f"❌ Erro ao buscar clientes: {str(e)}")
         st.error("🔍 Verifique se a coluna 'Cliente' existe no Excel")
         st.stop()
     
+    # Criar seletor de cliente
     cliente_selecionado = st.selectbox(
         "Cliente", 
-        [""] + list(clientes), 
-        label_visibility="collapsed", 
+        [""] + list(clientes),  # Lista começa vazia
+        label_visibility="collapsed",  # Esconde o label (já tem no HTML acima)
         key="cliente_select"
     )
     
     st.markdown('</div>', unsafe_allow_html=True)
     
+    # Se não selecionou cliente, para aqui
     if not cliente_selecionado:
         st.stop()
     
-    # Filtrar fundos do cliente com validação
+    # ===== PASSO 9: FILTRAR FUNDOS DO CLIENTE =====
     try:
+        # Pegar apenas os fundos deste cliente
         fundos_cliente = df_base_filtrado[df_base_filtrado['Cliente'] == cliente_selecionado]
     except Exception as e:
         st.error(f"❌ Erro ao filtrar fundos do cliente: {str(e)}")
         st.stop()
     
+    # Verificar se o cliente tem fundos
     if fundos_cliente.empty:
         st.error("❌ Nenhum fundo encontrado para este cliente!")
         st.stop()
     
-    # Validar se a coluna Fundo existe
+    # Verificar se a coluna Fundo existe
     if 'Fundo' not in fundos_cliente.columns:
         st.error("❌ Coluna 'Fundo' não encontrada no Excel!")
         st.stop()
 
-    # Inicializar fundo selecionado com segurança
+    # ===== PASSO 10: INICIALIZAR FUNDO SELECIONADO =====
+    # Guardar qual fundo está selecionado na tela
     if 'fundo_selecionado' not in st.session_state or st.session_state.fundo_selecionado is None:
         try:
+            # Selecionar o primeiro fundo por padrão
             st.session_state.fundo_selecionado = fundos_cliente['Fundo'].iloc[0] if not fundos_cliente.empty else None
         except Exception as e:
             st.error(f"❌ Erro ao selecionar fundo inicial: {str(e)}")
             st.session_state.fundo_selecionado = None
     
-    # Garantir que fundo_selecionado ainda existe na lista de fundos do cliente
+    # Garantir que o fundo selecionado ainda existe na lista
     try:
         if st.session_state.fundo_selecionado is not None:
             if st.session_state.fundo_selecionado not in fundos_cliente['Fundo'].values:
+                # Se o fundo não existe mais, selecionar o primeiro
                 st.session_state.fundo_selecionado = fundos_cliente['Fundo'].iloc[0] if not fundos_cliente.empty else None
     except Exception as e:
         st.warning(f"⚠️ Aviso ao validar fundo selecionado: {str(e)}")
         st.session_state.fundo_selecionado = fundos_cliente['Fundo'].iloc[0] if not fundos_cliente.empty else None
     
+    # ===== PASSO 11: CRIAR LAYOUT DE 3 COLUNAS =====
     st.markdown('<div class="container-principal">', unsafe_allow_html=True)
     
+    # Dividir a tela em 3 partes:
+    # - col1: Lista de fundos (esquerda)
+    # - col2: Tese do fundo (meio)
+    # - col3: Calendário (direita)
     col1, col2, col3 = st.columns([1.2, 1.5, 3])
     
+    # ===========================================================================
+    # COLUNA 1: LISTA DE FUNDOS DO CLIENTE
+    # ===========================================================================
     with col1:
         st.markdown('<div class="box"><div class="box-titulo">📊 FUNDOS DO CLIENTE</div><div class="box-conteudo">', unsafe_allow_html=True)
         
+        # ===== LOOP: MOSTRAR CADA FUNDO =====
         for idx, (row_idx, fundo) in enumerate(fundos_cliente.iterrows()):
             try:
+                # ------------------------------------------
+                # 1. PEGAR O NOME DO FUNDO
+                # ------------------------------------------
                 nome_fundo = str(fundo.get('Fundo', 'Fundo Desconhecido'))
                 
-                # Ler Valor Aplicado da Coluna Aplicado
+                # ------------------------------------------
+                # 2. LER VALOR APLICADO DO EXCEL
+                # ------------------------------------------
+                # Coluna 'Aplicado' contém quanto o cliente investiu
                 try:
                     valor_aplicado = float(fundo.get('Aplicado', 0))
                 except (ValueError, TypeError):
                     valor_aplicado = 0.0
                 
-                # Ler Rendimento % da Coluna %
+                # ------------------------------------------
+                # 3. LER RENDIMENTO % DO EXCEL
+                # ------------------------------------------
+                # IMPORTANTE: A coluna '%' já vem em decimal (0.0115 = 1.15%)
+                # Então multiplicamos por 100 para mostrar como porcentagem
                 try:
                     rendimento_str = str(fundo.get('%', '0')).strip()
+                    
+                    # Verificar se está vazio ou é nan
                     if rendimento_str in ['-', '', 'nan', 'None', 'NaN']:
                         rendimento_percentual = 0.0
                     else:
-                        rendimento_percentual = float(rendimento_str) * 100  # Converter para porcentagem
+                        # Converter para float e multiplicar por 100
+                        # Exemplo: 0.0115 * 100 = 1.15%
+                        rendimento_percentual = float(rendimento_str) * 100
+                
                 except (ValueError, TypeError):
                     rendimento_percentual = 0.0
                 
-                # Buscar info do fundo para obter dia de pagamento padrão
+                # ------------------------------------------
+                # 4. BUSCAR INFORMAÇÕES DO FUNDO
+                # ------------------------------------------
+                # Esta função busca a cor, sigla, tese, etc.
                 info = buscar_info_fundo(nome_fundo, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES, fundo)
                 
-                # Ler Data da Coluna Data ou usar padrão do MAPA_PAGAMENTOS
+                # ------------------------------------------
+                # 5. CALCULAR DATA DE PAGAMENTO
+                # ------------------------------------------
+                # Primeiro tenta usar a coluna 'Data' do Excel
+                # Se não tiver, usa o dia padrão do MAPA_PAGAMENTOS
+                
                 dia_pagamento = None
+                
+                # Tentar ler da coluna 'Data'
                 try:
                     data_str = str(fundo.get('Data', '')).strip()
                     if data_str not in ['-', '', 'nan', 'None', 'NaN']:
                         dia_pagamento = int(float(data_str))
                 except (ValueError, TypeError):
-                    pass
+                    pass  # Se der erro, deixa None
                 
                 # Se não tem data no Excel, usar o padrão do mapa
                 if not dia_pagamento or dia_pagamento == 0:
                     dia_pagamento = info.get('dia_util', None)
                 
-                # Calcular data de pagamento
+                # Calcular a data real de pagamento
                 data_pagamento = None
                 if dia_pagamento and dia_pagamento > 0:
                     try:
+                        # Calcular qual será o dia do pagamento
                         data_pagamento = calcular_dia_util(
-                            st.session_state.ano_atual, 
-                            st.session_state.mes_atual, 
-                            dia_pagamento, 
-                            feriados
+                            st.session_state.ano_atual,      # Ano atual
+                            st.session_state.mes_atual,      # Mês atual
+                            dia_pagamento,                    # Dia útil desejado
+                            feriados                          # Lista de feriados
                         )
                     except Exception:
-                        pass
+                        pass  # Se der erro, deixa None
                 
+                # Formatar data para mostrar ou colocar "Não definida"
                 data_texto = data_pagamento.strftime("%d/%m/%Y") if data_pagamento else "Não definida"
                 
+                # ------------------------------------------
+                # 6. VERIFICAR SE ESTE FUNDO ESTÁ SELECIONADO
+                # ------------------------------------------
                 classe_selecao = 'fundo-card-selecionado' if nome_fundo == st.session_state.fundo_selecionado else ''
                 
+                # ------------------------------------------
+                # 7. MOSTRAR O CARD DO FUNDO
+                # ------------------------------------------
                 st.markdown(f"""
                 <div class="fundo-card-container">
                     <div class="fundo-card {classe_selecao}" style="border-left-color: {info.get('cor', '#27ae60')}">
@@ -1219,30 +1504,49 @@ def main():
                     </div>
                 """, unsafe_allow_html=True)
                 
+                # ------------------------------------------
+                # 8. BOTÃO PARA SELECIONAR ESTE FUNDO
+                # ------------------------------------------
+                # Quando clica, este fundo fica selecionado
                 # CHAVE ÚNICA: usa índice + nome do fundo
                 if st.button("📊", key=f"sel_{idx}_{row_idx}", help=f"Selecionar {nome_fundo}"):
                     st.session_state.fundo_selecionado = nome_fundo
-                    st.rerun()
+                    st.rerun()  # Recarregar a página
                 
                 st.markdown("</div>", unsafe_allow_html=True)
                 
             except Exception as e:
+                # Se der erro em algum fundo, mostrar e continuar para o próximo
                 st.error(f"❌ Erro ao processar fundo: {str(e)}")
                 continue
 
         st.markdown('</div></div>', unsafe_allow_html=True)
     
+    # ===========================================================================
+    # COLUNA 2: TESE DO FUNDO SELECIONADO
+    # ===========================================================================
     with col2:
         st.markdown('<div class="box"><div class="box-titulo">📝 TESE DO FUNDO</div>', unsafe_allow_html=True)
         
+        # Verificar se tem um fundo selecionado
         if st.session_state.fundo_selecionado:
-            # Buscar dados do fundo selecionado no dataframe
+            
+            # Buscar dados do fundo selecionado no Excel
             fundo_selecionado_data = fundos_cliente[fundos_cliente['Fundo'] == st.session_state.fundo_selecionado]
             fundo_data = fundo_selecionado_data.iloc[0] if not fundo_selecionado_data.empty else None
             
-            info = buscar_info_fundo(st.session_state.fundo_selecionado, MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES, fundo_data)
+            # Buscar informações do fundo (tese, cor, etc.)
+            info = buscar_info_fundo(
+                st.session_state.fundo_selecionado, 
+                MAPA_PAGAMENTOS, 
+                MAPA_CORES, 
+                MAPA_SIGLAS, 
+                MAPA_TESES, 
+                fundo_data
+            )
             tese = info.get('tese', {})
             
+            # Mostrar a tese formatada
             st.markdown(f"""
             <div class="tese-texto">
                 <strong style="color: {info.get('cor', '#27ae60')};">{st.session_state.fundo_selecionado}</strong>
@@ -1255,53 +1559,81 @@ def main():
                 <p>{tese.get('perfil', '')}</p>
             </div>
             """, unsafe_allow_html=True)
+        
         else:
+            # Se não tem fundo selecionado
             st.markdown('<div class="tese-texto"><p>Selecione um fundo.</p></div>', unsafe_allow_html=True)
 
         st.markdown('</div>', unsafe_allow_html=True)
     
+    # ===========================================================================
+    # COLUNA 3: CALENDÁRIO
+    # ===========================================================================
     with col3:
         st.markdown('<div class="box"><div class="box-titulo">📅 CALENDÁRIO</div>', unsafe_allow_html=True)
         
+        # ===== INICIALIZAR MÊS E ANO =====
         if 'mes_atual' not in st.session_state:
-            st.session_state.mes_atual = datetime.now().month
-            st.session_state.ano_atual = datetime.now().year
+            st.session_state.mes_atual = datetime.now().month  # Mês atual
+            st.session_state.ano_atual = datetime.now().year   # Ano atual
         
+        # ===== BOTÕES DE NAVEGAÇÃO DO CALENDÁRIO =====
         col_p1, col_p2, col_p3 = st.columns([1, 3, 1])
         
         with col_p1:
+            # Botão para mês anterior
             if st.button("◀️ Anterior", key="prev_mes"):
                 st.session_state.mes_atual -= 1
-                if st.session_state.mes_atual < 1:
-                    st.session_state.mes_atual = 12
-                    st.session_state.ano_atual -= 1
+                if st.session_state.mes_atual < 1:  # Se passou de janeiro
+                    st.session_state.mes_atual = 12   # Volta para dezembro
+                    st.session_state.ano_atual -= 1   # Do ano anterior
                 st.rerun()
         
         with col_p2:
+            # Mostrar mês e ano atual
             st.markdown(f'<div style="text-align: center; padding: 8px; font-size: 18px; font-weight: bold; color: #1e4d2b;">{MESES_PT[st.session_state.mes_atual-1]} {st.session_state.ano_atual}</div>', unsafe_allow_html=True)
         
         with col_p3:
+            # Botão para próximo mês
             if st.button("Próximo ▶️", key="next_mes"):
                 st.session_state.mes_atual += 1
-                if st.session_state.mes_atual > 12:
-                    st.session_state.mes_atual = 1
-                    st.session_state.ano_atual += 1
+                if st.session_state.mes_atual > 12:  # Se passou de dezembro
+                    st.session_state.mes_atual = 1     # Volta para janeiro
+                    st.session_state.ano_atual += 1    # Do ano seguinte
                 st.rerun()
         
+        # ===== GERAR CALENDÁRIO DO MÊS =====
+        # calendar.monthcalendar retorna uma matriz com as semanas do mês
         cal = calendar.monthcalendar(st.session_state.ano_atual, st.session_state.mes_atual)
         
+        # Dias da semana
         dias_semana = ['seg.', 'ter.', 'qua.', 'qui.', 'sex.', 'sáb.', 'dom.']
+        
+        # Começar HTML do calendário
         html_cal = '<div class="calendario-grid">'
         
+        # Adicionar cabeçalho (seg, ter, qua, ...)
         for dia in dias_semana:
             html_cal += f'<div class="cal-header">{dia}</div>'
         
+        # ===== CALCULAR EVENTOS (PAGAMENTOS) DO MÊS =====
+        # Dicionário: {dia: [lista de fundos que pagam neste dia]}
         eventos_mes = {}
+        
+        # Para cada fundo do cliente
         for _, fundo in fundos_cliente.iterrows():
             try:
-                info = buscar_info_fundo(fundo.get('Fundo', ''), MAPA_PAGAMENTOS, MAPA_CORES, MAPA_SIGLAS, MAPA_TESES, fundo)
+                # Buscar info do fundo
+                info = buscar_info_fundo(
+                    fundo.get('Fundo', ''), 
+                    MAPA_PAGAMENTOS, 
+                    MAPA_CORES, 
+                    MAPA_SIGLAS, 
+                    MAPA_TESES, 
+                    fundo
+                )
                 
-                # Usar a coluna Data do Excel
+                # Pegar dia útil de pagamento da coluna 'Data' do Excel
                 try:
                     data_str = str(fundo.get('Data', '')).strip()
                     if data_str not in ['-', '', 'nan', 'None']:
@@ -1311,43 +1643,75 @@ def main():
                 except (ValueError, TypeError):
                     dia_util = None
                 
+                # Se tem dia útil definido
                 if dia_util and dia_util > 0:
                     try:
-                        data_pagamento = calcular_dia_util(st.session_state.ano_atual, st.session_state.mes_atual, dia_util, feriados)
+                        # Calcular a data real de pagamento
+                        data_pagamento = calcular_dia_util(
+                            st.session_state.ano_atual, 
+                            st.session_state.mes_atual, 
+                            dia_util, 
+                            feriados
+                        )
+                        
                         if data_pagamento:
                             dia = data_pagamento.day
+                            
+                            # Adicionar este fundo na lista de eventos deste dia
                             if dia not in eventos_mes:
                                 eventos_mes[dia] = []
+                            
                             eventos_mes[dia].append({
                                 'sigla': info.get('sigla', str(fundo.get('Fundo', 'N/A'))[:10]), 
                                 'cor': info.get('cor', '#27ae60')
                             })
                     except Exception:
-                        pass
+                        pass  # Se der erro, apenas pula
+            
             except Exception as e:
-                continue  # Se houver erro, apenas pula esse fundo
+                continue  # Se houver erro, pula este fundo
         
+        # ===== CRIAR GRID DO CALENDÁRIO =====
+        # Para cada semana do mês
         for semana in cal:
+            # Para cada dia da semana
             for dia in semana:
+                
                 if dia == 0:
+                    # Dia vazio (antes do início ou depois do fim do mês)
                     html_cal += '<div class="cal-dia" style="background: #f8f9fa;"></div>'
+                
                 else:
+                    # Criar objeto date para este dia
                     data = date(st.session_state.ano_atual, st.session_state.mes_atual, dia)
+                    
+                    # Definir classe CSS (fim de semana tem cor diferente)
                     classe = "cal-dia fim-semana" if data.weekday() >= 5 else "cal-dia" 
                     
+                    # Ver se tem eventos (pagamentos) neste dia
                     eventos_html = ""
                     if dia in eventos_mes:
+                        # Para cada fundo que paga neste dia
                         for evento in eventos_mes[dia]:
+                            # Adicionar um "chip" colorido com a sigla do fundo
                             eventos_html += f'<div class="cal-evento" style="background: {evento["cor"]}">{evento["sigla"]}</div>'
                     
+                    # Adicionar este dia ao HTML
                     html_cal += f'<div class="{classe}"><div class="numero">{dia}</div>{eventos_html}</div>'
         
+        # Fechar HTML do calendário
         html_cal += '</div>'
+        
+        # Mostrar o calendário na tela
         st.markdown(html_cal, unsafe_allow_html=True)
         
         st.markdown('</div>', unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
 
+# ==============================================================================
+# PONTO DE ENTRADA DO PROGRAMA
+# ==============================================================================
+# Esta parte é executada quando o programa inicia
 if __name__ == "__main__":
-    main()
+    main()  # Chama a função principal
